@@ -1,0 +1,81 @@
+#ifndef DEFINITIONS_H
+#define DEFINITIONS_H
+
+typedef enum {
+    TETRALATH_COLOR_NONE = 0,
+    TETRALATH_COLOR_WHITE = 1,
+    TETRALATH_COLOR_BLACK = 2
+} TETRALATH_COLOR;
+
+typedef enum {
+    TETRALATH_SEQUENCE_NONE = 0,
+    // Multiplier of triplet values
+    // 1 + (4 * 1) + (16 * 1) = 21
+    // 2 + (4 * 2) + (16 * 2) = 42
+    TETRALATH_SEQUENCE_TRIPLET = 21,
+    // Multiplier of quadruplet values
+    // 1 + (4 * 1) + (16 * 1) + (64 * 1) = 85
+    // 2 + (4 * 2) + (16 * 2) + (64 * 2) = 170
+    TETRALATH_SEQUENCE_QUADRUPLET = 85,
+    // Multipliers of near triplet values
+    // 1 + (4 * 1) + (16 * 0) = 5
+    // 2 + (4 * 2) + (16 * 0) = 10
+    // 1 + (4 * 0) + (16 * 1) = 17
+    // 2 + (4 * 0) + (16 * 2) = 34
+    TETRALATH_SEQUENCE_NEAR_TRIPLET_1 = 5,
+    TETRALATH_SEQUENCE_NEAR_TRIPLET_2 = 17,
+    // Multipliers of near quadruplet values
+    // 1 + (4 * 1) + (16 * 0) + (64 * 1) = 69
+    // 2 + (4 * 2) + (16 * 0) + (64 * 2) = 138
+    // 1 + (4 * 0) + (16 * 1) + (64 * 1) = 81
+    // 2 + (4 * 0) + (16 * 2) + (64 * 2) = 162
+    TETRALATH_SEQUENCE_NEAR_QUADRUPLET_1 = 69,
+    TETRALATH_SEQUENCE_NEAR_QUADRUPLET_2 = 81,
+    // Multipliers of far quadruplet values
+    // 1 + (4 * 0) + (16 * 0) + (64 * 1) = 65
+    // 2 + (4 * 0) + (16 * 0) + (64 * 2) = 130
+    TETRALATH_SEQUENCE_FAR_QUADRUPLET = 65
+} TETRALATH_SEQUENCE;
+
+typedef enum {
+    TETRALATH_RESULT_ALPHA_MIN = 0,
+    TETRALATH_RESULT_LOSS = 64,
+    TETRALATH_RESULT_ABOUT_TO_LOSE = 128,
+    TETRALATH_RESULT_CLOSER_TO_LOSING_3 = 192,
+    TETRALATH_RESULT_CLOSER_TO_LOSING_2 = 256,
+    TETRALATH_RESULT_CLOSER_TO_LOSING_1 = 320,
+    TETRALATH_RESULT_DRAW_MIN = 384,
+    TETRALATH_RESULT_DRAW_NEUTRAL = 448,
+    TETRALATH_RESULT_NONE = 512,
+    TETRALATH_RESULT_DRAW_MAX = 576,
+    TETRALATH_RESULT_CLOSER_TO_WINNING_1 = 640,
+    TETRALATH_RESULT_CLOSER_TO_WINNING_2 = 704,
+    TETRALATH_RESULT_CLOSER_TO_WINNING_3 = 768,
+    TETRALATH_RESULT_CLOSER_TO_WINNING_4 = 832,
+    TETRALATH_RESULT_ABOUT_TO_WIN = 896,
+    TETRALATH_RESULT_WIN = 960,
+    TETRALATH_RESULT_BETA_MAX = 1024
+} TETRALATH_RESULT;
+
+typedef enum {
+    TETRALATH_STATE_RUNNING = 0,
+    TETRALATH_STATE_ENDED = 1
+} TETRALATH_STATE;
+
+typedef enum {
+    TETRALATH_AI_MODE_NONE = 0,
+    TETRALATH_AI_MODE_FRIENDLY_MILDER_PRUNING = 1,
+    TETRALATH_AI_MODE_FRIENDLY = 2,
+    TETRALATH_AI_MODE_RUTHLESS = 3
+} TETRALATH_AI_MODE;
+
+#define TETRALATH_BOARD_SIZE 61
+#define TETRALATH_NUMBER_OF_COLORS 2
+#define TETRALATH_FALSE 0
+#define TETRALATH_TRUE 1
+#define TETRALATH_POSITION_NONE (-1)
+#define TETRALATH_DEFAULT_TIME_LIMIT_IN_SECONDS 5
+#define TETRALATH_DEFAULT_NUMBER_OF_THREADS 2
+#define TETRALATH_DEFAULT_MINIMAX_DEPTH_LIMIT 61
+
+#endif
