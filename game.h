@@ -28,6 +28,7 @@ typedef struct {
 typedef struct {
     int minimax_depth;
     int ai_move;
+    int64_t processing_end_time;
 } TETRALATH_MINIMAX_OUTPUT;
 
 typedef struct {

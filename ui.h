@@ -23,13 +23,14 @@ typedef struct {
 #define TETRALATH_BOARD_FORWARD_INCREMENT 1
 #define TETRALATH_BOARD_BACKWARD_INCREMENT (-1)
 #define TETRALATH_UNDO_LAST_MOVE 61
-#define TETRALATH_END_GAME 62
+#define TETRALATH_QUIT_GAME 62
+#define TETRALATH_END_GAME 63
 
 TETRALATH_AI_MODE choose_ai_mode();
 TETRALATH_COLOR choose_player_color();
 int get_player_action(TETRALATH_COLOR *board, TETRALATH_STATE game_state);
 void draw_move(int position, TETRALATH_COLOR color);
-void draw_ai_info(double time_taken, int show_time_taken);
+void draw_ai_info(bool show_info, int64_t processing_start_time, int64_t processing_end_time, int minimax_depth, int64_t minimax_processing_end_time);
 void initialize_game_ui();
 void draw_rest_of_panel();
 void start_turn_ui(TETRALATH_COLOR current_color, TETRALATH_COLOR player_color, TETRALATH_RESULT result);

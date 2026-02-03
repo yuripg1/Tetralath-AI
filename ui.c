@@ -1,22 +1,20 @@
 #include <ncurses.h>
 
+#include "time.h"
 #include "ui.h"
 
 static const TETRALATH_UI_POSITION board_ui_positions[TETRALATH_BOARD_SIZE] = {
-    // Row 1 - 5 positions
     {TETRALATH_BOARD_X + (TETRALATH_POSITION_OFFSET * 0) + (TETRALATH_ROW_OFFSET * 4) + 1, TETRALATH_BOARD_Y + 1},
     {TETRALATH_BOARD_X + (TETRALATH_POSITION_OFFSET * 1) + (TETRALATH_ROW_OFFSET * 4) + 1, TETRALATH_BOARD_Y + 1},
     {TETRALATH_BOARD_X + (TETRALATH_POSITION_OFFSET * 2) + (TETRALATH_ROW_OFFSET * 4) + 1, TETRALATH_BOARD_Y + 1},
     {TETRALATH_BOARD_X + (TETRALATH_POSITION_OFFSET * 3) + (TETRALATH_ROW_OFFSET * 4) + 1, TETRALATH_BOARD_Y + 1},
     {TETRALATH_BOARD_X + (TETRALATH_POSITION_OFFSET * 4) + (TETRALATH_ROW_OFFSET * 4) + 1, TETRALATH_BOARD_Y + 1},
-    // Row 2 - 6 positions
     {TETRALATH_BOARD_X + (TETRALATH_POSITION_OFFSET * 0) + (TETRALATH_ROW_OFFSET * 3) + 1, TETRALATH_BOARD_Y + 3},
     {TETRALATH_BOARD_X + (TETRALATH_POSITION_OFFSET * 1) + (TETRALATH_ROW_OFFSET * 3) + 1, TETRALATH_BOARD_Y + 3},
     {TETRALATH_BOARD_X + (TETRALATH_POSITION_OFFSET * 2) + (TETRALATH_ROW_OFFSET * 3) + 1, TETRALATH_BOARD_Y + 3},
     {TETRALATH_BOARD_X + (TETRALATH_POSITION_OFFSET * 3) + (TETRALATH_ROW_OFFSET * 3) + 1, TETRALATH_BOARD_Y + 3},
     {TETRALATH_BOARD_X + (TETRALATH_POSITION_OFFSET * 4) + (TETRALATH_ROW_OFFSET * 3) + 1, TETRALATH_BOARD_Y + 3},
     {TETRALATH_BOARD_X + (TETRALATH_POSITION_OFFSET * 5) + (TETRALATH_ROW_OFFSET * 3) + 1, TETRALATH_BOARD_Y + 3},
-    // Row 3 - 7 positions
     {TETRALATH_BOARD_X + (TETRALATH_POSITION_OFFSET * 0) + (TETRALATH_ROW_OFFSET * 2) + 1, TETRALATH_BOARD_Y + 5},
     {TETRALATH_BOARD_X + (TETRALATH_POSITION_OFFSET * 1) + (TETRALATH_ROW_OFFSET * 2) + 1, TETRALATH_BOARD_Y + 5},
     {TETRALATH_BOARD_X + (TETRALATH_POSITION_OFFSET * 2) + (TETRALATH_ROW_OFFSET * 2) + 1, TETRALATH_BOARD_Y + 5},
@@ -24,7 +22,6 @@ static const TETRALATH_UI_POSITION board_ui_positions[TETRALATH_BOARD_SIZE] = {
     {TETRALATH_BOARD_X + (TETRALATH_POSITION_OFFSET * 4) + (TETRALATH_ROW_OFFSET * 2) + 1, TETRALATH_BOARD_Y + 5},
     {TETRALATH_BOARD_X + (TETRALATH_POSITION_OFFSET * 5) + (TETRALATH_ROW_OFFSET * 2) + 1, TETRALATH_BOARD_Y + 5},
     {TETRALATH_BOARD_X + (TETRALATH_POSITION_OFFSET * 6) + (TETRALATH_ROW_OFFSET * 2) + 1, TETRALATH_BOARD_Y + 5},
-    // Row 4 - 8 positions
     {TETRALATH_BOARD_X + (TETRALATH_POSITION_OFFSET * 0) + (TETRALATH_ROW_OFFSET * 1) + 1, TETRALATH_BOARD_Y + 7},
     {TETRALATH_BOARD_X + (TETRALATH_POSITION_OFFSET * 1) + (TETRALATH_ROW_OFFSET * 1) + 1, TETRALATH_BOARD_Y + 7},
     {TETRALATH_BOARD_X + (TETRALATH_POSITION_OFFSET * 2) + (TETRALATH_ROW_OFFSET * 1) + 1, TETRALATH_BOARD_Y + 7},
@@ -33,7 +30,6 @@ static const TETRALATH_UI_POSITION board_ui_positions[TETRALATH_BOARD_SIZE] = {
     {TETRALATH_BOARD_X + (TETRALATH_POSITION_OFFSET * 5) + (TETRALATH_ROW_OFFSET * 1) + 1, TETRALATH_BOARD_Y + 7},
     {TETRALATH_BOARD_X + (TETRALATH_POSITION_OFFSET * 6) + (TETRALATH_ROW_OFFSET * 1) + 1, TETRALATH_BOARD_Y + 7},
     {TETRALATH_BOARD_X + (TETRALATH_POSITION_OFFSET * 7) + (TETRALATH_ROW_OFFSET * 1) + 1, TETRALATH_BOARD_Y + 7},
-    // Row 5 - 9 positions
     {TETRALATH_BOARD_X + (TETRALATH_POSITION_OFFSET * 0) + (TETRALATH_ROW_OFFSET * 0) + 1, TETRALATH_BOARD_Y + 9},
     {TETRALATH_BOARD_X + (TETRALATH_POSITION_OFFSET * 1) + (TETRALATH_ROW_OFFSET * 0) + 1, TETRALATH_BOARD_Y + 9},
     {TETRALATH_BOARD_X + (TETRALATH_POSITION_OFFSET * 2) + (TETRALATH_ROW_OFFSET * 0) + 1, TETRALATH_BOARD_Y + 9},
@@ -43,7 +39,6 @@ static const TETRALATH_UI_POSITION board_ui_positions[TETRALATH_BOARD_SIZE] = {
     {TETRALATH_BOARD_X + (TETRALATH_POSITION_OFFSET * 6) + (TETRALATH_ROW_OFFSET * 0) + 1, TETRALATH_BOARD_Y + 9},
     {TETRALATH_BOARD_X + (TETRALATH_POSITION_OFFSET * 7) + (TETRALATH_ROW_OFFSET * 0) + 1, TETRALATH_BOARD_Y + 9},
     {TETRALATH_BOARD_X + (TETRALATH_POSITION_OFFSET * 8) + (TETRALATH_ROW_OFFSET * 0) + 1, TETRALATH_BOARD_Y + 9},
-    // Row 6 - 8 positions
     {TETRALATH_BOARD_X + (TETRALATH_POSITION_OFFSET * 0) + (TETRALATH_ROW_OFFSET * 1) + 1, TETRALATH_BOARD_Y + 11},
     {TETRALATH_BOARD_X + (TETRALATH_POSITION_OFFSET * 1) + (TETRALATH_ROW_OFFSET * 1) + 1, TETRALATH_BOARD_Y + 11},
     {TETRALATH_BOARD_X + (TETRALATH_POSITION_OFFSET * 2) + (TETRALATH_ROW_OFFSET * 1) + 1, TETRALATH_BOARD_Y + 11},
@@ -52,7 +47,6 @@ static const TETRALATH_UI_POSITION board_ui_positions[TETRALATH_BOARD_SIZE] = {
     {TETRALATH_BOARD_X + (TETRALATH_POSITION_OFFSET * 5) + (TETRALATH_ROW_OFFSET * 1) + 1, TETRALATH_BOARD_Y + 11},
     {TETRALATH_BOARD_X + (TETRALATH_POSITION_OFFSET * 6) + (TETRALATH_ROW_OFFSET * 1) + 1, TETRALATH_BOARD_Y + 11},
     {TETRALATH_BOARD_X + (TETRALATH_POSITION_OFFSET * 7) + (TETRALATH_ROW_OFFSET * 1) + 1, TETRALATH_BOARD_Y + 11},
-    // Row 7 - 7 positions
     {TETRALATH_BOARD_X + (TETRALATH_POSITION_OFFSET * 0) + (TETRALATH_ROW_OFFSET * 2) + 1, TETRALATH_BOARD_Y + 13},
     {TETRALATH_BOARD_X + (TETRALATH_POSITION_OFFSET * 1) + (TETRALATH_ROW_OFFSET * 2) + 1, TETRALATH_BOARD_Y + 13},
     {TETRALATH_BOARD_X + (TETRALATH_POSITION_OFFSET * 2) + (TETRALATH_ROW_OFFSET * 2) + 1, TETRALATH_BOARD_Y + 13},
@@ -60,14 +54,12 @@ static const TETRALATH_UI_POSITION board_ui_positions[TETRALATH_BOARD_SIZE] = {
     {TETRALATH_BOARD_X + (TETRALATH_POSITION_OFFSET * 4) + (TETRALATH_ROW_OFFSET * 2) + 1, TETRALATH_BOARD_Y + 13},
     {TETRALATH_BOARD_X + (TETRALATH_POSITION_OFFSET * 5) + (TETRALATH_ROW_OFFSET * 2) + 1, TETRALATH_BOARD_Y + 13},
     {TETRALATH_BOARD_X + (TETRALATH_POSITION_OFFSET * 6) + (TETRALATH_ROW_OFFSET * 2) + 1, TETRALATH_BOARD_Y + 13},
-    // Row 8 - 6 positions
     {TETRALATH_BOARD_X + (TETRALATH_POSITION_OFFSET * 0) + (TETRALATH_ROW_OFFSET * 3) + 1, TETRALATH_BOARD_Y + 15},
     {TETRALATH_BOARD_X + (TETRALATH_POSITION_OFFSET * 1) + (TETRALATH_ROW_OFFSET * 3) + 1, TETRALATH_BOARD_Y + 15},
     {TETRALATH_BOARD_X + (TETRALATH_POSITION_OFFSET * 2) + (TETRALATH_ROW_OFFSET * 3) + 1, TETRALATH_BOARD_Y + 15},
     {TETRALATH_BOARD_X + (TETRALATH_POSITION_OFFSET * 3) + (TETRALATH_ROW_OFFSET * 3) + 1, TETRALATH_BOARD_Y + 15},
     {TETRALATH_BOARD_X + (TETRALATH_POSITION_OFFSET * 4) + (TETRALATH_ROW_OFFSET * 3) + 1, TETRALATH_BOARD_Y + 15},
     {TETRALATH_BOARD_X + (TETRALATH_POSITION_OFFSET * 5) + (TETRALATH_ROW_OFFSET * 3) + 1, TETRALATH_BOARD_Y + 15},
-    // Row 9 - 5 positions
     {TETRALATH_BOARD_X + (TETRALATH_POSITION_OFFSET * 0) + (TETRALATH_ROW_OFFSET * 4) + 1, TETRALATH_BOARD_Y + 17},
     {TETRALATH_BOARD_X + (TETRALATH_POSITION_OFFSET * 1) + (TETRALATH_ROW_OFFSET * 4) + 1, TETRALATH_BOARD_Y + 17},
     {TETRALATH_BOARD_X + (TETRALATH_POSITION_OFFSET * 2) + (TETRALATH_ROW_OFFSET * 4) + 1, TETRALATH_BOARD_Y + 17},
@@ -77,8 +69,8 @@ static const TETRALATH_UI_POSITION board_ui_positions[TETRALATH_BOARD_SIZE] = {
 
 
 TETRALATH_AI_MODE choose_ai_mode() {
-    int x = TETRALATH_PANEL_X;
-    int y = 2;
+    const int x = TETRALATH_PANEL_X;
+    const int y = 2;
 
     TETRALATH_AI_MODE chosen_mode = TETRALATH_AI_MODE_NONE;
 
@@ -128,8 +120,8 @@ TETRALATH_AI_MODE choose_ai_mode() {
 }
 
 TETRALATH_COLOR choose_player_color() {
-    int x = TETRALATH_PANEL_X;
-    int y = 7;
+    const int x = TETRALATH_PANEL_X;
+    const int y = 7;
 
     TETRALATH_COLOR chosen_color = TETRALATH_COLOR_NONE;
 
@@ -178,7 +170,7 @@ TETRALATH_COLOR choose_player_color() {
     return chosen_color;
 }
 
-int get_next_empty_position(TETRALATH_COLOR *board, int position, int increment) {
+int get_next_empty_position(TETRALATH_COLOR *board, const int position, const int increment) {
     int found_empty_position = TETRALATH_POSITION_NONE;
     int next_position = position + increment;
     while (found_empty_position == TETRALATH_POSITION_NONE && next_position >= TETRALATH_FIRST_POSITION && next_position <= TETRALATH_LAST_POSITION) {
@@ -190,7 +182,7 @@ int get_next_empty_position(TETRALATH_COLOR *board, int position, int increment)
     return found_empty_position;
 }
 
-void unhighlight_position(int position) {
+void unhighlight_position(const int position) {
     int position_x = board_ui_positions[position].x;
     int position_y = board_ui_positions[position].y;
     attron(COLOR_PAIR(TETRALATH_BLACK_YELLOW));
@@ -198,7 +190,7 @@ void unhighlight_position(int position) {
     attroff(COLOR_PAIR(TETRALATH_BLACK_YELLOW));
 }
 
-void highlight_position(int position) {
+void highlight_position(const int position) {
     int position_x = board_ui_positions[position].x;
     int position_y = board_ui_positions[position].y;
     attron(COLOR_PAIR(TETRALATH_BLUE_BLUE));
@@ -206,7 +198,7 @@ void highlight_position(int position) {
     attroff(COLOR_PAIR(TETRALATH_BLUE_BLUE));
 }
 
-void update_position_highlights(int current_position, int previous_position) {
+void update_position_highlights(const int current_position, const int previous_position) {
     if (previous_position != TETRALATH_POSITION_NONE) {
         unhighlight_position(previous_position);
     }
@@ -216,11 +208,11 @@ void update_position_highlights(int current_position, int previous_position) {
     refresh();
 }
 
-int get_player_action(TETRALATH_COLOR *board, TETRALATH_STATE game_state) {
+int get_player_action(TETRALATH_COLOR *board, const TETRALATH_STATE game_state) {
     int chosen_action = TETRALATH_POSITION_NONE;
     int previous_position = TETRALATH_POSITION_NONE;
     int highlighted_position = TETRALATH_POSITION_NONE;
-    if (game_state == TETRALATH_STATE_RUNNING) {
+    if (game_state != TETRALATH_STATE_ENDING) {
         highlighted_position = get_next_empty_position(board, (-1), TETRALATH_BOARD_FORWARD_INCREMENT);
     }
 
@@ -250,10 +242,9 @@ int get_player_action(TETRALATH_COLOR *board, TETRALATH_STATE game_state) {
             case '\n':
             case '\r':
             case KEY_ENTER:
-                if (game_state == TETRALATH_STATE_RUNNING) {
+                if (game_state != TETRALATH_STATE_ENDING) {
                     chosen_action = highlighted_position;
-                }
-                if (game_state == TETRALATH_STATE_ENDED) {
+                } else if (game_state == TETRALATH_STATE_ENDING) {
                     chosen_action = TETRALATH_END_GAME;
                 }
                 break;
@@ -266,15 +257,19 @@ int get_player_action(TETRALATH_COLOR *board, TETRALATH_STATE game_state) {
                 }
                 chosen_action = TETRALATH_UNDO_LAST_MOVE;
                 break;
+            case 'q':
+            case 'Q':
+                chosen_action = TETRALATH_QUIT_GAME;
+                break;
         }
     }
 
     return chosen_action;
 }
 
-void draw_move(int position, TETRALATH_COLOR color) {
-    int position_x = board_ui_positions[position].x;
-    int position_y = board_ui_positions[position].y;
+void draw_move(const int position, const TETRALATH_COLOR color) {
+    const int position_x = board_ui_positions[position].x;
+    const int position_y = board_ui_positions[position].y;
     if (color == TETRALATH_COLOR_WHITE) {
         attron(COLOR_PAIR(TETRALATH_WHITE_WHITE));
     } else if (color == TETRALATH_COLOR_BLACK) {
@@ -293,22 +288,29 @@ void draw_move(int position, TETRALATH_COLOR color) {
     refresh();
 }
 
-void draw_ai_info(double time_taken, int show_time_taken) {
-    int x = TETRALATH_PANEL_X;
-    int y = 20;
+void draw_ai_info(const bool show_info, const int64_t processing_start_time, const int64_t processing_end_time, const int minimax_depth, const int64_t minimax_processing_end_time) {
+    const int x = TETRALATH_PANEL_X;
+    const int y = 20;
 
     mvprintw(y, x, "                             ");
+    mvprintw(y + 1, x, "                                ");
 
-    if (show_time_taken == TETRALATH_TRUE) {
+    if (show_info) {
+        const double time_taken = nsec_to_seconds(processing_end_time - processing_start_time);
         mvprintw(y, x, "AI reasoned for %.3f seconds", time_taken);
+
+        if (TETRALATH_SHOW_DEBUG_INFO) {
+            const double time_taken_successfully = nsec_to_seconds(minimax_processing_end_time - processing_start_time);
+            mvprintw(y + 1, x, "Solved %d moves in %.3f seconds", minimax_depth, time_taken_successfully);
+        }
     }
 
     refresh();
 }
 
 void draw_board() {
-    int x = TETRALATH_BOARD_X;
-    int y = TETRALATH_BOARD_Y;
+    const int x = TETRALATH_BOARD_X;
+    const int y = TETRALATH_BOARD_Y;
 
     attron(COLOR_PAIR(TETRALATH_BLACK_YELLOW));
 
@@ -336,23 +338,23 @@ void draw_board() {
 }
 
 void draw_controls_manual() {
-    int x = TETRALATH_PANEL_X;
-    int y = 12;
+    const int x = TETRALATH_PANEL_X;
+    const int y = 12;
 
     mvprintw(y, x, "Controls:");
     mvprintw(y + 1, x, "[U] : Undo last move");
 }
 
 void draw_current_player_title() {
-    int x = TETRALATH_PANEL_X;
-    int y = 16;
+    const int x = TETRALATH_PANEL_X;
+    const int y = 16;
 
     mvprintw(y, x, "Current player:");
 }
 
-void update_current_player(TETRALATH_COLOR current_color, TETRALATH_COLOR player_color) {
-    int x = TETRALATH_PANEL_X;
-    int y = 17;
+void update_current_player(const TETRALATH_COLOR current_color, const TETRALATH_COLOR player_color) {
+    const int x = TETRALATH_PANEL_X;
+    const int y = 17;
 
     char *color_name = NULL;
     if (current_color == TETRALATH_COLOR_WHITE) {
@@ -373,9 +375,9 @@ void update_current_player(TETRALATH_COLOR current_color, TETRALATH_COLOR player
     mvprintw(y, x, "%s %s", color_name, role);
 }
 
-void update_game_result(TETRALATH_RESULT result) {
-    int x = TETRALATH_PANEL_X;
-    int y = 23;
+void update_game_result(const TETRALATH_RESULT result) {
+    const int x = TETRALATH_PANEL_X;
+    const int y = 23;
 
     mvprintw(y, x, "          ");
 
@@ -384,7 +386,7 @@ void update_game_result(TETRALATH_RESULT result) {
         mvprintw(y, x, "You won");
     } else if (result == TETRALATH_RESULT_LOSS) {
         mvprintw(y, x, "You lost");
-    } else if (result == TETRALATH_RESULT_DRAW_NEUTRAL) {
+    } else if (result == TETRALATH_RESULT_DRAW_MAX) {
         mvprintw(y, x, "It's a tie");
     }
     attroff(A_REVERSE);
