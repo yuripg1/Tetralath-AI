@@ -239,35 +239,39 @@ TETRALATH_RESULT check_game_result(TETRALATH_COLOR *board, const int moves_count
     }
 
     if (current_result == TETRALATH_RESULT_NONE_MAX) {
-        const int far_quadruplets_balance = far_quadruplets_per_color_count[perspective_color - 1] - far_quadruplets_per_color_count[opponent_color - 1];
-        if (far_quadruplets_balance >= 4) {
-            current_result = TETRALATH_RESULT_CLOSER_TO_WINNING_4;
-        } else if (far_quadruplets_balance == 3) {
-            current_result = TETRALATH_RESULT_CLOSER_TO_WINNING_3;
-        } else if (far_quadruplets_balance == 2) {
-            current_result = TETRALATH_RESULT_CLOSER_TO_WINNING_2;
-        } else if (far_quadruplets_balance == 1) {
-            current_result = TETRALATH_RESULT_CLOSER_TO_WINNING_1;
-        } else if (far_quadruplets_balance == (-1)) {
-            current_result = TETRALATH_RESULT_CLOSER_TO_LOSING_1;
-        } else if (far_quadruplets_balance == (-2)) {
-            current_result = TETRALATH_RESULT_CLOSER_TO_LOSING_2;
-        } else if (far_quadruplets_balance == (-3)) {
-            current_result = TETRALATH_RESULT_CLOSER_TO_LOSING_3;
-        } else if (far_quadruplets_balance <= (-4)) {
-            current_result = TETRALATH_RESULT_CLOSER_TO_LOSING_4;
+        const int opponent_far_quadruplets_count = far_quadruplets_per_color_count[opponent_color - 1];
+        const int perspective_far_quadruplets_count = far_quadruplets_per_color_count[perspective_color - 1];
+        if (opponent_far_quadruplets_count >= 1) {
+            if (opponent_far_quadruplets_count >= 4) {
+                current_result = TETRALATH_RESULT_CLOSER_TO_LOSING_4;
+            } else if (opponent_far_quadruplets_count == 3) {
+                current_result = TETRALATH_RESULT_CLOSER_TO_LOSING_3;
+            } else if (opponent_far_quadruplets_count == 2) {
+                current_result = TETRALATH_RESULT_CLOSER_TO_LOSING_2;
+            } else {
+                current_result = TETRALATH_RESULT_CLOSER_TO_LOSING_1;
+            }
+        } else if (perspective_far_quadruplets_count >= 1) {
+            if (perspective_far_quadruplets_count >= 4) {
+                current_result = TETRALATH_RESULT_CLOSER_TO_WINNING_4;
+            } else if (perspective_far_quadruplets_count == 3) {
+                current_result = TETRALATH_RESULT_CLOSER_TO_WINNING_3;
+            } else if (perspective_far_quadruplets_count == 2) {
+                current_result = TETRALATH_RESULT_CLOSER_TO_WINNING_2;
+            } else {
+                current_result = TETRALATH_RESULT_CLOSER_TO_WINNING_1;
+            }
         }
     }
 
     return current_result;
 }
 
-int max_level(int previous_alpha, int beta, TETRALATH_COLOR *board_copy, const TETRALATH_COLOR perspective_color, const TETRALATH_AI_MODE ai_mode, const int previous_moves_count, const int previous_depth, const int64_t target_end_time) {
+int max_level(const int previous_alpha, const int beta, TETRALATH_COLOR *board_copy, const TETRALATH_COLOR perspective_color, const TETRALATH_AI_MODE ai_mode, const int previous_moves_count, const int previous_remaining_depth, const int64_t target_end_time) {
     int alpha = previous_alpha;
 
     const TETRALATH_COLOR opponent_color = flip_color(perspective_color);
     const int moves_count = previous_moves_count + 1;
-    const int depth = previous_depth - 1;
     const TETRALATH_RESULT result = flip_result(check_game_result(board_copy, moves_count, opponent_color, perspective_color));
 
     bool terminal_result = false;
@@ -295,7 +299,8 @@ int max_level(int previous_alpha, int beta, TETRALATH_COLOR *board_copy, const T
     }
 
     if (!terminal_result) {
-        if (depth > 0 && get_current_time_nsec() < target_end_time) {
+        const int remaining_depth = previous_remaining_depth - 1;
+        if (remaining_depth > 0 && get_current_time_nsec() < target_end_time) {
             int i = 0;
             int evaluated_position;
             int evaluated_result;
@@ -303,7 +308,7 @@ int max_level(int previous_alpha, int beta, TETRALATH_COLOR *board_copy, const T
                 evaluated_position = default_move_order[i];
                 if (board_copy[evaluated_position] == TETRALATH_COLOR_NONE) {
                     board_copy[evaluated_position] = perspective_color;
-                    evaluated_result = min_level(alpha, beta, board_copy, perspective_color, ai_mode, moves_count, depth, target_end_time, false);
+                    evaluated_result = min_level(alpha, beta, board_copy, perspective_color, ai_mode, moves_count, remaining_depth, target_end_time, false);
                     board_copy[evaluated_position] = TETRALATH_COLOR_NONE;
                     if (evaluated_result > alpha) {
                         alpha = evaluated_result;
@@ -328,12 +333,11 @@ int max_level(int previous_alpha, int beta, TETRALATH_COLOR *board_copy, const T
     return alpha;
 }
 
-int min_level(int alpha, int previous_beta, TETRALATH_COLOR *board_copy, const TETRALATH_COLOR perspective_color, const TETRALATH_AI_MODE ai_mode, const int previous_moves_count, const int previous_depth, const int64_t target_end_time, const bool use_less_aggressive_pruning) {
+int min_level(const int alpha, const int previous_beta, TETRALATH_COLOR *board_copy, const TETRALATH_COLOR perspective_color, const TETRALATH_AI_MODE ai_mode, const int previous_moves_count, const int previous_remaining_depth, const int64_t target_end_time, const bool use_less_aggressive_pruning) {
     int beta = previous_beta;
 
     const TETRALATH_COLOR opponent_color = flip_color(perspective_color);
     const int moves_count = previous_moves_count + 1;
-    const int depth = previous_depth - 1;
     const TETRALATH_RESULT result = check_game_result(board_copy, moves_count, perspective_color, opponent_color);
 
     bool terminal_result = false;
@@ -361,7 +365,8 @@ int min_level(int alpha, int previous_beta, TETRALATH_COLOR *board_copy, const T
     }
 
     if (!terminal_result) {
-        if (depth > 0 && get_current_time_nsec() < target_end_time) {
+        const int remaining_depth = previous_remaining_depth - 1;
+        if (remaining_depth > 0 && get_current_time_nsec() < target_end_time) {
             int i = 0;
             int evaluated_position;
             int evaluated_result;
@@ -369,7 +374,7 @@ int min_level(int alpha, int previous_beta, TETRALATH_COLOR *board_copy, const T
                 evaluated_position = default_move_order[i];
                 if (board_copy[evaluated_position] == TETRALATH_COLOR_NONE) {
                     board_copy[evaluated_position] = opponent_color;
-                    evaluated_result = max_level(alpha, beta, board_copy, perspective_color, ai_mode, moves_count, depth, target_end_time);
+                    evaluated_result = max_level(alpha, beta, board_copy, perspective_color, ai_mode, moves_count, remaining_depth, target_end_time);
                     board_copy[evaluated_position] = TETRALATH_COLOR_NONE;
                     if (evaluated_result < beta) {
                         beta = evaluated_result;
@@ -512,18 +517,6 @@ void move_position_to_front(TETRALATH_MOVE_VALUE *move_values, const int positio
     move_values[0] = target_move_value;
 }
 
-int found_winning_move(TETRALATH_MOVE_VALUE *move_values) {
-    int winning_move = TETRALATH_POSITION_NONE;
-
-    for (int i = 0; i < TETRALATH_BOARD_SIZE; i += 1) {
-        if (move_values[i].minimax_result == TETRALATH_RESULT_WIN) {
-            winning_move = move_values[i].position;
-        }
-    }
-
-    return winning_move;
-}
-
 void copy_board(TETRALATH_COLOR *new_board, TETRALATH_COLOR *original_board) {
     memcpy(new_board, original_board, (TETRALATH_BOARD_SIZE + 1) * sizeof(TETRALATH_COLOR));
 }
@@ -549,6 +542,11 @@ void check_move_results(TETRALATH_COLOR *original_board, TETRALATH_MOVE_VALUE *m
         if (board_copy[evaluated_position_1] == TETRALATH_COLOR_NONE) {
             board_copy[evaluated_position_1] = perspective_color;
             evaluated_result_1 = check_game_result(board_copy, next_move_count, perspective_color, opponent_color);
+            if (evaluated_result_1 == TETRALATH_RESULT_ABOUT_TO_WIN) {
+                evaluated_result_1 = TETRALATH_RESULT_WIN;
+            } else if (evaluated_result_1 == TETRALATH_RESULT_ABOUT_TO_LOSE) {
+                evaluated_result_1 = TETRALATH_RESULT_LOSS;
+            }
             if ((evaluated_result_1 == TETRALATH_RESULT_WIN) || (evaluated_result_1 == TETRALATH_RESULT_LOSS) || (evaluated_result_1 == TETRALATH_RESULT_DRAW_MAX)) {
                 worst_evaluated_result_2 = evaluated_result_1;
             } else {
@@ -560,6 +558,13 @@ void check_move_results(TETRALATH_COLOR *original_board, TETRALATH_MOVE_VALUE *m
                         board_copy[evaluated_position_2] = opponent_color;
                         evaluated_result_2 = flip_result(check_game_result(board_copy, second_next_move_count, opponent_color, perspective_color));
                         board_copy[evaluated_position_2] = TETRALATH_COLOR_NONE;
+                        if (evaluated_result_2 == TETRALATH_RESULT_ABOUT_TO_WIN) {
+                            evaluated_result_2 = TETRALATH_RESULT_WIN;
+                        } else if (evaluated_result_2 == TETRALATH_RESULT_ABOUT_TO_LOSE) {
+                            evaluated_result_2 = TETRALATH_RESULT_LOSS;
+                        } else if (evaluated_result_2 == TETRALATH_RESULT_DRAW_MIN) {
+                            evaluated_result_2 = TETRALATH_RESULT_DRAW_MAX;
+                        }
                         if (evaluated_result_2 < worst_evaluated_result_2) {
                             worst_evaluated_result_2 = evaluated_result_2;
                         }
@@ -568,9 +573,6 @@ void check_move_results(TETRALATH_COLOR *original_board, TETRALATH_MOVE_VALUE *m
                 }
             }
             board_copy[evaluated_position_1] = TETRALATH_COLOR_NONE;
-            if (evaluated_result_1 == TETRALATH_RESULT_NONE_MIN) {
-                evaluated_result_1 = TETRALATH_RESULT_NONE_MAX;
-            }
             if (worst_evaluated_result_2 == TETRALATH_RESULT_NONE_MIN) {
                 worst_evaluated_result_2 = TETRALATH_RESULT_NONE_MAX;
             }
