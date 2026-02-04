@@ -70,7 +70,7 @@ static const TETRALATH_UI_POSITION board_ui_positions[TETRALATH_BOARD_SIZE] = {
 
 TETRALATH_AI_MODE choose_ai_mode() {
     const int x = TETRALATH_PANEL_X;
-    const int y = 2;
+    const int y = TETRALATH_PANEL_Y;
 
     TETRALATH_AI_MODE chosen_mode = TETRALATH_AI_MODE_NONE;
 
@@ -121,7 +121,7 @@ TETRALATH_AI_MODE choose_ai_mode() {
 
 TETRALATH_COLOR choose_player_color() {
     const int x = TETRALATH_PANEL_X;
-    const int y = 7;
+    const int y = TETRALATH_PANEL_Y + 5;
 
     TETRALATH_COLOR chosen_color = TETRALATH_COLOR_NONE;
 
@@ -261,6 +261,8 @@ int get_player_action(TETRALATH_COLOR *board, const TETRALATH_STATE game_state) 
             case 'Q':
                 chosen_action = TETRALATH_QUIT_GAME;
                 break;
+            default:
+                break;
         }
     }
 
@@ -290,7 +292,7 @@ void draw_move(const int position, const TETRALATH_COLOR color) {
 
 void draw_ai_info(const bool show_info, const int64_t processing_start_time, const int64_t processing_end_time, const int minimax_depth, const int64_t minimax_processing_end_time) {
     const int x = TETRALATH_PANEL_X;
-    const int y = 20;
+    const int y = TETRALATH_PANEL_Y + 18;
 
     mvprintw(y, x, "                             ");
     mvprintw(y + 1, x, "                                ");
@@ -339,7 +341,7 @@ void draw_board() {
 
 void draw_controls_manual() {
     const int x = TETRALATH_PANEL_X;
-    const int y = 12;
+    const int y = TETRALATH_PANEL_Y + 10;
 
     mvprintw(y, x, "Controls:");
     mvprintw(y + 1, x, "[U] : Undo last move");
@@ -347,14 +349,14 @@ void draw_controls_manual() {
 
 void draw_current_player_title() {
     const int x = TETRALATH_PANEL_X;
-    const int y = 16;
+    const int y = TETRALATH_PANEL_Y + 14;
 
     mvprintw(y, x, "Current player:");
 }
 
 void update_current_player(const TETRALATH_COLOR current_color, const TETRALATH_COLOR player_color) {
     const int x = TETRALATH_PANEL_X;
-    const int y = 17;
+    const int y = TETRALATH_PANEL_Y + 15;
 
     char *color_name = NULL;
     if (current_color == TETRALATH_COLOR_WHITE) {
@@ -377,7 +379,7 @@ void update_current_player(const TETRALATH_COLOR current_color, const TETRALATH_
 
 void update_game_result(const TETRALATH_RESULT result) {
     const int x = TETRALATH_PANEL_X;
-    const int y = 23;
+    const int y = TETRALATH_PANEL_Y + 21;
 
     mvprintw(y, x, "          ");
 

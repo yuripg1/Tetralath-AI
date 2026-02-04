@@ -211,6 +211,8 @@ TETRALATH_RESULT check_game_result(TETRALATH_COLOR *board, const int moves_count
                         empty_position = sequence_next_positions[i][position];
                         add_near_sequence_per_color(near_quadruplets_per_color_count, near_quadruplets_per_color_empty_positions, empty_position, current_color);
                         break;
+                    default:
+                        break;
                 }
             }
             j += 1;
@@ -296,6 +298,8 @@ int max_level(const int previous_alpha, const int beta, TETRALATH_COLOR *board_c
             alpha = TETRALATH_RESULT_LOSS + moves_count;
             terminal_result = true;
             break;
+        default:
+            break;
     }
 
     if (!terminal_result) {
@@ -361,6 +365,8 @@ int min_level(const int alpha, const int previous_beta, TETRALATH_COLOR *board_c
         case TETRALATH_RESULT_LOSS:
             beta = TETRALATH_RESULT_LOSS + moves_count;
             terminal_result = true;
+            break;
+        default:
             break;
     }
 
@@ -434,7 +440,7 @@ int get_best_move(TETRALATH_MOVE_VALUE *move_values) {
 }
 
 int get_first_best_move_by_minimax_result(TETRALATH_MOVE_VALUE *move_values) {
-    int first_best_move;
+    int first_best_move = TETRALATH_POSITION_NONE;
 
     int best_minimax_result = TETRALATH_RESULT_ALPHA_MIN;
     for (int i = 0; i < TETRALATH_BOARD_SIZE; i += 1) {
@@ -502,19 +508,21 @@ void sort_move_values(TETRALATH_MOVE_VALUE *move_values) {
 }
 
 void move_position_to_front(TETRALATH_MOVE_VALUE *move_values, const int position) {
-    int found_index;
+    int found_index = (-1);
     for (int i = 0; i < TETRALATH_BOARD_SIZE; i += 1) {
         if (move_values[i].position == position) {
             found_index = i;
         }
     }
-    TETRALATH_MOVE_VALUE target_move_value = move_values[found_index];
-    int j = found_index - 1;
-    while (j >= 0) {
-        move_values[j + 1] = move_values[j];
-        j -= 1;
+    if (found_index > 0) {
+        TETRALATH_MOVE_VALUE target_move_value = move_values[found_index];
+        int j = found_index - 1;
+        while (j >= 0) {
+            move_values[j + 1] = move_values[j];
+            j -= 1;
+        }
+        move_values[0] = target_move_value;
     }
-    move_values[0] = target_move_value;
 }
 
 void copy_board(TETRALATH_COLOR *new_board, TETRALATH_COLOR *original_board) {

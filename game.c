@@ -202,6 +202,8 @@ TETRALATH_RESULT get_simplified_game_result(TETRALATH_GAME *game) {
         case TETRALATH_RESULT_DRAW_MAX:
             simplified_game_result = game_result;
             break;
+        default:
+            break;
     }
 
     return simplified_game_result;
