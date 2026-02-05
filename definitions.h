@@ -92,22 +92,22 @@ typedef enum {
 
     // 1 + (4 * 1) + (16 * 1) = 21
     // 2 + (4 * 2) + (16 * 2) = 42
-    TETRALATH_SEQUENCE_TRIPLET = 42,
+    TETRALATH_SEQUENCE_TRIPLET = 21,
 
     // 1 + (4 * 1) + (16 * 1) + (64 * 1) = 85
     // 2 + (4 * 2) + (16 * 2) + (64 * 2) = 170
-    TETRALATH_SEQUENCE_QUADRUPLET = 170,
+    TETRALATH_SEQUENCE_QUADRUPLET = 85,
 
     // 1 + (4 * 1) + (16 * 0) + (64 * 1) = 69
     // 2 + (4 * 2) + (16 * 0) + (64 * 2) = 138
     // 1 + (4 * 0) + (16 * 1) + (64 * 1) = 81
     // 2 + (4 * 0) + (16 * 2) + (64 * 2) = 162
-    TETRALATH_SEQUENCE_NEAR_QUADRUPLET_1 = 138,
-    TETRALATH_SEQUENCE_NEAR_QUADRUPLET_2 = 162,
+    TETRALATH_SEQUENCE_NEAR_QUADRUPLET_1 = 69,
+    TETRALATH_SEQUENCE_NEAR_QUADRUPLET_2 = 81,
 
     // 1 + (4 * 0) + (16 * 0) + (64 * 1) = 65
     // 2 + (4 * 0) + (16 * 0) + (64 * 2) = 130
-    TETRALATH_SEQUENCE_FAR_QUADRUPLET = 130
+    TETRALATH_SEQUENCE_FAR_QUADRUPLET = 65
 } TETRALATH_SEQUENCE;
 
 typedef enum {

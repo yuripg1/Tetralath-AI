@@ -33,7 +33,7 @@ typedef struct {
 
 typedef struct {
     TETRALATH_GAME *game;
-    int minimax_depth_divider;
+    int minimax_depth_divisor;
     int minimax_depth_remainder;
     int minimax_depth_limit;
     int64_t target_end_time;

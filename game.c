@@ -6,7 +6,7 @@
 #include "time.h"
 #include "ui.h"
 
-TETRALATH_COLOR *initialize_board() {
+static TETRALATH_COLOR *initialize_board() {
     TETRALATH_COLOR *board = (TETRALATH_COLOR *)malloc((TETRALATH_BOARD_SIZE + 1) * sizeof(TETRALATH_COLOR));
     for (int i = 0; i < TETRALATH_BOARD_SIZE + 1; i += 1) {
         board[i] = TETRALATH_COLOR_NONE;
@@ -14,14 +14,14 @@ TETRALATH_COLOR *initialize_board() {
     return board;
 }
 
-TETRALATH_MOVES *initialize_moves() {
+static TETRALATH_MOVES *initialize_moves() {
     TETRALATH_MOVES *moves = (TETRALATH_MOVES *)malloc(sizeof(TETRALATH_MOVES));
     moves->moves_list = (TETRALATH_MOVE *)malloc(TETRALATH_BOARD_SIZE * sizeof(TETRALATH_MOVE));
     moves->moves_count = 0;
     return moves;
 }
 
-TETRALATH_GAME *initialize_game_data() {
+static TETRALATH_GAME *initialize_game_data() {
     TETRALATH_GAME *game = (TETRALATH_GAME *)malloc(sizeof(TETRALATH_GAME));
     game->board = initialize_board();
     game->moves = initialize_moves();
@@ -31,17 +31,18 @@ TETRALATH_GAME *initialize_game_data() {
     game->ai_mode = TETRALATH_AI_MODE_NONE;
     game->state = TETRALATH_STATE_RUNNING;
     game->result = TETRALATH_RESULT_NONE_MAX;
+    index_sequence_values();
     return game;
 }
 
-void destroy_game_data(TETRALATH_GAME *game) {
+static void destroy_game_data(TETRALATH_GAME *game) {
     free(game->board);
     free(game->moves->moves_list);
     free(game->moves);
     free(game);
 }
 
-void start_new_turn_data(TETRALATH_GAME *game) {
+static void start_new_turn_data(TETRALATH_GAME *game) {
     if (game->next_color == TETRALATH_COLOR_NONE) {
         game->next_color = TETRALATH_COLOR_WHITE;
     }
@@ -49,21 +50,21 @@ void start_new_turn_data(TETRALATH_GAME *game) {
     game->next_color = flip_color(game->current_color);
 }
 
-void set_move(TETRALATH_GAME *game, const int position, const TETRALATH_COLOR color) {
+static void set_move(TETRALATH_GAME *game, const int position, const TETRALATH_COLOR color) {
     game->board[position] = color;
     game->moves->moves_list[game->moves->moves_count].position = position;
     game->moves->moves_list[game->moves->moves_count].color = color;
     game->moves->moves_count += 1;
 }
 
-int set_move_undoing(TETRALATH_GAME *game) {
+static int set_move_undoing(TETRALATH_GAME *game) {
     const int position_to_undo = game->moves->moves_list[game->moves->moves_count - 1].position;
     game->board[position_to_undo] = TETRALATH_COLOR_NONE;
     game->moves->moves_count -= 1;
     return position_to_undo;
 }
 
-int get_number_of_moves_to_undo(TETRALATH_GAME *game) {
+static int get_number_of_moves_to_undo(TETRALATH_GAME *game) {
     int number_of_moves_to_undo = 0;
     if (game->state == TETRALATH_STATE_ENDING) {
         game->state = TETRALATH_STATE_RUNNING;
@@ -84,7 +85,7 @@ int get_number_of_moves_to_undo(TETRALATH_GAME *game) {
     return number_of_moves_to_undo;
 }
 
-void process_player_action(TETRALATH_GAME *game) {
+static void process_player_action(TETRALATH_GAME *game) {
     int player_move = TETRALATH_POSITION_NONE;
     const int player_action = get_player_action(game->board, game->state);
     if (player_action >= TETRALATH_FIRST_POSITION && player_action <= TETRALATH_LAST_POSITION) {
@@ -106,14 +107,14 @@ void process_player_action(TETRALATH_GAME *game) {
     }
 }
 
-void initialize_minimax_outputs(TETRALATH_MINIMAX_OUTPUT *minimax_outputs) {
+static void initialize_minimax_outputs(TETRALATH_MINIMAX_OUTPUT *minimax_outputs) {
     for (int i = 0; i < TETRALATH_BOARD_SIZE; i += 1) {
         minimax_outputs[i].minimax_depth = 0;
         minimax_outputs[i].ai_move = TETRALATH_POSITION_NONE;
     }
 }
 
-void *process_ai_move_thread(void *arg) {
+static void *process_ai_move_thread(void *arg) {
     TETRALATH_THREAD_INPUT *thread_input = (TETRALATH_THREAD_INPUT *)arg;
 
     TETRALATH_MOVE_VALUE move_values[TETRALATH_BOARD_SIZE];
@@ -133,14 +134,14 @@ void *process_ai_move_thread(void *arg) {
             thread_input->minimax_outputs[minimax_depth - 1].minimax_depth = minimax_depth;
             thread_input->minimax_outputs[minimax_depth - 1].ai_move = current_ai_move;
             thread_input->minimax_outputs[minimax_depth - 1].processing_end_time = current_time;
-            minimax_depth += thread_input->minimax_depth_divider;
+            minimax_depth += thread_input->minimax_depth_divisor;
         }
     }
 
     return NULL;
 }
 
-TETRALATH_MINIMAX_OUTPUT *get_best_ai_move(TETRALATH_MINIMAX_OUTPUT *minimax_outputs) {
+static TETRALATH_MINIMAX_OUTPUT *get_best_ai_move(TETRALATH_MINIMAX_OUTPUT *minimax_outputs) {
     TETRALATH_MINIMAX_OUTPUT *best_minimax_output = NULL;
     int best_minimax_depth = 0;
     for (int i = 0; i < TETRALATH_BOARD_SIZE; i += 1) {
@@ -152,7 +153,7 @@ TETRALATH_MINIMAX_OUTPUT *get_best_ai_move(TETRALATH_MINIMAX_OUTPUT *minimax_out
     return best_minimax_output;
 }
 
-void process_ai_move(TETRALATH_GAME *game) {
+static void process_ai_move(TETRALATH_GAME *game) {
     int minimax_depth_limit = TETRALATH_DEFAULT_MINIMAX_MAXIMUM_DEPTH;
     if (minimax_depth_limit > (TETRALATH_BOARD_SIZE - game->moves->moves_count)) {
         minimax_depth_limit = TETRALATH_BOARD_SIZE - game->moves->moves_count;
@@ -168,7 +169,7 @@ void process_ai_move(TETRALATH_GAME *game) {
     TETRALATH_THREAD_INPUT thread_inputs[number_of_threads];
     for (int i = 0; i < number_of_threads; i += 1) {
         thread_inputs[i].game = game;
-        thread_inputs[i].minimax_depth_divider = number_of_threads;
+        thread_inputs[i].minimax_depth_divisor = number_of_threads;
         thread_inputs[i].minimax_depth_remainder = i;
         thread_inputs[i].minimax_depth_limit = minimax_depth_limit;
         thread_inputs[i].target_end_time = target_end_time;
@@ -192,7 +193,7 @@ void process_ai_move(TETRALATH_GAME *game) {
     draw_ai_info(true, processing_start_time, processing_end_time, best_minimax_output->minimax_depth, best_minimax_output->processing_end_time);
 }
 
-TETRALATH_RESULT get_simplified_game_result(TETRALATH_GAME *game) {
+static TETRALATH_RESULT get_simplified_game_result(TETRALATH_GAME *game) {
     TETRALATH_RESULT simplified_game_result = TETRALATH_RESULT_NONE_MAX;
 
     TETRALATH_RESULT game_result = check_game_result(game->board, game->moves->moves_count, game->player_color, flip_color(game->player_color));
