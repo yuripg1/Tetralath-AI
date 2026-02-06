@@ -35,8 +35,10 @@ typedef struct {
     TETRALATH_GAME *game;
     int minimax_depth_divisor;
     int minimax_depth_remainder;
-    int minimax_depth_limit;
+    int minimum_minimax_depth;
+    int maximum_minimax_depth;
     int64_t target_end_time;
+    TETRALATH_MOVE_VALUE *initial_move_values;
     TETRALATH_MINIMAX_OUTPUT *minimax_outputs;
 } TETRALATH_THREAD_INPUT;
 
