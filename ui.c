@@ -190,25 +190,29 @@ static void unhighlight_position(const int position) {
     attroff(COLOR_PAIR(TETRALATH_BLACK_YELLOW));
 }
 
-static void highlight_position(const int position) {
+static void highlight_position(const int position, const TETRALATH_COLOR player_color) {
     int position_x = board_ui_positions[position].x;
     int position_y = board_ui_positions[position].y;
-    attron(COLOR_PAIR(TETRALATH_BLUE_BLUE));
-    mvprintw(position_y, position_x, "   ");
-    attroff(COLOR_PAIR(TETRALATH_BLUE_BLUE));
+    int highlight_color = TETRALATH_WHITE_BLUE;
+    if (player_color == TETRALATH_COLOR_BLACK) {
+        highlight_color = TETRALATH_BLACK_BLUE;
+    }
+    attron(COLOR_PAIR(highlight_color));
+    mvprintw(position_y, position_x, "___");
+    attroff(COLOR_PAIR(highlight_color));
 }
 
-static void update_position_highlights(const int current_position, const int previous_position) {
+static void update_position_highlights(const int current_position, const int previous_position, const TETRALATH_COLOR player_color) {
     if (previous_position != TETRALATH_POSITION_NONE) {
         unhighlight_position(previous_position);
     }
     if (current_position != TETRALATH_POSITION_NONE) {
-        highlight_position(current_position);
+        highlight_position(current_position, player_color);
     }
     refresh();
 }
 
-int get_player_action(TETRALATH_COLOR *board, const TETRALATH_STATE game_state) {
+int get_player_action(TETRALATH_COLOR *board, const TETRALATH_COLOR player_color, const TETRALATH_STATE game_state) {
     int chosen_action = TETRALATH_POSITION_NONE;
     int previous_position = TETRALATH_POSITION_NONE;
     int highlighted_position = TETRALATH_POSITION_NONE;
@@ -217,7 +221,7 @@ int get_player_action(TETRALATH_COLOR *board, const TETRALATH_STATE game_state) 
     }
 
     while (chosen_action == TETRALATH_POSITION_NONE) {
-        update_position_highlights(highlighted_position, previous_position);
+        update_position_highlights(highlighted_position, previous_position, player_color);
         int input = getch();
         int next_position = TETRALATH_POSITION_NONE;
         switch (input) {
@@ -253,7 +257,7 @@ int get_player_action(TETRALATH_COLOR *board, const TETRALATH_STATE game_state) 
                 if (highlighted_position != TETRALATH_POSITION_NONE) {
                     previous_position = highlighted_position;
                     highlighted_position = TETRALATH_POSITION_NONE;
-                    update_position_highlights(highlighted_position, previous_position);
+                    update_position_highlights(highlighted_position, previous_position, player_color);
                 }
                 chosen_action = TETRALATH_UNDO_LAST_MOVE;
                 break;
@@ -269,41 +273,47 @@ int get_player_action(TETRALATH_COLOR *board, const TETRALATH_STATE game_state) 
     return chosen_action;
 }
 
-void draw_move(const int position, const TETRALATH_COLOR color) {
+void draw_move(const int position, const TETRALATH_COLOR color, const bool is_latest_move) {
     const int position_x = board_ui_positions[position].x;
     const int position_y = board_ui_positions[position].y;
     if (color == TETRALATH_COLOR_WHITE) {
-        attron(COLOR_PAIR(TETRALATH_WHITE_WHITE));
+        attron(COLOR_PAIR(TETRALATH_YELLOW_WHITE));
     } else if (color == TETRALATH_COLOR_BLACK) {
-        attron(COLOR_PAIR(TETRALATH_BLACK_BLACK));
+        attron(COLOR_PAIR(TETRALATH_YELLOW_BLACK));
     } else if (color == TETRALATH_COLOR_NONE) {
         attron(COLOR_PAIR(TETRALATH_BLACK_YELLOW));
     }
-    mvprintw(position_y, position_x, "   ");
+    if (is_latest_move) {
+        mvprintw(position_y, position_x, " X ");
+    } else {
+        mvprintw(position_y, position_x, "   ");
+    }
     if (color == TETRALATH_COLOR_WHITE) {
-        attroff(COLOR_PAIR(TETRALATH_WHITE_WHITE));
+        attroff(COLOR_PAIR(TETRALATH_YELLOW_WHITE));
     } else if (color == TETRALATH_COLOR_BLACK) {
-        attroff(COLOR_PAIR(TETRALATH_BLACK_BLACK));
+        attroff(COLOR_PAIR(TETRALATH_YELLOW_BLACK));
     } else if (color == TETRALATH_COLOR_NONE) {
         attroff(COLOR_PAIR(TETRALATH_BLACK_YELLOW));
     }
     refresh();
 }
 
-void draw_ai_info(const bool show_info, const int64_t processing_start_time, const int64_t processing_end_time, const int minimax_depth, const int64_t minimax_processing_end_time) {
+void draw_ai_info(TETRALATH_AI_INFO_STATE ai_info_state, const int64_t processing_start_time, const int64_t processing_end_time, const int minimax_depth, const int64_t minimax_processing_end_time) {
     const int x = TETRALATH_PANEL_X;
     const int y = TETRALATH_PANEL_Y + 18;
 
-    mvprintw(y, x, "                             ");
-    mvprintw(y + 1, x, "                                ");
+    mvprintw(y, x, "                            ");
+    mvprintw(y + 1, x, "                         ");
 
-    if (show_info) {
+    if (ai_info_state == TETRALATH_AI_INFO_STATE_THINKING) {
+        mvprintw(y, x, "AI thinking...");
+    } else if (ai_info_state == TETRALATH_AI_INFO_STATE_FINISHED) {
         const double time_taken = nsec_to_seconds(processing_end_time - processing_start_time);
-        mvprintw(y, x, "AI reasoned for %.3f seconds", time_taken);
+        mvprintw(y, x, "AI thought for %.3f seconds", time_taken);
 
         if (TETRALATH_SHOW_DEBUG_INFO) {
             const double time_taken_successfully = nsec_to_seconds(minimax_processing_end_time - processing_start_time);
-            mvprintw(y + 1, x, "Solved %d moves in %.3f seconds", minimax_depth, time_taken_successfully);
+            mvprintw(y + 1, x, "Depth %d in %.3f seconds", minimax_depth, time_taken_successfully);
         }
     }
 
@@ -404,9 +414,10 @@ void initialize_game_ui() {
     start_color();
     init_pair(TETRALATH_WHITE_BLACK, COLOR_WHITE, COLOR_BLACK);
     init_pair(TETRALATH_BLACK_YELLOW, COLOR_BLACK, COLOR_YELLOW);
-    init_pair(TETRALATH_WHITE_WHITE, COLOR_WHITE, COLOR_WHITE);
-    init_pair(TETRALATH_BLACK_BLACK, COLOR_BLACK, COLOR_BLACK);
-    init_pair(TETRALATH_BLUE_BLUE, COLOR_BLUE, COLOR_BLUE);
+    init_pair(TETRALATH_YELLOW_WHITE, COLOR_YELLOW, COLOR_WHITE);
+    init_pair(TETRALATH_YELLOW_BLACK, COLOR_YELLOW, COLOR_BLACK);
+    init_pair(TETRALATH_WHITE_BLUE, COLOR_WHITE, COLOR_BLUE);
+    init_pair(TETRALATH_BLACK_BLUE, COLOR_BLACK, COLOR_BLUE);
     bkgd(COLOR_PAIR(TETRALATH_WHITE_BLACK));
     draw_board();
     refresh();
