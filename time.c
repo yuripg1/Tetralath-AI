@@ -13,10 +13,10 @@ int64_t get_current_time_nsec() {
     return timespec_to_nsec(&ts);
 }
 
-int64_t seconds_to_nsec(double seconds) {
+int64_t seconds_to_nsec(const double seconds) {
     return (int64_t)(seconds * 1e9);
 }
 
-double nsec_to_seconds(int64_t nsec) {
+double nsec_to_seconds(const int64_t nsec) {
     return nsec / 1e9;
 }

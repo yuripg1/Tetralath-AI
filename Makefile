@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -O2 -Wall
+CFLAGS = -O2 -flto -Wall
 LDLIBS = -lncurses -lpthread
 
 SRCS = main.c game.c ai.c ui.c time.c debug.c

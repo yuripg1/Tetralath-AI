@@ -8,8 +8,8 @@ int64_t timespec_to_nsec(const struct timespec *ts);
 
 int64_t get_current_time_nsec();
 
-int64_t seconds_to_nsec(double seconds);
+int64_t seconds_to_nsec(const double seconds);
 
-double nsec_to_seconds(int64_t nsec);
+double nsec_to_seconds(const int64_t nsec);
 
 #endif

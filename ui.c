@@ -170,7 +170,7 @@ TETRALATH_COLOR choose_player_color() {
     return chosen_color;
 }
 
-static int get_next_empty_position(TETRALATH_COLOR *board, const int position, const int increment) {
+static int get_next_empty_position(const TETRALATH_COLOR *board, const int position, const int increment) {
     int found_empty_position = TETRALATH_POSITION_NONE;
     int next_position = position + increment;
     while (found_empty_position == TETRALATH_POSITION_NONE && next_position >= TETRALATH_FIRST_POSITION && next_position <= TETRALATH_LAST_POSITION) {
@@ -212,7 +212,7 @@ static void update_position_highlights(const int current_position, const int pre
     refresh();
 }
 
-int get_player_action(TETRALATH_COLOR *board, const TETRALATH_COLOR player_color, const TETRALATH_STATE game_state) {
+int get_player_action(const TETRALATH_COLOR *board, const TETRALATH_COLOR player_color, const TETRALATH_STATE game_state) {
     int chosen_action = TETRALATH_POSITION_NONE;
     int previous_position = TETRALATH_POSITION_NONE;
     int highlighted_position = TETRALATH_POSITION_NONE;
@@ -298,7 +298,7 @@ void draw_move(const int position, const TETRALATH_COLOR color, const bool is_la
     refresh();
 }
 
-void draw_ai_info(TETRALATH_AI_INFO_STATE ai_info_state, const int64_t processing_start_time, const int64_t processing_end_time, const int minimax_depth, const int64_t minimax_processing_end_time) {
+void draw_ai_info(const TETRALATH_AI_INFO_STATE ai_info_state, const int64_t processing_start_time, const int64_t processing_end_time, const int minimax_depth, const int64_t minimax_processing_end_time) {
     const int x = TETRALATH_PANEL_X;
     const int y = TETRALATH_PANEL_Y + 18;
 
@@ -383,7 +383,7 @@ static void update_current_player(const TETRALATH_COLOR current_color, const TET
         role = "(AI)";
     }
 
-    mvprintw(y, x, "           "); // Clear previous text
+    mvprintw(y, x, "           ");
     mvprintw(y, x, "%s %s", color_name, role);
 }
 
@@ -429,7 +429,7 @@ void draw_rest_of_panel() {
     refresh();
 }
 
-void start_turn_ui(TETRALATH_COLOR current_color, TETRALATH_COLOR player_color, TETRALATH_RESULT result) {
+void start_turn_ui(const TETRALATH_COLOR current_color, const TETRALATH_COLOR player_color, const TETRALATH_RESULT result) {
     update_current_player(current_color, player_color);
     update_game_result(result);
     refresh();

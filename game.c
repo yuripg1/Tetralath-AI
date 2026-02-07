@@ -171,7 +171,6 @@ static void process_ai_move(TETRALATH_GAME *game) {
 
     TETRALATH_MOVE_VALUE initial_move_values[TETRALATH_BOARD_SIZE];
     initialize_move_values(initial_move_values);
-    update_move_order(initial_move_values);
 
     const int shallow_minimax_depth = 3;
     const int first_ai_move = shallow_minimax(game->board, initial_move_values, game->current_color, game->moves->moves_count);
@@ -221,7 +220,7 @@ static void process_ai_move(TETRALATH_GAME *game) {
     draw_ai_info(TETRALATH_AI_INFO_STATE_FINISHED, processing_start_time, processing_end_time, best_minimax_output->minimax_depth, best_minimax_output->processing_end_time);
 }
 
-static TETRALATH_RESULT get_simplified_game_result(TETRALATH_GAME *game) {
+static TETRALATH_RESULT get_simplified_game_result(const TETRALATH_GAME *game) {
     TETRALATH_RESULT simplified_game_result = TETRALATH_RESULT_NONE_MAX;
 
     TETRALATH_RESULT game_result = check_game_result(game->board, game->moves->moves_count, game->player_color, flip_color(game->player_color));

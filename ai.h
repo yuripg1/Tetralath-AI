@@ -22,14 +22,10 @@ typedef struct {
 
 void index_sequence_positions();
 void index_sequence_values();
-void update_move_order(TETRALATH_MOVE_VALUE *move_values);
-TETRALATH_RESULT check_game_result(TETRALATH_COLOR *board, const int moves_count, const TETRALATH_COLOR perspective_color, const TETRALATH_COLOR opponent_color);
-int max_level(const int previous_alpha, const int beta, TETRALATH_COLOR *board_copy, const TETRALATH_COLOR perspective_color, const TETRALATH_AI_MODE ai_mode, const int previous_moves_count, const int previous_remaining_depth, const int64_t target_end_time);
-int min_level(const int alpha, const int previous_beta, TETRALATH_COLOR *board_copy, const TETRALATH_COLOR perspective_color, const TETRALATH_AI_MODE ai_mode, const int previous_moves_count, const int previous_remaining_depth, const int64_t target_end_time, const bool use_strict_pruning);
+TETRALATH_RESULT check_game_result(const TETRALATH_COLOR *board, const int moves_count, const TETRALATH_COLOR perspective_color, const TETRALATH_COLOR opponent_color);
 void initialize_move_values(TETRALATH_MOVE_VALUE *move_values);
-void copy_move_values(TETRALATH_MOVE_VALUE *new_move_values, TETRALATH_MOVE_VALUE *move_values);
-void sort_move_values(TETRALATH_MOVE_VALUE *move_values);
-int shallow_minimax(TETRALATH_COLOR *original_board, TETRALATH_MOVE_VALUE *move_values, const TETRALATH_COLOR perspective_color, const int moves_count);
-int deep_minimax(TETRALATH_COLOR *original_board, TETRALATH_MOVE_VALUE *move_values, const TETRALATH_COLOR ai_color, const int moves_count, const int minimax_depth, const TETRALATH_AI_MODE ai_mode, const int64_t target_end_time);
+void copy_move_values(TETRALATH_MOVE_VALUE *new_move_values, const TETRALATH_MOVE_VALUE *move_values);
+int shallow_minimax(const TETRALATH_COLOR *original_board, TETRALATH_MOVE_VALUE *move_values, const TETRALATH_COLOR perspective_color, const int moves_count);
+int deep_minimax(const TETRALATH_COLOR *original_board, TETRALATH_MOVE_VALUE *move_values, const TETRALATH_COLOR ai_color, const int moves_count, const int minimax_depth, const TETRALATH_AI_MODE ai_mode, const int64_t target_end_time);
 
 #endif

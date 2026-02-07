@@ -36,13 +36,13 @@ typedef struct {
 
 TETRALATH_AI_MODE choose_ai_mode();
 TETRALATH_COLOR choose_player_color();
-int get_player_action(TETRALATH_COLOR *board, TETRALATH_COLOR player_color, TETRALATH_STATE game_state);
-void draw_move(int position, TETRALATH_COLOR color, bool is_latest_move);
-void draw_ai_info(TETRALATH_AI_INFO_STATE ai_info_state, int64_t processing_start_time, int64_t processing_end_time, int minimax_depth, int64_t minimax_processing_end_time);
+int get_player_action(const TETRALATH_COLOR *board, const TETRALATH_COLOR player_color, const TETRALATH_STATE game_state);
+void draw_move(const int position, const TETRALATH_COLOR color, const bool is_latest_move);
+void draw_ai_info(const TETRALATH_AI_INFO_STATE ai_info_state, const int64_t processing_start_time, const int64_t processing_end_time, const int minimax_depth, const int64_t minimax_processing_end_time);
 void initialize_game_ui();
 void draw_rest_of_panel();
-void start_turn_ui(TETRALATH_COLOR current_color, TETRALATH_COLOR player_color, TETRALATH_RESULT result);
-void finish_game_ui(TETRALATH_RESULT result);
+void start_turn_ui(const TETRALATH_COLOR current_color, const TETRALATH_COLOR player_color, const TETRALATH_RESULT result);
+void finish_game_ui(const TETRALATH_RESULT result);
 void destroy_game_ui();
 
 #endif
