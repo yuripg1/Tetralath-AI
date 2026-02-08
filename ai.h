@@ -6,11 +6,6 @@
 #include "definitions.h"
 
 typedef struct {
-    int positions[TETRALATH_BOARD_SIZE + 1];
-    int positions_count;
-} TETRALATH_ROOTS;
-
-typedef struct {
     int position;
     int deep_minimax_result;
     int shallow_minimax_result;
@@ -19,6 +14,8 @@ typedef struct {
 
 #define TETRALATH_NUMBER_OF_DIRECTIONS 3
 #define TETRALATH_NO_NEXT_POSITION 61
+#define TETRALATH_SEQUENCE_START_POSITIONS_PER_DIRECTION_COUNT 43
+#define TETRALATH_MAXIMUM_NEAR_SEQUENCES 21
 
 void index_sequence_positions();
 void index_sequence_values();
