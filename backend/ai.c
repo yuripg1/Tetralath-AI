@@ -460,26 +460,26 @@ static void sort_move_values(TETRALATH_MOVE_VALUE *move_values) {
     for (int i = 1; i < TETRALATH_BOARD_SIZE; i += 1) {
         TETRALATH_MOVE_VALUE current_move_value = move_values[i];
         int j = i - 1;
-        int current_move_value_sorted = TETRALATH_FALSE;
-        int move_ahead;
-        while (j >= 0 && current_move_value_sorted == TETRALATH_FALSE) {
-            move_ahead = TETRALATH_FALSE;
+        bool current_move_value_sorted = false;
+        bool move_ahead;
+        while (j >= 0 && current_move_value_sorted == false) {
+            move_ahead = false;
             if (move_values[j].deep_minimax_result < current_move_value.deep_minimax_result) {
-                move_ahead = TETRALATH_TRUE;
+                move_ahead = true;
             } else if (move_values[j].deep_minimax_result == current_move_value.deep_minimax_result) {
                 if (move_values[j].shallow_minimax_result < current_move_value.shallow_minimax_result) {
-                    move_ahead = TETRALATH_TRUE;
+                    move_ahead = true;
                 } else if (move_values[j].shallow_minimax_result == current_move_value.shallow_minimax_result) {
                     if (move_values[j].weight < current_move_value.weight) {
-                        move_ahead = TETRALATH_TRUE;
+                        move_ahead = true;
                     }
                 }
             }
-            if (move_ahead == TETRALATH_TRUE) {
+            if (move_ahead == true) {
                 move_values[j + 1] = move_values[j];
                 j -= 1;
             } else {
-                current_move_value_sorted = TETRALATH_TRUE;
+                current_move_value_sorted = true;
             }
         }
         move_values[j + 1] = current_move_value;

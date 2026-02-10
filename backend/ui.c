@@ -170,16 +170,35 @@ TETRALATH_COLOR choose_player_color() {
     return chosen_color;
 }
 
-static int get_next_empty_position(const TETRALATH_COLOR *board, const int position, const int increment) {
-    int found_empty_position = TETRALATH_POSITION_NONE;
-    int next_position = position + increment;
-    while (found_empty_position == TETRALATH_POSITION_NONE && next_position >= TETRALATH_FIRST_POSITION && next_position <= TETRALATH_LAST_POSITION) {
-        if (board[next_position] == TETRALATH_COLOR_NONE) {
-            found_empty_position = next_position;
-        }
-        next_position += increment;
+TETRALATH_PLAYER_ACTION choose_player_action() {
+    TETRALATH_PLAYER_ACTION chosen_action = TETRALATH_PLAYER_ACTION_NONE;
+
+    int input = getch();
+    switch (input) {
+        case KEY_LEFT:
+            chosen_action = TETRALATH_PLAYER_ACTION_KEY_LEFT;
+            break;
+        case KEY_RIGHT:
+            chosen_action = TETRALATH_PLAYER_ACTION_KEY_RIGHT;
+            break;
+        case '\n':
+        case '\r':
+        case KEY_ENTER:
+            chosen_action = TETRALATH_PLAYER_ACTION_KEY_ENTER;
+            break;
+        case 'u':
+        case 'U':
+            chosen_action = TETRALATH_PLAYER_ACTION_KEY_U;
+            break;
+        case 'q':
+        case 'Q':
+            chosen_action = TETRALATH_PLAYER_ACTION_KEY_Q;
+            break;
+        default:
+            break;
     }
-    return found_empty_position;
+
+    return chosen_action;
 }
 
 static void unhighlight_position(const int position) {
@@ -202,7 +221,7 @@ static void highlight_position(const int position, const TETRALATH_COLOR player_
     attroff(COLOR_PAIR(highlight_color));
 }
 
-static void update_position_highlights(const int current_position, const int previous_position, const TETRALATH_COLOR player_color) {
+void update_position_highlights(const int current_position, const int previous_position, const TETRALATH_COLOR player_color) {
     if (previous_position != TETRALATH_POSITION_NONE) {
         unhighlight_position(previous_position);
     }
@@ -210,67 +229,6 @@ static void update_position_highlights(const int current_position, const int pre
         highlight_position(current_position, player_color);
     }
     refresh();
-}
-
-int get_player_action(const TETRALATH_COLOR *board, const TETRALATH_COLOR player_color, const TETRALATH_STATE game_state) {
-    int chosen_action = TETRALATH_POSITION_NONE;
-    int previous_position = TETRALATH_POSITION_NONE;
-    int highlighted_position = TETRALATH_POSITION_NONE;
-    if (game_state != TETRALATH_STATE_ENDING) {
-        highlighted_position = get_next_empty_position(board, (-1), TETRALATH_BOARD_FORWARD_INCREMENT);
-    }
-
-    while (chosen_action == TETRALATH_POSITION_NONE) {
-        update_position_highlights(highlighted_position, previous_position, player_color);
-        int input = getch();
-        int next_position = TETRALATH_POSITION_NONE;
-        switch (input) {
-            case KEY_LEFT:
-                if (highlighted_position != TETRALATH_POSITION_NONE) {
-                    next_position = get_next_empty_position(board, highlighted_position, TETRALATH_BOARD_BACKWARD_INCREMENT);
-                    if (next_position != TETRALATH_POSITION_NONE) {
-                        previous_position = highlighted_position;
-                        highlighted_position = next_position;
-                    }
-                }
-                break;
-            case KEY_RIGHT:
-                if (highlighted_position != TETRALATH_POSITION_NONE) {
-                    next_position = get_next_empty_position(board, highlighted_position, TETRALATH_BOARD_FORWARD_INCREMENT);
-                    if (next_position != TETRALATH_POSITION_NONE) {
-                        previous_position = highlighted_position;
-                        highlighted_position = next_position;
-                    }
-                }
-                break;
-            case '\n':
-            case '\r':
-            case KEY_ENTER:
-                if (game_state != TETRALATH_STATE_ENDING) {
-                    chosen_action = highlighted_position;
-                } else if (game_state == TETRALATH_STATE_ENDING) {
-                    chosen_action = TETRALATH_END_GAME;
-                }
-                break;
-            case 'u':
-            case 'U':
-                if (highlighted_position != TETRALATH_POSITION_NONE) {
-                    previous_position = highlighted_position;
-                    highlighted_position = TETRALATH_POSITION_NONE;
-                    update_position_highlights(highlighted_position, previous_position, player_color);
-                }
-                chosen_action = TETRALATH_UNDO_LAST_MOVE;
-                break;
-            case 'q':
-            case 'Q':
-                chosen_action = TETRALATH_QUIT_GAME;
-                break;
-            default:
-                break;
-        }
-    }
-
-    return chosen_action;
 }
 
 void draw_move(const int position, const TETRALATH_COLOR color, const bool is_latest_move) {

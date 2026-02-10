@@ -191,6 +191,18 @@ TETRALATH_RESULT get_simplified_game_result(const TETRALATH_GAME *game) {
     return simplified_game_result;
 }
 
+int get_next_empty_position(const TETRALATH_GAME *game, const int position, const int increment) {
+    int found_empty_position = TETRALATH_POSITION_NONE;
+    int next_position = position + increment;
+    while (found_empty_position == TETRALATH_POSITION_NONE && next_position >= TETRALATH_FIRST_POSITION && next_position <= TETRALATH_LAST_POSITION) {
+        if (game->board[next_position] == TETRALATH_COLOR_NONE) {
+            found_empty_position = next_position;
+        }
+        next_position += increment;
+    }
+    return found_empty_position;
+}
+
 TETRALATH_GAME *init_headless_game() {
     TETRALATH_GAME *game = initialize_game_data();
     return game;
@@ -204,7 +216,7 @@ void set_ai_mode(TETRALATH_GAME *game, const TETRALATH_AI_MODE ai_mode) {
     game->ai_mode = ai_mode;
 }
 
-TETRALATH_COLOR get_player_color(TETRALATH_GAME *game) {
+TETRALATH_COLOR get_player_color(const TETRALATH_GAME *game) {
     return game->player_color;
 }
 
@@ -212,7 +224,7 @@ void set_player_color(TETRALATH_GAME *game, const TETRALATH_COLOR player_color) 
     game->player_color = player_color;
 }
 
-TETRALATH_STATE get_game_state(TETRALATH_GAME *game) {
+TETRALATH_STATE get_game_state(const TETRALATH_GAME *game) {
     return game->state;
 }
 
@@ -220,7 +232,7 @@ void set_game_state(TETRALATH_GAME *game, const TETRALATH_STATE state) {
     game->state = state;
 }
 
-TETRALATH_RESULT get_game_result(TETRALATH_GAME *game) {
+TETRALATH_RESULT get_game_result(const TETRALATH_GAME *game) {
     return game->result;
 }
 
@@ -228,19 +240,19 @@ void update_game_result(TETRALATH_GAME *game) {
     game->result = get_simplified_game_result(game);
 }
 
-TETRALATH_COLOR get_current_color(TETRALATH_GAME *game) {
+TETRALATH_COLOR get_current_color(const TETRALATH_GAME *game) {
     return game->current_color;
 }
 
-int get_moves_count(TETRALATH_GAME *game) {
+int get_moves_count(const TETRALATH_GAME *game) {
     return game->moves->moves_count;
 }
 
-TETRALATH_MOVE get_latest_move(TETRALATH_GAME *game) {
+TETRALATH_MOVE get_latest_move(const TETRALATH_GAME *game) {
     return game->moves->moves_list[game->moves->moves_count - 1];
 }
 
-TETRALATH_COLOR *get_board(TETRALATH_GAME *game) {
+TETRALATH_COLOR *get_board(const TETRALATH_GAME *game) {
     return game->board;
 }
 
