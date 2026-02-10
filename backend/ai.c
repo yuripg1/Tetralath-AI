@@ -26,16 +26,6 @@
         --------------------------
 */
 
-static const int default_move_order[TETRALATH_BOARD_SIZE] = {
-    21, 22, 29, 30, 31, 38, 39, 14, 20, 23,
-    37, 40, 46, 13, 15, 28, 32, 45, 47, 7,
-    8, 12, 16, 19, 24, 36, 41, 44, 48, 52,
-    53, 6, 9, 27, 33, 51, 54, 1, 2, 3,
-    5, 10, 11, 17, 18, 25, 35, 42, 43, 49,
-    50, 55, 57, 58, 59, 0, 4, 26, 34, 56,
-    60
-};
-
 static const int default_move_weights[TETRALATH_BOARD_SIZE] = {
     15, 16, 16, 16, 15,
     16, 18, 19, 19, 18, 16,
@@ -48,7 +38,17 @@ static const int default_move_weights[TETRALATH_BOARD_SIZE] = {
     15, 16, 16, 16, 15
 };
 
-static const int sequence_start_positions[TETRALATH_NUMBER_OF_DIRECTIONS][TETRALATH_SEQUENCE_START_POSITIONS_PER_DIRECTION_COUNT] = {
+static const uint8_t default_move_order[TETRALATH_BOARD_SIZE] = {
+    21, 22, 29, 30, 31, 38, 39, 14, 20, 23,
+    37, 40, 46, 13, 15, 28, 32, 45, 47, 7,
+    8, 12, 16, 19, 24, 36, 41, 44, 48, 52,
+    53, 6, 9, 27, 33, 51, 54, 1, 2, 3,
+    5, 10, 11, 17, 18, 25, 35, 42, 43, 49,
+    50, 55, 57, 58, 59, 0, 4, 26, 34, 56,
+    60
+};
+
+static const uint8_t sequence_start_positions[TETRALATH_NUMBER_OF_DIRECTIONS][TETRALATH_SEQUENCE_START_POSITIONS_PER_DIRECTION_COUNT] = {
     {
         0, 1, 2,
         5, 6, 7, 8,
@@ -80,7 +80,7 @@ static const int sequence_start_positions[TETRALATH_NUMBER_OF_DIRECTIONS][TETRAL
     }
 };
 
-static const int sequence_next_positions[TETRALATH_NUMBER_OF_DIRECTIONS][TETRALATH_BOARD_SIZE + 1] = {
+static const uint8_t sequence_next_positions[TETRALATH_NUMBER_OF_DIRECTIONS][TETRALATH_BOARD_SIZE + 1] = {
     {
         1, 2, 3, 4, TETRALATH_NO_NEXT_POSITION,
         6, 7, 8, 9, 10, TETRALATH_NO_NEXT_POSITION,
@@ -119,59 +119,70 @@ static const int sequence_next_positions[TETRALATH_NUMBER_OF_DIRECTIONS][TETRALA
     }
 };
 
-static int indexed_sequence_positions[TETRALATH_NUMBER_OF_DIRECTIONS][TETRALATH_BOARD_SIZE][3];
-
-void index_sequence_positions() {
-    for (int i = 0; i < TETRALATH_NUMBER_OF_DIRECTIONS; i += 1) {
-        for (int j = 0; j < TETRALATH_BOARD_SIZE; j += 1) {
-            int next_position_1 = sequence_next_positions[i][j];
-            int next_position_2 = sequence_next_positions[i][next_position_1];
-            int next_position_3 = sequence_next_positions[i][next_position_2];
-            indexed_sequence_positions[i][j][0] = next_position_1;
-            indexed_sequence_positions[i][j][1] = next_position_2;
-            indexed_sequence_positions[i][j][2] = next_position_3;
-        }
-    }
-}
-
-static TETRALATH_SEQUENCE indexed_sequence_values[256];
+static uint8_t indexed_sequence_values[171];
 
 void index_sequence_values() {
-    for (int i = 0; i < 256; i += 1) {
-        indexed_sequence_values[i] = TETRALATH_SEQUENCE_NONE;
+    for (int i = 0; i < 171; i += 1) {
+        indexed_sequence_values[i] = (uint8_t)TETRALATH_SEQUENCE_NONE;
     }
-    indexed_sequence_values[TETRALATH_SEQUENCE_TRIPLET * TETRALATH_COLOR_WHITE] = TETRALATH_SEQUENCE_TRIPLET;
-    indexed_sequence_values[TETRALATH_SEQUENCE_TRIPLET * TETRALATH_COLOR_BLACK] = TETRALATH_SEQUENCE_TRIPLET;
-    indexed_sequence_values[TETRALATH_SEQUENCE_QUADRUPLET * TETRALATH_COLOR_WHITE] = TETRALATH_SEQUENCE_QUADRUPLET;
-    indexed_sequence_values[TETRALATH_SEQUENCE_QUADRUPLET * TETRALATH_COLOR_BLACK] = TETRALATH_SEQUENCE_QUADRUPLET;
-    indexed_sequence_values[TETRALATH_SEQUENCE_NEAR_QUADRUPLET_1 * TETRALATH_COLOR_WHITE] = TETRALATH_SEQUENCE_NEAR_QUADRUPLET_1;
-    indexed_sequence_values[TETRALATH_SEQUENCE_NEAR_QUADRUPLET_1 * TETRALATH_COLOR_BLACK] = TETRALATH_SEQUENCE_NEAR_QUADRUPLET_1;
-    indexed_sequence_values[TETRALATH_SEQUENCE_NEAR_QUADRUPLET_2 * TETRALATH_COLOR_WHITE] = TETRALATH_SEQUENCE_NEAR_QUADRUPLET_2;
-    indexed_sequence_values[TETRALATH_SEQUENCE_NEAR_QUADRUPLET_2 * TETRALATH_COLOR_BLACK] = TETRALATH_SEQUENCE_NEAR_QUADRUPLET_2;
+    // 1 + (4 * 1) + (16 * 1) + (64 * 0) = 21
+    // 1 + (4 * 1) + (16 * 1) + (64 * 2) = 149
+    // 2 + (4 * 2) + (16 * 2) + (64 * 0) = 42
+    // 2 + (4 * 2) + (16 * 2) + (64 * 1) = 106
+    indexed_sequence_values[21] = (uint8_t)TETRALATH_SEQUENCE_TRIPLET;
+    indexed_sequence_values[149] = (uint8_t)TETRALATH_SEQUENCE_TRIPLET;
+    indexed_sequence_values[42] = (uint8_t)TETRALATH_SEQUENCE_TRIPLET;
+    indexed_sequence_values[106] = (uint8_t)TETRALATH_SEQUENCE_TRIPLET;
+    // 1 + (4 * 1) + (16 * 1) + (64 * 1) = 85
+    // 2 + (4 * 2) + (16 * 2) + (64 * 2) = 170
+    indexed_sequence_values[85] = (uint8_t)TETRALATH_SEQUENCE_QUADRUPLET;
+    indexed_sequence_values[170] = (uint8_t)TETRALATH_SEQUENCE_QUADRUPLET;
+    // 1 + (4 * 1) + (16 * 0) + (64 * 0) = 5
+    // 1 + (4 * 1) + (16 * 0) + (64 * 2) = 133
+    // 2 + (4 * 2) + (16 * 0) + (64 * 0) = 10
+    // 2 + (4 * 2) + (16 * 0) + (64 * 1) = 74
+    indexed_sequence_values[5] = (uint8_t)TETRALATH_SEQUENCE_NEAR_TRIPLET_1;
+    indexed_sequence_values[133] = (uint8_t)TETRALATH_SEQUENCE_NEAR_TRIPLET_1;
+    indexed_sequence_values[10] = (uint8_t)TETRALATH_SEQUENCE_NEAR_TRIPLET_1;
+    indexed_sequence_values[74] = (uint8_t)TETRALATH_SEQUENCE_NEAR_TRIPLET_1;
+    // 1 + (4 * 0) + (16 * 1) + (64 * 0) = 17
+    // 1 + (4 * 0) + (16 * 1) + (64 * 2) = 145
+    // 2 + (4 * 0) + (16 * 2) + (64 * 0) = 34
+    // 2 + (4 * 0) + (16 * 2) + (64 * 1) = 98
+    indexed_sequence_values[17] = (uint8_t)TETRALATH_SEQUENCE_NEAR_TRIPLET_2;
+    indexed_sequence_values[145] = (uint8_t)TETRALATH_SEQUENCE_NEAR_TRIPLET_2;
+    indexed_sequence_values[34] = (uint8_t)TETRALATH_SEQUENCE_NEAR_TRIPLET_2;
+    indexed_sequence_values[98] = (uint8_t)TETRALATH_SEQUENCE_NEAR_TRIPLET_2;
+    // 1 + (4 * 1) + (16 * 0) + (64 * 1) = 69
+    // 2 + (4 * 2) + (16 * 0) + (64 * 2) = 138
+    indexed_sequence_values[69] = (uint8_t)TETRALATH_SEQUENCE_NEAR_QUADRUPLET_1;
+    indexed_sequence_values[138] = (uint8_t)TETRALATH_SEQUENCE_NEAR_QUADRUPLET_1;
+    // 1 + (4 * 0) + (16 * 1) + (64 * 1) = 81
+    // 2 + (4 * 0) + (16 * 2) + (64 * 2) = 162
+    indexed_sequence_values[81] = (uint8_t)TETRALATH_SEQUENCE_NEAR_QUADRUPLET_2;
+    indexed_sequence_values[162] = (uint8_t)TETRALATH_SEQUENCE_NEAR_QUADRUPLET_2;
 }
 
 static int check_sequence_from_position(const TETRALATH_COLOR *board, const int sequence_start_position, const int direction) {
-    const int triplet_value = board[sequence_start_position] | (board[indexed_sequence_positions[direction][sequence_start_position][0]] << 2) | (board[indexed_sequence_positions[direction][sequence_start_position][1]] << 4);
-    const int quadruplet_value = triplet_value | (board[indexed_sequence_positions[direction][sequence_start_position][2]] << 6);
-
-    const int quadruplet_sequence = indexed_sequence_values[quadruplet_value];
-
-    return (quadruplet_sequence != TETRALATH_SEQUENCE_NONE) ? quadruplet_sequence : indexed_sequence_values[triplet_value];
+    int sequence_value = board[sequence_start_position];
+    const int next_position_1 = (int)(sequence_next_positions[direction][sequence_start_position]);
+    sequence_value |= (board[next_position_1] << 2);
+    const int next_position_2 = (int)(sequence_next_positions[direction][next_position_1]);
+    sequence_value |= (board[next_position_2] << 4);
+    const int next_position_3 = (int)(sequence_next_positions[direction][next_position_2]);
+    sequence_value |= (board[next_position_3] << 6);
+    return (int)(indexed_sequence_values[sequence_value]);
 }
 
 static void add_near_sequence_per_color(int *near_sequences_per_color_count, int near_sequences_per_color_empty_positions[TETRALATH_NUMBER_OF_COLORS][TETRALATH_MAXIMUM_NEAR_SEQUENCES], const int empty_position, const int current_color_index) {
-    bool position_already_known = false;
     int const near_sequences_count = near_sequences_per_color_count[current_color_index];
     for (int i = 0; i < near_sequences_count; i += 1) {
         if (near_sequences_per_color_empty_positions[current_color_index][i] == empty_position) {
-            position_already_known = true;
-            break;
+            return;
         }
     }
-    if (!position_already_known) {
-        near_sequences_per_color_empty_positions[current_color_index][near_sequences_count] = empty_position;
-        near_sequences_per_color_count[current_color_index] += 1;
-    }
+    near_sequences_per_color_empty_positions[current_color_index][near_sequences_count] = empty_position;
+    near_sequences_per_color_count[current_color_index] += 1;
 }
 
 TETRALATH_RESULT check_game_result(const TETRALATH_COLOR *board, const int moves_count, const TETRALATH_COLOR perspective_color, const TETRALATH_COLOR opponent_color) {
@@ -179,27 +190,41 @@ TETRALATH_RESULT check_game_result(const TETRALATH_COLOR *board, const int moves
         return TETRALATH_RESULT_NONE_MAX;
     }
 
-    int position;
+    int empty_position;
+    int current_position;
     TETRALATH_COLOR current_color;
     int triplets_per_color_count[TETRALATH_NUMBER_OF_COLORS] = {0, 0};
     int near_quadruplets_per_color_count[TETRALATH_NUMBER_OF_COLORS] = {0, 0};
     int near_quadruplets_per_color_empty_positions[TETRALATH_NUMBER_OF_COLORS][TETRALATH_MAXIMUM_NEAR_SEQUENCES];
+    int near_triplets_per_color_count[TETRALATH_NUMBER_OF_COLORS] = {0, 0};
+    int near_triplets_per_color_empty_positions[TETRALATH_NUMBER_OF_COLORS][TETRALATH_MAXIMUM_NEAR_SEQUENCES];
     for (int i = 0; i < TETRALATH_NUMBER_OF_DIRECTIONS; i += 1) {
         for (int j = 0; j < TETRALATH_SEQUENCE_START_POSITIONS_PER_DIRECTION_COUNT; j += 1) {
-            position = sequence_start_positions[i][j];
-            current_color = board[position];
+            current_position = (int)(sequence_start_positions[i][j]);
+            current_color = board[current_position];
             if (current_color != TETRALATH_COLOR_NONE) {
-                switch (check_sequence_from_position(board, position, i)) {
+                const int sequence_value = check_sequence_from_position(board, current_position, i);
+                switch (sequence_value) {
                     case TETRALATH_SEQUENCE_QUADRUPLET:
                         return (current_color == perspective_color) ? TETRALATH_RESULT_WIN : TETRALATH_RESULT_LOSS;
                     case TETRALATH_SEQUENCE_TRIPLET:
                         triplets_per_color_count[current_color - 1] += 1;
                         break;
+                    case TETRALATH_SEQUENCE_NEAR_TRIPLET_1:
+                        empty_position = (int)(sequence_next_positions[i][sequence_next_positions[i][current_position]]);
+                        add_near_sequence_per_color(near_triplets_per_color_count, near_triplets_per_color_empty_positions, empty_position, current_color - 1);
+                        break;
+                    case TETRALATH_SEQUENCE_NEAR_TRIPLET_2:
+                        empty_position = (int)(sequence_next_positions[i][current_position]);
+                        add_near_sequence_per_color(near_triplets_per_color_count, near_triplets_per_color_empty_positions, empty_position, current_color - 1);
+                        break;
                     case TETRALATH_SEQUENCE_NEAR_QUADRUPLET_1:
-                        add_near_sequence_per_color(near_quadruplets_per_color_count, near_quadruplets_per_color_empty_positions, indexed_sequence_positions[i][position][1], current_color - 1);
+                        empty_position = (int)(sequence_next_positions[i][sequence_next_positions[i][current_position]]);
+                        add_near_sequence_per_color(near_quadruplets_per_color_count, near_quadruplets_per_color_empty_positions, empty_position, current_color - 1);
                         break;
                     case TETRALATH_SEQUENCE_NEAR_QUADRUPLET_2:
-                        add_near_sequence_per_color(near_quadruplets_per_color_count, near_quadruplets_per_color_empty_positions, indexed_sequence_positions[i][position][0], current_color - 1);
+                        empty_position = (int)(sequence_next_positions[i][current_position]);
+                        add_near_sequence_per_color(near_quadruplets_per_color_count, near_quadruplets_per_color_empty_positions, empty_position, current_color - 1);
                         break;
                     default:
                         break;
@@ -219,6 +244,33 @@ TETRALATH_RESULT check_game_result(const TETRALATH_COLOR *board, const int moves
     } else if (near_quadruplets_per_color_count[perspective_color - 1] >= 2) {
         return TETRALATH_RESULT_ABOUT_TO_WIN;
     } else if (near_quadruplets_per_color_count[perspective_color - 1] == 1) {
+        if (near_triplets_per_color_count[opponent_color - 1] >= 1) {
+            const int candidate_for_winning_move = near_quadruplets_per_color_empty_positions[perspective_color - 1][0];
+            bool is_opponent_near_triplet = false;
+            int opponent_near_triplets_count = near_triplets_per_color_count[opponent_color - 1];
+            for (int i = 0; i < opponent_near_triplets_count; i += 1) {
+                if (near_triplets_per_color_empty_positions[opponent_color - 1][i] == candidate_for_winning_move) {
+                    is_opponent_near_triplet = true;
+                    break;
+                }
+            }
+            if (is_opponent_near_triplet) {
+                bool is_opponent_near_quadruplet = false;
+                if (near_quadruplets_per_color_count[opponent_color - 1] >= 1) {
+                    int opponent_near_quadruplets_count = near_quadruplets_per_color_count[opponent_color - 1];
+                    for (int i = 0; i < opponent_near_quadruplets_count; i += 1) {
+                        if (near_quadruplets_per_color_empty_positions[opponent_color - 1][i] == candidate_for_winning_move) {
+                            is_opponent_near_quadruplet = true;
+                            break;
+                        }
+                    }
+                }
+                if (is_opponent_near_triplet && !is_opponent_near_quadruplet) {
+                    return TETRALATH_RESULT_ABOUT_TO_WIN;
+                }
+            }
+
+        }
         return TETRALATH_RESULT_CLOSER_TO_WINNING;
     }
 
@@ -230,7 +282,9 @@ static int min_level(const int alpha, const int previous_beta, TETRALATH_COLOR *
 static int max_level(const int previous_alpha, const int beta, TETRALATH_COLOR *board_copy, const TETRALATH_COLOR perspective_color, const TETRALATH_AI_MODE ai_mode, const int previous_moves_count, const int previous_remaining_depth, const int64_t target_end_time) {
     const int moves_count = previous_moves_count + 1;
 
-    switch (flip_result(check_game_result(board_copy, moves_count, flip_color(perspective_color), perspective_color))) {
+    const int result = (int)flip_result(check_game_result(board_copy, moves_count, flip_color(perspective_color), perspective_color));
+
+    switch (result) {
         case TETRALATH_RESULT_WIN:
             return TETRALATH_RESULT_WIN - ((ai_mode != TETRALATH_AI_MODE_RUTHLESS) * moves_count);
         case TETRALATH_RESULT_ABOUT_TO_WIN:
@@ -252,7 +306,7 @@ static int max_level(const int previous_alpha, const int beta, TETRALATH_COLOR *
         int evaluated_position;
         int evaluated_result;
         for (int i = 0; i < TETRALATH_BOARD_SIZE; i += 1) {
-            evaluated_position = default_move_order[i];
+            evaluated_position = (int)(default_move_order[i]);
             if (board_copy[evaluated_position] == TETRALATH_COLOR_NONE) {
                 board_copy[evaluated_position] = perspective_color;
                 evaluated_result = min_level(alpha, beta, board_copy, perspective_color, ai_mode, moves_count, remaining_depth, target_end_time, false);
@@ -280,7 +334,9 @@ static int min_level(const int alpha, const int previous_beta, TETRALATH_COLOR *
     const TETRALATH_COLOR opponent_color = flip_color(perspective_color);
     const int moves_count = previous_moves_count + 1;
 
-    switch (check_game_result(board_copy, moves_count, perspective_color, opponent_color)) {
+    const int result = (int)check_game_result(board_copy, moves_count, perspective_color, opponent_color);
+
+    switch (result) {
         case TETRALATH_RESULT_WIN:
             return TETRALATH_RESULT_WIN - ((ai_mode != TETRALATH_AI_MODE_RUTHLESS) * moves_count);
         case TETRALATH_RESULT_ABOUT_TO_WIN:
@@ -302,7 +358,7 @@ static int min_level(const int alpha, const int previous_beta, TETRALATH_COLOR *
         int evaluated_position;
         int evaluated_result;
         for (int i = 0; i < TETRALATH_BOARD_SIZE; i += 1) {
-            evaluated_position = default_move_order[i];
+            evaluated_position = (int)(default_move_order[i]);
             if (board_copy[evaluated_position] == TETRALATH_COLOR_NONE) {
                 board_copy[evaluated_position] = opponent_color;
                 evaluated_result = max_level(alpha, beta, board_copy, perspective_color, ai_mode, moves_count, remaining_depth, target_end_time);

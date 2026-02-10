@@ -65,21 +65,12 @@ static inline TETRALATH_RESULT flip_result(TETRALATH_RESULT result) {
 
 typedef enum {
     TETRALATH_SEQUENCE_NONE = 0,
-
-    // 1 + (4 * 1) + (16 * 1) = 21
-    // 2 + (4 * 2) + (16 * 2) = 42
-    TETRALATH_SEQUENCE_TRIPLET = 21,
-
-    // 1 + (4 * 1) + (16 * 1) + (64 * 1) = 85
-    // 2 + (4 * 2) + (16 * 2) + (64 * 2) = 170
-    TETRALATH_SEQUENCE_QUADRUPLET = 85,
-
-    // 1 + (4 * 1) + (16 * 0) + (64 * 1) = 69
-    // 2 + (4 * 2) + (16 * 0) + (64 * 2) = 138
-    // 1 + (4 * 0) + (16 * 1) + (64 * 1) = 81
-    // 2 + (4 * 0) + (16 * 2) + (64 * 2) = 162
-    TETRALATH_SEQUENCE_NEAR_QUADRUPLET_1 = 69,
-    TETRALATH_SEQUENCE_NEAR_QUADRUPLET_2 = 81,
+    TETRALATH_SEQUENCE_TRIPLET = 1,
+    TETRALATH_SEQUENCE_QUADRUPLET = 2,
+    TETRALATH_SEQUENCE_NEAR_TRIPLET_1 = 3,
+    TETRALATH_SEQUENCE_NEAR_TRIPLET_2 = 4,
+    TETRALATH_SEQUENCE_NEAR_QUADRUPLET_1 = 5,
+    TETRALATH_SEQUENCE_NEAR_QUADRUPLET_2 = 6,
 } TETRALATH_SEQUENCE;
 
 typedef enum {

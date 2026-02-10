@@ -30,7 +30,6 @@ static TETRALATH_GAME *initialize_game_data() {
     game->ai_mode = TETRALATH_AI_MODE_NONE;
     game->state = TETRALATH_STATE_RUNNING;
     game->result = TETRALATH_RESULT_NONE_MAX;
-    index_sequence_positions();
     index_sequence_values();
     return game;
 }
