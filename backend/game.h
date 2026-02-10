@@ -52,6 +52,7 @@ int get_number_of_moves_to_undo(TETRALATH_GAME *game);
 void compute_ai_move(TETRALATH_GAME *game, TETRALATH_MINIMAX_OUTPUT *best_minimax_output, int64_t target_end_time);
 TETRALATH_RESULT get_simplified_game_result(const TETRALATH_GAME *game);
 int get_next_empty_position(const TETRALATH_GAME *game, const int position, const int increment);
+int get_position_color(const TETRALATH_GAME *game, const int position);
 TETRALATH_GAME *init_headless_game();
 void teardown_headless_game(TETRALATH_GAME *game);
 void set_ai_mode(TETRALATH_GAME *game, const TETRALATH_AI_MODE ai_mode);

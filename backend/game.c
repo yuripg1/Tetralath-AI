@@ -203,6 +203,13 @@ int get_next_empty_position(const TETRALATH_GAME *game, const int position, cons
     return found_empty_position;
 }
 
+int get_position_color(const TETRALATH_GAME *game, const int position) {
+    if (position >= TETRALATH_FIRST_POSITION && position <= TETRALATH_LAST_POSITION) {
+        return game->board[position];
+    }
+    return TETRALATH_COLOR_NONE;
+}
+
 TETRALATH_GAME *init_headless_game() {
     TETRALATH_GAME *game = initialize_game_data();
     return game;
