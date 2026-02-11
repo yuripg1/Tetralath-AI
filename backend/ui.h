@@ -46,7 +46,7 @@ TETRALATH_COLOR choose_player_color();
 TETRALATH_PLAYER_ACTION choose_player_action();
 void update_position_highlights(const int current_position, const int previous_position, const TETRALATH_COLOR player_color);
 void draw_move(const int position, const TETRALATH_COLOR color, const bool is_latest_move);
-void draw_ai_info(const TETRALATH_AI_INFO_STATE ai_info_state, const int64_t processing_start_time, const int64_t processing_end_time, const int minimax_depth, const int64_t minimax_processing_end_time);
+void draw_ai_info(const TETRALATH_AI_INFO_STATE ai_info_state, const int64_t processing_start_time, const int64_t processing_end_time, const int minimax_depth, const double minimax_time_taken);
 void initialize_game_ui();
 void draw_rest_of_panel();
 void start_turn_ui(const TETRALATH_COLOR current_color, const TETRALATH_COLOR player_color, const TETRALATH_RESULT result);

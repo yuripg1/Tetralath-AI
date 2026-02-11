@@ -101,13 +101,10 @@ static void process_player_action(TETRALATH_GAME *game) {
 
 static void process_ai_move(TETRALATH_GAME *game) {
     const int64_t processing_start_time = get_current_time_nsec();
-    const int64_t target_end_time = processing_start_time + seconds_to_nsec(TETRALATH_DEFAULT_TIME_LIMIT_IN_SECONDS);
 
     draw_ai_info(TETRALATH_AI_INFO_STATE_THINKING, 0, 0, 0, 0);
 
-    TETRALATH_MINIMAX_OUTPUT best_minimax_output;
-
-    compute_ai_move(game, &best_minimax_output, target_end_time);
+    int ai_move = compute_ai_move(game);
 
     if (get_moves_count(game) >= 1) {
         TETRALATH_MOVE previous_move = get_latest_move(game);
@@ -115,12 +112,12 @@ static void process_ai_move(TETRALATH_GAME *game) {
     }
 
     TETRALATH_COLOR current_color = get_current_color(game);
-    set_move(game, best_minimax_output.ai_move, current_color);
-    draw_move(best_minimax_output.ai_move, current_color, true);
+    set_move(game, ai_move, current_color);
+    draw_move(ai_move, current_color, true);
 
     const int64_t processing_end_time = get_current_time_nsec();
 
-    draw_ai_info(TETRALATH_AI_INFO_STATE_FINISHED, processing_start_time, processing_end_time, best_minimax_output.minimax_depth, best_minimax_output.processing_end_time);
+    draw_ai_info(TETRALATH_AI_INFO_STATE_FINISHED, processing_start_time, processing_end_time, get_latest_minimax_depth(game), get_latest_minimax_time_taken(game));
 }
 
 static void graphical_game() {

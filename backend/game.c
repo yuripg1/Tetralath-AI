@@ -87,6 +87,7 @@ static void initialize_minimax_outputs(TETRALATH_MINIMAX_OUTPUT *minimax_outputs
     for (int i = 0; i < TETRALATH_BOARD_SIZE; i += 1) {
         minimax_outputs[i].minimax_depth = 0;
         minimax_outputs[i].ai_move = TETRALATH_POSITION_NONE;
+        minimax_outputs[i].time_taken_nsec = 0;
     }
 }
 
@@ -107,7 +108,7 @@ static void *process_ai_move_thread(void *arg) {
         if (current_time < thread_input->target_end_time) {
             thread_input->minimax_outputs[minimax_depth - 1].minimax_depth = minimax_depth;
             thread_input->minimax_outputs[minimax_depth - 1].ai_move = current_ai_move;
-            thread_input->minimax_outputs[minimax_depth - 1].processing_end_time = current_time;
+            thread_input->minimax_outputs[minimax_depth - 1].time_taken_nsec = current_time - thread_input->computing_start_time;
             minimax_depth += thread_input->minimax_depth_divisor;
         }
     }
@@ -127,7 +128,10 @@ static TETRALATH_MINIMAX_OUTPUT *get_best_ai_move(TETRALATH_MINIMAX_OUTPUT *mini
     return best_minimax_output;
 }
 
-void compute_ai_move(TETRALATH_GAME *game, TETRALATH_MINIMAX_OUTPUT *best_minimax_output, int64_t target_end_time) {
+int compute_ai_move(TETRALATH_GAME *game) {
+    const int64_t computing_start_time = get_current_time_nsec();
+    const int64_t target_end_time = computing_start_time + seconds_to_nsec(TETRALATH_DEFAULT_TIME_LIMIT_IN_SECONDS);
+
     TETRALATH_MINIMAX_OUTPUT minimax_outputs[TETRALATH_BOARD_SIZE];
     initialize_minimax_outputs(minimax_outputs);
 
@@ -138,7 +142,7 @@ void compute_ai_move(TETRALATH_GAME *game, TETRALATH_MINIMAX_OUTPUT *best_minima
     const int first_ai_move = shallow_minimax(get_board(game), initial_move_values, get_current_color(game), get_moves_count(game));
     minimax_outputs[shallow_minimax_depth - 1].minimax_depth = shallow_minimax_depth;
     minimax_outputs[shallow_minimax_depth - 1].ai_move = first_ai_move;
-    minimax_outputs[shallow_minimax_depth - 1].processing_end_time = get_current_time_nsec();
+    minimax_outputs[shallow_minimax_depth - 1].time_taken_nsec = get_current_time_nsec() - computing_start_time;
 
     int minimum_minimax_depth = shallow_minimax_depth + 1;
     int maximum_minimax_depth = TETRALATH_DEFAULT_MINIMAX_MAXIMUM_DEPTH;
@@ -154,6 +158,7 @@ void compute_ai_move(TETRALATH_GAME *game, TETRALATH_MINIMAX_OUTPUT *best_minima
         thread_inputs[i].minimax_depth_remainder = i;
         thread_inputs[i].minimum_minimax_depth = minimum_minimax_depth;
         thread_inputs[i].maximum_minimax_depth = maximum_minimax_depth;
+        thread_inputs[i].computing_start_time = computing_start_time;
         thread_inputs[i].target_end_time = target_end_time;
         thread_inputs[i].initial_move_values = initial_move_values;
         thread_inputs[i].minimax_outputs = minimax_outputs;
@@ -167,11 +172,13 @@ void compute_ai_move(TETRALATH_GAME *game, TETRALATH_MINIMAX_OUTPUT *best_minima
         pthread_join(threads[i], NULL);
     }
 
-    TETRALATH_MINIMAX_OUTPUT *best_computed_minimax_output = get_best_ai_move(minimax_outputs);
+    TETRALATH_MINIMAX_OUTPUT *best_minimax_output = get_best_ai_move(minimax_outputs);
 
-    best_minimax_output->minimax_depth = best_computed_minimax_output->minimax_depth;
-    best_minimax_output->ai_move = best_computed_minimax_output->ai_move;
-    best_minimax_output->processing_end_time = best_computed_minimax_output->processing_end_time;
+    game->latest_minimax_output.minimax_depth = best_minimax_output->minimax_depth;
+    game->latest_minimax_output.ai_move = best_minimax_output->ai_move;
+    game->latest_minimax_output.time_taken_nsec = best_minimax_output->time_taken_nsec;
+
+    return best_minimax_output->ai_move;
 }
 
 TETRALATH_RESULT get_simplified_game_result(const TETRALATH_GAME *game) {
@@ -265,4 +272,12 @@ TETRALATH_COLOR *get_board(const TETRALATH_GAME *game) {
 
 void set_next_color(TETRALATH_GAME *game, const TETRALATH_COLOR next_color) {
     game->next_color = next_color;
+}
+
+int get_latest_minimax_depth(const TETRALATH_GAME *game) {
+    return game->latest_minimax_output.minimax_depth;
+}
+
+double get_latest_minimax_time_taken(const TETRALATH_GAME *game) {
+    return nsec_to_seconds(game->latest_minimax_output.time_taken_nsec);
 }

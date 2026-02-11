@@ -256,7 +256,7 @@ void draw_move(const int position, const TETRALATH_COLOR color, const bool is_la
     refresh();
 }
 
-void draw_ai_info(const TETRALATH_AI_INFO_STATE ai_info_state, const int64_t processing_start_time, const int64_t processing_end_time, const int minimax_depth, const int64_t minimax_processing_end_time) {
+void draw_ai_info(const TETRALATH_AI_INFO_STATE ai_info_state, const int64_t processing_start_time, const int64_t processing_end_time, const int minimax_depth, const double minimax_time_taken) {
     const int x = TETRALATH_PANEL_X;
     const int y = TETRALATH_PANEL_Y + 18;
 
@@ -270,8 +270,7 @@ void draw_ai_info(const TETRALATH_AI_INFO_STATE ai_info_state, const int64_t pro
         mvprintw(y, x, "AI thought for %.3f seconds", time_taken);
 
         if (TETRALATH_SHOW_DEBUG_INFO) {
-            const double time_taken_successfully = nsec_to_seconds(minimax_processing_end_time - processing_start_time);
-            mvprintw(y + 1, x, "Depth %d in %.3f seconds", minimax_depth, time_taken_successfully);
+            mvprintw(y + 1, x, "Depth %d in %.3f seconds", minimax_depth, minimax_time_taken);
         }
     }
 
