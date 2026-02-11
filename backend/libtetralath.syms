@@ -1,0 +1,29 @@
+# Export only the public API from game.h. All other symbols (time.c, ai internals, etc.) are hidden.
+LIBTETRALATH {
+  global:
+    init_headless_game;
+    teardown_headless_game;
+    start_new_turn_data;
+    set_move;
+    set_move_undoing;
+    get_number_of_moves_to_undo;
+    compute_ai_move;
+    get_simplified_game_result;
+    get_next_empty_position;
+    get_position_color;
+    set_ai_mode;
+    get_player_color;
+    set_player_color;
+    get_game_state;
+    set_game_state;
+    get_game_result;
+    update_game_result;
+    get_current_color;
+    get_moves_count;
+    get_latest_move;
+    get_board;
+    set_next_color;
+    get_latest_minimax_depth;
+    get_latest_minimax_time_taken;
+  local: *;
+};
