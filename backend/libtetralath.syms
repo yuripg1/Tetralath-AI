@@ -1,4 +1,3 @@
-# Export only the public API from game.h. All other symbols (time.c, ai internals, etc.) are hidden.
 LIBTETRALATH {
   global:
     init_headless_game;
