@@ -69,8 +69,8 @@ static const TETRALATH_UI_POSITION board_ui_positions[TETRALATH_BOARD_SIZE] = {
 
 
 TETRALATH_AI_MODE choose_ai_mode() {
-    const int x = TETRALATH_PANEL_X;
-    const int y = TETRALATH_PANEL_Y;
+    const int x = TETRALATH_LEFT_PANEL_X;
+    const int y = TETRALATH_LEFT_PANEL_Y;
 
     TETRALATH_AI_MODE chosen_mode = TETRALATH_AI_MODE_NONE;
 
@@ -120,8 +120,8 @@ TETRALATH_AI_MODE choose_ai_mode() {
 }
 
 TETRALATH_COLOR choose_player_color() {
-    const int x = TETRALATH_PANEL_X;
-    const int y = TETRALATH_PANEL_Y + 5;
+    const int x = TETRALATH_LEFT_PANEL_X;
+    const int y = TETRALATH_LEFT_PANEL_Y + 5;
 
     TETRALATH_COLOR chosen_color = TETRALATH_COLOR_NONE;
 
@@ -142,7 +142,7 @@ TETRALATH_COLOR choose_player_color() {
                 attron(A_REVERSE);
             }
             if (i == 0) {
-                mvprintw(option_y, x, "- White  (starts the game)");
+                mvprintw(option_y, x, "- White (starts the game)");
             } else {
                 mvprintw(option_y, x, "- Black");
             }
@@ -257,8 +257,8 @@ void draw_move(const int position, const TETRALATH_COLOR color, const bool is_la
 }
 
 void draw_ai_info(const TETRALATH_AI_INFO_STATE ai_info_state, const int64_t processing_start_time, const int64_t processing_end_time, const int minimax_depth, const double minimax_time_taken) {
-    const int x = TETRALATH_PANEL_X;
-    const int y = TETRALATH_PANEL_Y + 18;
+    const int x = TETRALATH_RIGHT_PANEL_X;
+    const int y = TETRALATH_RIGHT_PANEL_Y + 9;
 
     mvprintw(y, x, "                            ");
     mvprintw(y + 1, x, "                         ");
@@ -307,23 +307,24 @@ static void draw_board() {
 }
 
 static void draw_controls_manual() {
-    const int x = TETRALATH_PANEL_X;
-    const int y = TETRALATH_PANEL_Y + 10;
+    const int x = TETRALATH_RIGHT_PANEL_X;
+    const int y = TETRALATH_RIGHT_PANEL_Y;
 
     mvprintw(y, x, "Controls:");
     mvprintw(y + 1, x, "[U] : Undo last move");
+    mvprintw(y + 2, x, "[Q] : Quit");
 }
 
 static void draw_current_player_title() {
-    const int x = TETRALATH_PANEL_X;
-    const int y = TETRALATH_PANEL_Y + 14;
+    const int x = TETRALATH_RIGHT_PANEL_X;
+    const int y = TETRALATH_RIGHT_PANEL_Y + 5;
 
     mvprintw(y, x, "Current player:");
 }
 
 static void update_current_player(const TETRALATH_COLOR current_color, const TETRALATH_COLOR player_color) {
-    const int x = TETRALATH_PANEL_X;
-    const int y = TETRALATH_PANEL_Y + 15;
+    const int x = TETRALATH_RIGHT_PANEL_X;
+    const int y = TETRALATH_RIGHT_PANEL_Y + 6;
 
     char *color_name = NULL;
     if (current_color == TETRALATH_COLOR_WHITE) {
@@ -345,8 +346,8 @@ static void update_current_player(const TETRALATH_COLOR current_color, const TET
 }
 
 static void update_game_result(const TETRALATH_RESULT result) {
-    const int x = TETRALATH_PANEL_X;
-    const int y = TETRALATH_PANEL_Y + 21;
+    const int x = TETRALATH_RIGHT_PANEL_X;
+    const int y = TETRALATH_RIGHT_PANEL_Y + 12;
 
     mvprintw(y, x, "          ");
 
