@@ -3,3 +3,5 @@
 /backend/libtetralath.so
 /backend/libtetralath_debug.so
 /backend/*.o
+/frontend/.venv/
+/frontend/__pycache__/
