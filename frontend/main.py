@@ -9,19 +9,19 @@ def graphical_game() -> None:
         "ai_mode": definitions.TetralathAIMode.NONE,
     }
     game_window, clock = ui.initialize_game_ui()
-    pending_tetralath_events: list[definitions.TetralathEvent] = []
+    pending_tetralath_ui_events: list[definitions.TetralathUIEvent] = []
     left_panel, ai_mode_selector, player_color_selector, start_game_button = (
-        ui.draw_left_panel(game, pending_tetralath_events)
+        ui.draw_left_panel(game, pending_tetralath_ui_events)
     )
     running = True
     while running:
-        tetralath_event, pygame_events = ui.get_events(pending_tetralath_events)
+        tetralath_ui_event, pygame_events = ui.get_events(pending_tetralath_ui_events)
         ui.update_left_panel(left_panel, pygame_events)
-        if tetralath_event is not None:
-            if tetralath_event == definitions.TetralathEvent.QUIT:
+        if tetralath_ui_event is not None:
+            if tetralath_ui_event["type"] == definitions.TetralathEventType.QUIT:
                 if running is not False:
                     running = False
-            elif tetralath_event == definitions.TetralathEvent.START_GAME:
+            elif tetralath_ui_event["type"] == definitions.TetralathEventType.START_GAME:
                 if game["is_started"] is not True:
                     game["is_started"] = True
                     ui.disable_left_panel(

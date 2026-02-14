@@ -128,3 +128,52 @@ def get_all_hexagon_centers(
             )
             hexagon_centers.append(hexagon_center)
     return hexagon_centers
+
+
+def is_click_in_hexagon(
+    click_x: int,
+    click_y: int,
+    hexagon_radius: float,
+    hexagon_center_x: int,
+    hexagon_center_y: int,
+) -> bool:
+    hexagon_vertices = get_hexagon_vertices(
+        hexagon_center_x, hexagon_center_y, hexagon_radius
+    )
+    number_of_vertices = len(hexagon_vertices)
+    for i in range(number_of_vertices):
+        start_vertex_x, start_vertex_y = hexagon_vertices[i]
+        end_vertex_x, end_vertex_y = hexagon_vertices[(i + 1) % number_of_vertices]
+        cross_product = (end_vertex_x - start_vertex_x) * (click_y - start_vertex_y) - (
+            end_vertex_y - start_vertex_y
+        ) * (click_x - start_vertex_x)
+        if cross_product >= 0:
+            return False
+    return True
+
+
+def click_in_an_hexagon(
+    click_x: int,
+    click_y: int,
+    row_lengths: list[int],
+    middle_row_index: int,
+    hexagon_radius: float,
+    board_center_x: int,
+    board_center_y: int,
+) -> int | None:
+    for i in range(len(row_lengths)):
+        row, column = get_row_and_column_from_index(i, row_lengths)
+        hexagon_center_x, hexagon_center_y = get_single_hexagon_center(
+            row,
+            column,
+            len(row_lengths),
+            middle_row_index,
+            hexagon_radius,
+            board_center_x,
+            board_center_y,
+        )
+        if is_click_in_hexagon(
+            click_x, click_y, hexagon_radius, hexagon_center_x, hexagon_center_y
+        ):
+            return i
+    return None

@@ -47,21 +47,35 @@ def refresh_game_ui(
 
 
 def get_events(
-    pending_tetralath_events: list[definitions.TetralathEvent],
-) -> tuple[definitions.TetralathEvent | None, list[pygame.event.Event]]:
-    tetralath_event: definitions.TetralathEvent | None = None
+    pending_tetralath_ui_events: list[definitions.TetralathUIEvent],
+) -> tuple[definitions.TetralathUIEvent | None, list[pygame.event.Event]]:
+    tetralath_event: definitions.TetralathUIEvent | None = None
     pygame_events = pygame.event.get()
     for event in pygame_events:
         if event.type == pygame.QUIT:
-            pending_tetralath_events.append(definitions.TetralathEvent.QUIT)
-    if len(pending_tetralath_events) > 0:
-        tetralath_event = pending_tetralath_events.pop(0)
+            ui_event: definitions.TetralathUIEvent = {
+                "type": definitions.TetralathEventType.QUIT,
+            }
+            pending_tetralath_ui_events.append(ui_event)
+        elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            click_x = event.pos[0]
+            click_y = event.pos[1]
+            board_position_index = board.click_in_an_hexagon(click_x, click_y, board.TETRALATH_BOARD_ROW_LENGTHS, board.TETRALATH_BOARD_MIDDLE_ROW_INDEX, TETRALATH_BOARD_HEXAGON_RADIUS, round(TETRALATH_WINDOW_WIDTH / 2), round(TETRALATH_WINDOW_HEIGHT / 2))
+            if board_position_index is not None:
+                ui_event: definitions.TetralathUIEvent = {
+                    "type": definitions.TetralathEventType.BOARD_POSITION_CLICKED,
+                    "board_position_index": board_position_index,
+                }
+                pending_tetralath_ui_events.append(ui_event)
+
+    if len(pending_tetralath_ui_events) > 0:
+        tetralath_event = pending_tetralath_ui_events.pop(0)
     return tetralath_event, pygame_events
 
 
 def draw_left_panel(
     game: definitions.TetralathGame,
-    pending_tetralath_events: list[definitions.TetralathEvent],
+    pending_tetralath_ui_events: list[definitions.TetralathUIEvent],
 ) -> tuple[
     pygame_menu.Menu,
     pygame_menu.widgets.Selector,
@@ -133,7 +147,10 @@ def draw_left_panel(
     menu.add.label("")
 
     def on_start_game() -> None:
-        pending_tetralath_events.append(definitions.TetralathEvent.START_GAME)
+        ui_event: definitions.TetralathUIEvent = {
+            "type": definitions.TetralathEventType.START_GAME,
+        }
+        pending_tetralath_ui_events.append(ui_event)
 
     start_game_button = menu.add.button(
         "Start game",

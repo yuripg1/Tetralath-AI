@@ -1,10 +1,10 @@
 from enum import Enum
 import typing
 
-
-class TetralathEvent(Enum):
+class TetralathEventType(Enum):
     QUIT = 1
     START_GAME = 2
+    BOARD_POSITION_CLICKED = 3
 
 
 class TetralathColor(Enum):
@@ -23,3 +23,7 @@ class TetralathGame(typing.TypedDict):
     is_started: bool
     player_color: TetralathColor
     ai_mode: TetralathAIMode
+
+class TetralathUIEvent(typing.TypedDict):
+    type: TetralathEventType
+    board_position_index: int
