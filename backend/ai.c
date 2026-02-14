@@ -1,3 +1,4 @@
+#include <stdalign.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -27,63 +28,67 @@
 */
 
 static const int default_move_weights[TETRALATH_BOARD_SIZE] = {
-    15, 16, 16, 16, 15,
-    16, 18, 19, 19, 18, 16,
-    16, 19, 21, 22, 21, 19, 16,
-    16, 19, 22, 24, 24, 22, 19, 16,
+            15, 16, 16, 16, 15,
+          16, 18, 19, 19, 18, 16,
+        16, 19, 21, 22, 21, 19, 16,
+      16, 19, 22, 24, 24, 22, 19, 16,
     15, 18, 21, 24, 24, 24, 21, 18, 15,
-    16, 19, 22, 24, 24, 22, 19, 16,
-    16, 19, 21, 22, 21, 19, 16,
-    16, 18, 19, 19, 18, 16,
-    15, 16, 16, 16, 15
+      16, 19, 22, 24, 24, 22, 19, 16,
+        16, 19, 21, 22, 21, 19, 16,
+          16, 18, 19, 19, 18, 16,
+            15, 16, 16, 16, 15
 };
 
-static const uint8_t default_move_order[TETRALATH_BOARD_SIZE] = {
+static const alignas(64) uint8_t default_move_order[TETRALATH_BOARD_SIZE] = {
     21, 22, 29, 30, 31, 38, 39, 14, 20, 23,
-    37, 40, 46, 13, 15, 28, 32, 45, 47, 7,
-    8, 12, 16, 19, 24, 36, 41, 44, 48, 52,
-    53, 6, 9, 27, 33, 51, 54, 1, 2, 3,
-    5, 10, 11, 17, 18, 25, 35, 42, 43, 49,
-    50, 55, 57, 58, 59, 0, 4, 26, 34, 56,
+    37, 40, 46, 13, 15, 28, 32, 45, 47,  7,
+     8, 12, 16, 19, 24, 36, 41, 44, 48, 52,
+    53,  6,  9, 27, 33, 51, 54,  1,  2,  3,
+     5, 10, 11, 17, 18, 25, 35, 42, 43, 49,
+    50, 55, 57, 58, 59,  0,  4, 26, 34, 56,
     60
 };
 
-static const uint8_t sequence_start_positions[TETRALATH_NUMBER_OF_DIRECTIONS][TETRALATH_SEQUENCE_START_POSITIONS_PER_DIRECTION_COUNT] = {
+static const alignas(64) uint8_t sequence_start_positions[TETRALATH_NUMBER_OF_DIRECTIONS][TETRALATH_SEQUENCE_START_POSITIONS_PER_DIRECTION_COUNT] = {
     {
-        0, 1, 2,
-        5, 6, 7, 8,
-        11, 12, 13, 14, 15,
-        18, 19, 20, 21, 22, 23,
         26, 27, 28, 29, 30, 31, 32,
+        18, 19, 20, 21, 22, 23,
         35, 36, 37, 38, 39, 40,
+        11, 12, 13, 14, 15,
         43, 44, 45, 46, 47,
+         5,  6,  7,  8,
         50, 51, 52, 53,
+         0,  1,  2,
         56, 57, 58
     },
     {
-        0, 1, 2, 3, 4,
-        5, 6, 7, 8, 9, 10,
-        11, 12, 13, 14, 15, 16, 17,
-        18, 19, 20, 21, 22, 23, 24,
-        26, 27, 28, 29, 30, 31, 32,
-        35, 36, 37, 38, 39, 40,
-        43, 44, 45, 46, 47
+         0,  6, 13, 21, 30, 39, 47,
+         1,  7, 14, 22, 31, 40,
+         5, 12, 20, 29, 38, 46,
+         2,  8, 15, 23, 32,
+        11, 19, 28, 37, 45,
+         3,  9, 16, 24,
+        18, 27, 36, 44,
+         4, 10, 17,
+        26, 35, 43
     },
     {
-        0, 1, 2, 3, 4,
-        5, 6, 7, 8, 9, 10,
-        11, 12, 13, 14, 15, 16, 17,
-        19, 20, 21, 22, 23, 24, 25,
-        28, 29, 30, 31, 32, 33, 34,
-        37, 38, 39, 40, 41, 42,
-        45, 46, 47, 48, 49
+         4,  9, 15, 22, 30, 38, 45,
+         3,  8, 14, 21, 29, 37,
+        10, 16, 23, 31, 39, 46,
+         2,  7, 13, 20, 28,
+        17, 24, 32, 40, 47,
+         1,  6, 12, 19,
+        25, 33, 41, 48,
+         0,  5, 11,
+        34, 42, 49
     }
 };
 
-static const uint8_t sequence_next_positions[TETRALATH_NUMBER_OF_DIRECTIONS][TETRALATH_BOARD_SIZE + 1] = {
+static const alignas(64) uint8_t sequence_next_positions[TETRALATH_NUMBER_OF_DIRECTIONS][TETRALATH_BOARD_SIZE + 1] = {
     {
-        1, 2, 3, 4, TETRALATH_NO_NEXT_POSITION,
-        6, 7, 8, 9, 10, TETRALATH_NO_NEXT_POSITION,
+         1,  2,  3,  4, TETRALATH_NO_NEXT_POSITION,
+         6,  7,  8,  9, 10, TETRALATH_NO_NEXT_POSITION,
         12, 13, 14, 15, 16, 17, TETRALATH_NO_NEXT_POSITION,
         19, 20, 21, 22, 23, 24, 25, TETRALATH_NO_NEXT_POSITION,
         27, 28, 29, 30, 31, 32, 33, 34, TETRALATH_NO_NEXT_POSITION,
@@ -94,7 +99,7 @@ static const uint8_t sequence_next_positions[TETRALATH_NUMBER_OF_DIRECTIONS][TET
         TETRALATH_NO_NEXT_POSITION
     },
     {
-        6, 7, 8, 9, 10,
+         6,  7,  8,  9, 10,
         12, 13, 14, 15, 16, 17,
         19, 20, 21, 22, 23, 24, 25,
         27, 28, 29, 30, 31, 32, 33, 34,
@@ -106,7 +111,7 @@ static const uint8_t sequence_next_positions[TETRALATH_NUMBER_OF_DIRECTIONS][TET
         TETRALATH_NO_NEXT_POSITION
     },
     {
-        5, 6, 7, 8, 9,
+         5,  6,  7,  8,  9,
         11, 12, 13, 14, 15, 16,
         18, 19, 20, 21, 22, 23, 24,
         26, 27, 28, 29, 30, 31, 32, 33,
@@ -119,10 +124,10 @@ static const uint8_t sequence_next_positions[TETRALATH_NUMBER_OF_DIRECTIONS][TET
     }
 };
 
-static uint8_t indexed_sequence_values[171];
+static alignas(64)uint8_t indexed_sequence_values[192];
 
 void index_sequence_values() {
-    for (int i = 0; i < 171; i += 1) {
+    for (int i = 0; i < 192; i += 1) {
         indexed_sequence_values[i] = (uint8_t)TETRALATH_SEQUENCE_NONE;
     }
     // 1 + (4 * 1) + (16 * 1) + (64 * 0) = 21
@@ -186,10 +191,6 @@ static void add_near_sequence_per_color(int *near_sequences_per_color_count, int
 }
 
 TETRALATH_RESULT check_game_result(const TETRALATH_COLOR *board, const int moves_count, const TETRALATH_COLOR perspective_color, const TETRALATH_COLOR opponent_color) {
-    if (__builtin_expect(moves_count < 5, 0)) {
-        return TETRALATH_RESULT_NONE_MAX;
-    }
-
     int empty_position;
     int current_position;
     TETRALATH_COLOR current_color;
@@ -277,11 +278,9 @@ TETRALATH_RESULT check_game_result(const TETRALATH_COLOR *board, const int moves
     return TETRALATH_RESULT_NONE_MAX;
 }
 
-static int min_level(const int alpha, const int previous_beta, TETRALATH_COLOR *board_copy, const TETRALATH_COLOR perspective_color, const TETRALATH_AI_MODE ai_mode, const int previous_moves_count, const int previous_remaining_depth, const int64_t target_end_time, const bool use_strict_pruning);
+static int min_level(const int alpha, const int previous_beta, TETRALATH_COLOR *board_copy, const int moves_count, const TETRALATH_COLOR perspective_color, const TETRALATH_AI_MODE ai_mode, const int previous_remaining_depth, const int64_t target_end_time, const bool use_strict_pruning);
 
-static int max_level(const int previous_alpha, const int beta, TETRALATH_COLOR *board_copy, const TETRALATH_COLOR perspective_color, const TETRALATH_AI_MODE ai_mode, const int previous_moves_count, const int previous_remaining_depth, const int64_t target_end_time) {
-    const int moves_count = previous_moves_count + 1;
-
+static int max_level(const int previous_alpha, const int beta, TETRALATH_COLOR *board_copy, const int moves_count, const TETRALATH_COLOR perspective_color, const TETRALATH_AI_MODE ai_mode, const int previous_remaining_depth, const int64_t target_end_time) {
     const int result = (int)flip_result(check_game_result(board_copy, moves_count, flip_color(perspective_color), perspective_color));
 
     switch (result) {
@@ -303,13 +302,14 @@ static int max_level(const int previous_alpha, const int beta, TETRALATH_COLOR *
     int alpha = previous_alpha;
 
     if (remaining_depth > 0 && get_current_time_nsec() < target_end_time) {
+        const int next_moves_count = moves_count + 1;
         int evaluated_position;
         int evaluated_result;
         for (int i = 0; i < TETRALATH_BOARD_SIZE; i += 1) {
             evaluated_position = (int)(default_move_order[i]);
             if (board_copy[evaluated_position] == TETRALATH_COLOR_NONE) {
                 board_copy[evaluated_position] = perspective_color;
-                evaluated_result = min_level(alpha, beta, board_copy, perspective_color, ai_mode, moves_count, remaining_depth, target_end_time, false);
+                evaluated_result = min_level(alpha, beta, board_copy, next_moves_count, perspective_color, ai_mode, remaining_depth, target_end_time, false);
                 board_copy[evaluated_position] = TETRALATH_COLOR_NONE;
                 if (evaluated_result > alpha) {
                     alpha = evaluated_result;
@@ -330,9 +330,8 @@ static int max_level(const int previous_alpha, const int beta, TETRALATH_COLOR *
     return alpha;
 }
 
-static int min_level(const int alpha, const int previous_beta, TETRALATH_COLOR *board_copy, const TETRALATH_COLOR perspective_color, const TETRALATH_AI_MODE ai_mode, const int previous_moves_count, const int previous_remaining_depth, const int64_t target_end_time, const bool use_strict_pruning) {
+static int min_level(const int alpha, const int previous_beta, TETRALATH_COLOR *board_copy, const int moves_count, const TETRALATH_COLOR perspective_color, const TETRALATH_AI_MODE ai_mode, const int previous_remaining_depth, const int64_t target_end_time, const bool use_strict_pruning) {
     const TETRALATH_COLOR opponent_color = flip_color(perspective_color);
-    const int moves_count = previous_moves_count + 1;
 
     const int result = (int)check_game_result(board_copy, moves_count, perspective_color, opponent_color);
 
@@ -355,13 +354,14 @@ static int min_level(const int alpha, const int previous_beta, TETRALATH_COLOR *
     int beta = previous_beta;
 
     if (remaining_depth > 0 && get_current_time_nsec() < target_end_time) {
+        const int next_moves_count = moves_count + 1;
         int evaluated_position;
         int evaluated_result;
         for (int i = 0; i < TETRALATH_BOARD_SIZE; i += 1) {
             evaluated_position = (int)(default_move_order[i]);
             if (board_copy[evaluated_position] == TETRALATH_COLOR_NONE) {
                 board_copy[evaluated_position] = opponent_color;
-                evaluated_result = max_level(alpha, beta, board_copy, perspective_color, ai_mode, moves_count, remaining_depth, target_end_time);
+                evaluated_result = max_level(alpha, beta, board_copy, next_moves_count, perspective_color, ai_mode, remaining_depth, target_end_time);
                 board_copy[evaluated_position] = TETRALATH_COLOR_NONE;
                 if (evaluated_result < beta) {
                     beta = evaluated_result;
@@ -671,13 +671,15 @@ int deep_minimax(const TETRALATH_COLOR *original_board, TETRALATH_MOVE_VALUE *mo
         use_strict_pruning = false;
     }
 
+    const int next_moves_count = moves_count + 1;
+
     int evaluated_position;
     int result;
     for (int i = 0; i < TETRALATH_BOARD_SIZE; i += 1) {
         evaluated_position = new_move_values[i].position;
         if (board_copy[evaluated_position] == TETRALATH_COLOR_NONE) {
             board_copy[evaluated_position] = ai_color;
-            result = min_level(alpha, TETRALATH_RESULT_BETA_MAX, board_copy, ai_color, ai_mode, moves_count, minimax_depth, target_end_time, use_strict_pruning);
+            result = min_level(alpha, TETRALATH_RESULT_BETA_MAX, board_copy, next_moves_count, ai_color, ai_mode, minimax_depth, target_end_time, use_strict_pruning);
             board_copy[evaluated_position] = TETRALATH_COLOR_NONE;
             new_move_values[i].deep_minimax_result = result;
             if (result > alpha) {
