@@ -192,8 +192,6 @@ static void add_near_sequence_per_color(int *near_sequences_per_color_count, int
 
 TETRALATH_RESULT check_game_result(const TETRALATH_COLOR *board, const int moves_count, const TETRALATH_COLOR perspective_color, const TETRALATH_COLOR opponent_color) {
     int empty_position;
-    int current_position;
-    TETRALATH_COLOR current_color;
     int triplets_per_color_count[TETRALATH_NUMBER_OF_COLORS] = {0, 0};
     int near_quadruplets_per_color_count[TETRALATH_NUMBER_OF_COLORS] = {0, 0};
     int near_quadruplets_per_color_empty_positions[TETRALATH_NUMBER_OF_COLORS][TETRALATH_MAXIMUM_NEAR_SEQUENCES];
@@ -201,8 +199,8 @@ TETRALATH_RESULT check_game_result(const TETRALATH_COLOR *board, const int moves
     int near_triplets_per_color_empty_positions[TETRALATH_NUMBER_OF_COLORS][TETRALATH_MAXIMUM_NEAR_SEQUENCES];
     for (int i = 0; i < TETRALATH_NUMBER_OF_DIRECTIONS; i += 1) {
         for (int j = 0; j < TETRALATH_SEQUENCE_START_POSITIONS_PER_DIRECTION_COUNT; j += 1) {
-            current_position = (int)(sequence_start_positions[i][j]);
-            current_color = board[current_position];
+            int current_position = (int)(sequence_start_positions[i][j]);
+            TETRALATH_COLOR current_color = board[current_position];
             if (current_color != TETRALATH_COLOR_NONE) {
                 const int sequence_value = check_sequence_from_position(board, current_position, i);
                 switch (sequence_value) {
@@ -303,13 +301,11 @@ static int max_level(const int previous_alpha, const int beta, TETRALATH_COLOR *
 
     if (remaining_depth > 0 && get_current_time_nsec() < target_end_time) {
         const int next_moves_count = moves_count + 1;
-        int evaluated_position;
-        int evaluated_result;
         for (int i = 0; i < TETRALATH_BOARD_SIZE; i += 1) {
-            evaluated_position = (int)(default_move_order[i]);
+            int evaluated_position = (int)(default_move_order[i]);
             if (board_copy[evaluated_position] == TETRALATH_COLOR_NONE) {
                 board_copy[evaluated_position] = perspective_color;
-                evaluated_result = min_level(alpha, beta, board_copy, next_moves_count, perspective_color, ai_mode, remaining_depth, target_end_time, false);
+                int evaluated_result = min_level(alpha, beta, board_copy, next_moves_count, perspective_color, ai_mode, remaining_depth, target_end_time, false);
                 board_copy[evaluated_position] = TETRALATH_COLOR_NONE;
                 if (evaluated_result > alpha) {
                     alpha = evaluated_result;
@@ -355,13 +351,11 @@ static int min_level(const int alpha, const int previous_beta, TETRALATH_COLOR *
 
     if (remaining_depth > 0 && get_current_time_nsec() < target_end_time) {
         const int next_moves_count = moves_count + 1;
-        int evaluated_position;
-        int evaluated_result;
         for (int i = 0; i < TETRALATH_BOARD_SIZE; i += 1) {
-            evaluated_position = (int)(default_move_order[i]);
+            int evaluated_position = (int)(default_move_order[i]);
             if (board_copy[evaluated_position] == TETRALATH_COLOR_NONE) {
                 board_copy[evaluated_position] = opponent_color;
-                evaluated_result = max_level(alpha, beta, board_copy, next_moves_count, perspective_color, ai_mode, remaining_depth, target_end_time);
+                int evaluated_result = max_level(alpha, beta, board_copy, next_moves_count, perspective_color, ai_mode, remaining_depth, target_end_time);
                 board_copy[evaluated_position] = TETRALATH_COLOR_NONE;
                 if (evaluated_result < beta) {
                     beta = evaluated_result;
@@ -516,82 +510,71 @@ int shallow_minimax(const TETRALATH_COLOR *original_board, TETRALATH_MOVE_VALUE 
     copy_move_values(new_move_values, move_values);
     reset_move_values(new_move_values);
 
-    TETRALATH_COLOR opponent_color = flip_color(perspective_color);
+    const TETRALATH_COLOR opponent_color = flip_color(perspective_color);
 
-    const int first_move_count = moves_count + 1;
-    const int second_move_count = moves_count + 2;
-    const int third_move_count = moves_count + 3;
-
-    int evaluated_position_1;
-    int evaluated_position_2;
-    int evaluated_position_3;
-    int evaluated_result_1;
-    int evaluated_result_2;
-    int evaluated_result_3;
-    int worst_evaluated_result_2;
-    int best_evaluated_result_3;
-
-    bool terminal_result;
+    const int moves_count_1 = moves_count + 1;
+    const int moves_count_2 = moves_count + 2;
+    const int moves_count_3 = moves_count + 3;
 
     for (int i = 0; i < TETRALATH_BOARD_SIZE; i += 1) {
-        evaluated_position_1 = new_move_values[i].position;
+        int evaluated_position_1 = new_move_values[i].position;
         if (board_copy[evaluated_position_1] == TETRALATH_COLOR_NONE) {
             board_copy[evaluated_position_1] = perspective_color;
-            evaluated_result_1 = check_game_result(board_copy, first_move_count, perspective_color, opponent_color);
-            terminal_result = false;
+            int evaluated_result_1 = check_game_result(board_copy, moves_count_1, perspective_color, opponent_color);
+            int is_terminal_result_1 = false;
             switch (evaluated_result_1) {
                 case TETRALATH_RESULT_WIN:
-                    evaluated_result_1 = TETRALATH_RESULT_WIN - first_move_count;
-                    terminal_result = true;
+                    evaluated_result_1 = TETRALATH_RESULT_WIN - moves_count_1;
+                    is_terminal_result_1 = true;
                     break;
                 case TETRALATH_RESULT_ABOUT_TO_WIN:
-                evaluated_result_1 = TETRALATH_RESULT_WIN - (first_move_count + 2);
+                evaluated_result_1 = TETRALATH_RESULT_WIN - (moves_count_1 + 2);
                     break;
                 case TETRALATH_RESULT_DRAW_MAX:
                     evaluated_result_1 = TETRALATH_RESULT_DRAW_MAX;
-                    terminal_result = true;
+                    is_terminal_result_1 = true;
                     break;
                 case TETRALATH_RESULT_ABOUT_TO_LOSE:
-                    evaluated_result_1 = TETRALATH_RESULT_LOSS + first_move_count + 1;
-                    terminal_result = true;
+                    evaluated_result_1 = TETRALATH_RESULT_LOSS + moves_count_1 + 1;
+                    is_terminal_result_1 = true;
                     break;
                 case TETRALATH_RESULT_LOSS:
-                    evaluated_result_1 = TETRALATH_RESULT_LOSS + first_move_count;
-                    terminal_result = true;
+                    evaluated_result_1 = TETRALATH_RESULT_LOSS + moves_count_1;
+                    is_terminal_result_1 = true;
                     break;
                 default:
                     break;
             }
-            if (terminal_result || first_move_count == TETRALATH_BOARD_SIZE) {
+            if (is_terminal_result_1 || moves_count_1 == TETRALATH_BOARD_SIZE) {
                 evaluated_result_1 = evaluated_result_1 | (evaluated_result_1 << 9) | (evaluated_result_1 << 18);
             } else {
-                worst_evaluated_result_2 = TETRALATH_RESULT_BETA_MAX | (TETRALATH_RESULT_BETA_MAX << 9);
+                int worst_evaluated_result_2 = TETRALATH_RESULT_BETA_MAX | (TETRALATH_RESULT_BETA_MAX << 9);
                 for (int j = 0; j < TETRALATH_BOARD_SIZE; j += 1) {
-                    evaluated_position_2 = new_move_values[j].position;
+                    int evaluated_position_2 = new_move_values[j].position;
                     if (board_copy[evaluated_position_2] == TETRALATH_COLOR_NONE) {
                         board_copy[evaluated_position_2] = opponent_color;
-                        evaluated_result_2 = flip_result(check_game_result(board_copy, second_move_count, opponent_color, perspective_color));
-                        terminal_result = false;
+                        int evaluated_result_2 = flip_result(check_game_result(board_copy, moves_count_2, opponent_color, perspective_color));
+                        int is_terminal_result_2 = false;
                         switch (evaluated_result_2) {
                             case TETRALATH_RESULT_WIN:
-                                evaluated_result_2 = TETRALATH_RESULT_WIN - second_move_count;
-                                terminal_result = true;
+                                evaluated_result_2 = TETRALATH_RESULT_WIN - moves_count_2;
+                                is_terminal_result_2 = true;
                                 break;
                             case TETRALATH_RESULT_ABOUT_TO_WIN:
-                                evaluated_result_2 = TETRALATH_RESULT_WIN - (second_move_count + 1);
-                                terminal_result = true;
+                                evaluated_result_2 = TETRALATH_RESULT_WIN - (moves_count_2 + 1);
+                                is_terminal_result_2 = true;
                                 break;
                             case TETRALATH_RESULT_DRAW_MIN:
                                 evaluated_result_2 = TETRALATH_RESULT_DRAW_MAX;
-                                terminal_result = true;
+                                is_terminal_result_2 = true;
                                 break;
                             case TETRALATH_RESULT_ABOUT_TO_LOSE:
-                                evaluated_result_2 = TETRALATH_RESULT_LOSS + second_move_count + 2;
-                                terminal_result = true;
+                                evaluated_result_2 = TETRALATH_RESULT_LOSS + moves_count_2 + 2;
+                                is_terminal_result_2 = true;
                                 break;
                             case TETRALATH_RESULT_LOSS:
-                                evaluated_result_2 = TETRALATH_RESULT_LOSS + second_move_count;
-                                terminal_result = true;
+                                evaluated_result_2 = TETRALATH_RESULT_LOSS + moves_count_2;
+                                is_terminal_result_2 = true;
                                 break;
                             case TETRALATH_RESULT_NONE_MIN:
                                 evaluated_result_2 = TETRALATH_RESULT_NONE_MAX;
@@ -599,30 +582,30 @@ int shallow_minimax(const TETRALATH_COLOR *original_board, TETRALATH_MOVE_VALUE 
                             default:
                                 break;
                         }
-                        if (terminal_result || second_move_count == TETRALATH_BOARD_SIZE) {
+                        if (is_terminal_result_2 || moves_count_2 == TETRALATH_BOARD_SIZE) {
                             evaluated_result_2 = evaluated_result_2 | (evaluated_result_2 << 9);
                         } else {
-                            best_evaluated_result_3 = TETRALATH_RESULT_ALPHA_MIN;
+                            int best_evaluated_result_3 = TETRALATH_RESULT_ALPHA_MIN;
                             for (int k = 0; k < TETRALATH_BOARD_SIZE; k += 1) {
-                                evaluated_position_3 = new_move_values[k].position;
+                                int evaluated_position_3 = new_move_values[k].position;
                                 if (board_copy[evaluated_position_3] == TETRALATH_COLOR_NONE) {
                                     board_copy[evaluated_position_3] = perspective_color;
-                                    evaluated_result_3 = check_game_result(board_copy, third_move_count, perspective_color, opponent_color);
+                                    int evaluated_result_3 = check_game_result(board_copy, moves_count_3, perspective_color, opponent_color);
                                     switch (evaluated_result_3) {
                                         case TETRALATH_RESULT_WIN:
-                                            evaluated_result_3 = TETRALATH_RESULT_WIN - third_move_count;
+                                            evaluated_result_3 = TETRALATH_RESULT_WIN - moves_count_3;
                                             break;
                                         case TETRALATH_RESULT_ABOUT_TO_WIN:
-                                            evaluated_result_3 = TETRALATH_RESULT_WIN - (third_move_count + 2);
+                                            evaluated_result_3 = TETRALATH_RESULT_WIN - (moves_count_3 + 2);
                                             break;
                                         case TETRALATH_RESULT_DRAW_MAX:
                                             evaluated_result_3 = TETRALATH_RESULT_DRAW_MAX;
                                             break;
                                         case TETRALATH_RESULT_ABOUT_TO_LOSE:
-                                            evaluated_result_3 = TETRALATH_RESULT_LOSS + third_move_count + 1;
+                                            evaluated_result_3 = TETRALATH_RESULT_LOSS + moves_count_3 + 1;
                                             break;
                                         case TETRALATH_RESULT_LOSS:
-                                            evaluated_result_3 = TETRALATH_RESULT_LOSS + third_move_count;
+                                            evaluated_result_3 = TETRALATH_RESULT_LOSS + moves_count_3;
                                             break;
                                         default:
                                             break;
