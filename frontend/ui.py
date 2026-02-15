@@ -60,14 +60,22 @@ def get_events(
         elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             click_x = event.pos[0]
             click_y = event.pos[1]
-            board_position_index = board.click_in_an_hexagon(click_x, click_y, board.TETRALATH_BOARD_ROW_LENGTHS, board.TETRALATH_BOARD_MIDDLE_ROW_INDEX, TETRALATH_BOARD_HEXAGON_RADIUS, round(TETRALATH_WINDOW_WIDTH / 2), round(TETRALATH_WINDOW_HEIGHT / 2))
+            board_position_index = board.click_in_an_hexagon(
+                click_x,
+                click_y,
+                board.TETRALATH_BOARD_NUMBER_OF_HEXAGONS,
+                board.TETRALATH_BOARD_ROW_LENGTHS,
+                board.TETRALATH_BOARD_MIDDLE_ROW_INDEX,
+                TETRALATH_BOARD_HEXAGON_RADIUS,
+                round(TETRALATH_WINDOW_WIDTH / 2),
+                round(TETRALATH_WINDOW_HEIGHT / 2),
+            )
             if board_position_index is not None:
                 ui_event: definitions.TetralathUIEvent = {
                     "type": definitions.TetralathEventType.BOARD_POSITION_CLICKED,
                     "board_position_index": board_position_index,
                 }
                 pending_tetralath_ui_events.append(ui_event)
-
     if len(pending_tetralath_ui_events) > 0:
         tetralath_event = pending_tetralath_ui_events.pop(0)
     return tetralath_event, pygame_events

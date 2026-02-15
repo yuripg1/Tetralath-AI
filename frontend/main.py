@@ -21,7 +21,9 @@ def graphical_game() -> None:
             if tetralath_ui_event["type"] == definitions.TetralathEventType.QUIT:
                 if running is not False:
                     running = False
-            elif tetralath_ui_event["type"] == definitions.TetralathEventType.START_GAME:
+            elif (
+                tetralath_ui_event["type"] == definitions.TetralathEventType.START_GAME
+            ):
                 if game["is_started"] is not True:
                     game["is_started"] = True
                     ui.disable_left_panel(
@@ -31,6 +33,11 @@ def graphical_game() -> None:
                         start_game_button,
                     )
                 running = True
+            elif (
+                tetralath_ui_event["type"]
+                == definitions.TetralathEventType.BOARD_POSITION_CLICKED
+            ):
+                board_position_index = tetralath_ui_event["board_position_index"]
         ui.refresh_game_ui(game_window, clock, left_panel)
     if running is False:
         ui.destroy_game_ui()

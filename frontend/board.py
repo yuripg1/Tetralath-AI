@@ -1,6 +1,7 @@
 import math
 
 
+TETRALATH_BOARD_NUMBER_OF_HEXAGONS = 61
 TETRALATH_BOARD_ROW_LENGTHS = [5, 6, 7, 8, 9, 8, 7, 6, 5]
 TETRALATH_BOARD_MIDDLE_ROW_INDEX = 4
 TETRALATH_BOARD_POSITION_FILL_COLOR = (255, 255, 0)
@@ -155,13 +156,14 @@ def is_click_in_hexagon(
 def click_in_an_hexagon(
     click_x: int,
     click_y: int,
+    number_of_hexagons: int,
     row_lengths: list[int],
     middle_row_index: int,
     hexagon_radius: float,
     board_center_x: int,
     board_center_y: int,
 ) -> int | None:
-    for i in range(len(row_lengths)):
+    for i in range(number_of_hexagons):
         row, column = get_row_and_column_from_index(i, row_lengths)
         hexagon_center_x, hexagon_center_y = get_single_hexagon_center(
             row,
