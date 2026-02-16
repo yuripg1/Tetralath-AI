@@ -7,9 +7,10 @@
 
 static TETRALATH_COLOR *initialize_board() {
     TETRALATH_COLOR *board = (TETRALATH_COLOR *)malloc((TETRALATH_BOARD_SIZE + 1) * sizeof(TETRALATH_COLOR));
-    for (int i = 0; i < TETRALATH_BOARD_SIZE + 1; i += 1) {
+    for (int i = 0; i < TETRALATH_BOARD_SIZE; i += 1) {
         board[i] = TETRALATH_COLOR_NONE;
     }
+    board[TETRALATH_BOARD_SIZE] = TETRALATH_COLOR_INVALID;
     return board;
 }
 

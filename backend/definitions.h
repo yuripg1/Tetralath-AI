@@ -9,7 +9,10 @@ typedef enum {
     TETRALATH_COLOR_WHITE = 1,
 
     // 10 binary
-    TETRALATH_COLOR_BLACK = 2
+    TETRALATH_COLOR_BLACK = 2,
+
+    // 11 binary
+    TETRALATH_COLOR_INVALID = 3
 } TETRALATH_COLOR;
 
 // 11 binary

@@ -130,51 +130,63 @@ void index_sequence_values() {
     for (int i = 0; i < 192; i += 1) {
         indexed_sequence_values[i] = (uint8_t)TETRALATH_SEQUENCE_NONE;
     }
-    // 1 + (4 * 1) + (16 * 1) + (64 * 0) = 21
-    // 1 + (4 * 1) + (16 * 1) + (64 * 2) = 149
-    // 2 + (4 * 2) + (16 * 2) + (64 * 0) = 42
-    // 2 + (4 * 2) + (16 * 2) + (64 * 1) = 106
-    indexed_sequence_values[21] = (uint8_t)TETRALATH_SEQUENCE_TRIPLET;
-    indexed_sequence_values[149] = (uint8_t)TETRALATH_SEQUENCE_TRIPLET;
-    indexed_sequence_values[42] = (uint8_t)TETRALATH_SEQUENCE_TRIPLET;
-    indexed_sequence_values[106] = (uint8_t)TETRALATH_SEQUENCE_TRIPLET;
-    // 1 + (4 * 1) + (16 * 1) + (64 * 1) = 85
-    // 2 + (4 * 2) + (16 * 2) + (64 * 2) = 170
+
+    // (64 * 1) + (16 * 1) + (4 * 1) + (1 * 0) =  84
+    // (64 * 1) + (16 * 1) + (4 * 1) + (1 * 2) =  86
+    // (64 * 1) + (16 * 1) + (4 * 1) + (1 * 3) =  87
+    // (64 * 2) + (16 * 2) + (4 * 2) + (1 * 0) = 168
+    // (64 * 2) + (16 * 2) + (4 * 2) + (1 * 1) = 169
+    // (64 * 2) + (16 * 2) + (4 * 2) + (1 * 3) = 171
+    indexed_sequence_values[84] = (uint8_t)TETRALATH_SEQUENCE_TRIPLET;
+    indexed_sequence_values[86] = (uint8_t)TETRALATH_SEQUENCE_TRIPLET;
+    indexed_sequence_values[87] = (uint8_t)TETRALATH_SEQUENCE_TRIPLET;
+    indexed_sequence_values[168] = (uint8_t)TETRALATH_SEQUENCE_TRIPLET;
+    indexed_sequence_values[169] = (uint8_t)TETRALATH_SEQUENCE_TRIPLET;
+    indexed_sequence_values[171] = (uint8_t)TETRALATH_SEQUENCE_TRIPLET;
+    // (64 * 1) + (16 * 1) + (4 * 1) + (1 * 1) =  85
+    // (64 * 2) + (16 * 2) + (4 * 2) + (1 * 2) = 170
     indexed_sequence_values[85] = (uint8_t)TETRALATH_SEQUENCE_QUADRUPLET;
     indexed_sequence_values[170] = (uint8_t)TETRALATH_SEQUENCE_QUADRUPLET;
-    // 1 + (4 * 1) + (16 * 0) + (64 * 0) = 5
-    // 1 + (4 * 1) + (16 * 0) + (64 * 2) = 133
-    // 2 + (4 * 2) + (16 * 0) + (64 * 0) = 10
-    // 2 + (4 * 2) + (16 * 0) + (64 * 1) = 74
-    indexed_sequence_values[5] = (uint8_t)TETRALATH_SEQUENCE_NEAR_TRIPLET_1;
-    indexed_sequence_values[133] = (uint8_t)TETRALATH_SEQUENCE_NEAR_TRIPLET_1;
-    indexed_sequence_values[10] = (uint8_t)TETRALATH_SEQUENCE_NEAR_TRIPLET_1;
-    indexed_sequence_values[74] = (uint8_t)TETRALATH_SEQUENCE_NEAR_TRIPLET_1;
-    // 1 + (4 * 0) + (16 * 1) + (64 * 0) = 17
-    // 1 + (4 * 0) + (16 * 1) + (64 * 2) = 145
-    // 2 + (4 * 0) + (16 * 2) + (64 * 0) = 34
-    // 2 + (4 * 0) + (16 * 2) + (64 * 1) = 98
-    indexed_sequence_values[17] = (uint8_t)TETRALATH_SEQUENCE_NEAR_TRIPLET_2;
-    indexed_sequence_values[145] = (uint8_t)TETRALATH_SEQUENCE_NEAR_TRIPLET_2;
-    indexed_sequence_values[34] = (uint8_t)TETRALATH_SEQUENCE_NEAR_TRIPLET_2;
-    indexed_sequence_values[98] = (uint8_t)TETRALATH_SEQUENCE_NEAR_TRIPLET_2;
-    // 1 + (4 * 1) + (16 * 0) + (64 * 1) = 69
-    // 2 + (4 * 2) + (16 * 0) + (64 * 2) = 138
-    indexed_sequence_values[69] = (uint8_t)TETRALATH_SEQUENCE_NEAR_QUADRUPLET_1;
-    indexed_sequence_values[138] = (uint8_t)TETRALATH_SEQUENCE_NEAR_QUADRUPLET_1;
-    // 1 + (4 * 0) + (16 * 1) + (64 * 1) = 81
-    // 2 + (4 * 0) + (16 * 2) + (64 * 2) = 162
-    indexed_sequence_values[81] = (uint8_t)TETRALATH_SEQUENCE_NEAR_QUADRUPLET_2;
-    indexed_sequence_values[162] = (uint8_t)TETRALATH_SEQUENCE_NEAR_QUADRUPLET_2;
+    // (64 * 1) + (16 * 1) + (4 * 0) + (1 * 0) =  80
+    // (64 * 1) + (16 * 1) + (4 * 0) + (1 * 2) =  82
+    // (64 * 1) + (16 * 1) + (4 * 0) + (1 * 3) =  83
+    // (64 * 2) + (16 * 2) + (4 * 0) + (1 * 0) = 160
+    // (64 * 2) + (16 * 2) + (4 * 0) + (1 * 1) = 161
+    // (64 * 2) + (16 * 2) + (4 * 0) + (1 * 3) = 163
+    indexed_sequence_values[80] = (uint8_t)TETRALATH_SEQUENCE_NEAR_TRIPLET_1;
+    indexed_sequence_values[82] = (uint8_t)TETRALATH_SEQUENCE_NEAR_TRIPLET_1;
+    indexed_sequence_values[83] = (uint8_t)TETRALATH_SEQUENCE_NEAR_TRIPLET_1;
+    indexed_sequence_values[160] = (uint8_t)TETRALATH_SEQUENCE_NEAR_TRIPLET_1;
+    indexed_sequence_values[161] = (uint8_t)TETRALATH_SEQUENCE_NEAR_TRIPLET_1;
+    indexed_sequence_values[163] = (uint8_t)TETRALATH_SEQUENCE_NEAR_TRIPLET_1;
+    // (64 * 1) + (16 * 0) + (4 * 1) + (1 * 0) =  68
+    // (64 * 1) + (16 * 0) + (4 * 1) + (1 * 2) =  70
+    // (64 * 1) + (16 * 0) + (4 * 1) + (1 * 3) =  71
+    // (64 * 2) + (16 * 0) + (4 * 2) + (1 * 0) = 136
+    // (64 * 2) + (16 * 0) + (4 * 2) + (1 * 1) = 137
+    // (64 * 2) + (16 * 0) + (4 * 2) + (1 * 3) = 139
+    indexed_sequence_values[68] = (uint8_t)TETRALATH_SEQUENCE_NEAR_TRIPLET_2;
+    indexed_sequence_values[70] = (uint8_t)TETRALATH_SEQUENCE_NEAR_TRIPLET_2;
+    indexed_sequence_values[71] = (uint8_t)TETRALATH_SEQUENCE_NEAR_TRIPLET_2;
+    indexed_sequence_values[136] = (uint8_t)TETRALATH_SEQUENCE_NEAR_TRIPLET_2;
+    indexed_sequence_values[137] = (uint8_t)TETRALATH_SEQUENCE_NEAR_TRIPLET_2;
+    indexed_sequence_values[139] = (uint8_t)TETRALATH_SEQUENCE_NEAR_TRIPLET_2;
+    // (64 * 1) + (16 * 1) + (4 * 0) + (1 * 1) =  81
+    // (64 * 2) + (16 * 2) + (4 * 0) + (1 * 2) = 162
+    indexed_sequence_values[81] = (uint8_t)TETRALATH_SEQUENCE_NEAR_QUADRUPLET_1;
+    indexed_sequence_values[162] = (uint8_t)TETRALATH_SEQUENCE_NEAR_QUADRUPLET_1;
+    // (64 * 1) + (16 * 0) + (4 * 1) + (1 * 1) =  69
+    // (64 * 2) + (16 * 0) + (4 * 2) + (1 * 2) = 138
+    indexed_sequence_values[69] = (uint8_t)TETRALATH_SEQUENCE_NEAR_QUADRUPLET_2;
+    indexed_sequence_values[138] = (uint8_t)TETRALATH_SEQUENCE_NEAR_QUADRUPLET_2;
 }
 
 static int check_sequence_from_position(const TETRALATH_COLOR *board, const TETRALATH_COLOR sequence_first_color, const int sequence_second_position, const int direction) {
-    int sequence_value = sequence_first_color;
-    sequence_value |= (board[sequence_second_position] << 2);
+    int sequence_value = (sequence_first_color << 6) | (board[sequence_second_position] << 4);
     const int sequence_third_position = (int)(sequence_next_positions[direction][sequence_second_position]);
-    sequence_value |= (board[sequence_third_position] << 4);
+    sequence_value |= (board[sequence_third_position] << 2);
     const int sequence_fourth_position = (int)(sequence_next_positions[direction][sequence_third_position]);
-    sequence_value |= (board[sequence_fourth_position] << 6);
+    sequence_value |= board[sequence_fourth_position];
     return (int)(indexed_sequence_values[sequence_value]);
 }
 
@@ -189,6 +201,8 @@ static void add_near_sequence_per_color(int *near_sequences_per_color_count, int
     near_sequences_per_color_count[current_color_index] += 1;
 }
 
+// This function returns the result of the game for the perspective color
+// Important: the perspective color must be the one who made the most recent move and the opponent color must be the one who is going to make the next move
 TETRALATH_RESULT check_game_result(const TETRALATH_COLOR *board, const int moves_count, const TETRALATH_COLOR perspective_color, const TETRALATH_COLOR opponent_color) {
     int triplets_per_color_count[TETRALATH_NUMBER_OF_COLORS] = {0, 0};
     int near_quadruplets_per_color_count[TETRALATH_NUMBER_OF_COLORS] = {0, 0};
@@ -216,8 +230,8 @@ TETRALATH_RESULT check_game_result(const TETRALATH_COLOR *board, const int moves
                         add_near_sequence_per_color(near_triplets_per_color_count, near_triplets_per_color_empty_positions, sequence_second_position, sequence_first_color - 1);
                         break;
                     case TETRALATH_SEQUENCE_NEAR_QUADRUPLET_1:
-                    const int empty_position_3 = (int)(sequence_next_positions[i][sequence_second_position]);
-                        add_near_sequence_per_color(near_quadruplets_per_color_count, near_quadruplets_per_color_empty_positions, empty_position_3, sequence_first_color - 1);
+                    const int empty_position_2 = (int)(sequence_next_positions[i][sequence_second_position]);
+                        add_near_sequence_per_color(near_quadruplets_per_color_count, near_quadruplets_per_color_empty_positions, empty_position_2, sequence_first_color - 1);
                         break;
                     case TETRALATH_SEQUENCE_NEAR_QUADRUPLET_2:
                         add_near_sequence_per_color(near_quadruplets_per_color_count, near_quadruplets_per_color_empty_positions, sequence_second_position, sequence_first_color - 1);
