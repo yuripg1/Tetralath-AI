@@ -126,9 +126,10 @@ static void graphical_game() {
     set_ai_mode(game, choose_ai_mode());
     TETRALATH_COLOR player_color = choose_player_color();
     set_player_color(game, player_color);
-    draw_rest_of_panel();
+    draw_right_panel();
     TETRALATH_RESULT game_result;
     TETRALATH_COLOR current_color;
+    set_game_state(game, TETRALATH_STATE_RUNNING);
     TETRALATH_STATE game_state = get_game_state(game);
     while (game_state != TETRALATH_STATE_ENDING && game_state != TETRALATH_STATE_QUITTING) {
         update_game_result(game);
@@ -136,7 +137,6 @@ static void graphical_game() {
         while (game_result == TETRALATH_RESULT_NONE_MAX && game_state != TETRALATH_STATE_QUITTING) {
             start_new_turn_data(game);
             current_color = get_current_color(game);
-            player_color = get_player_color(game);
             start_turn_ui(current_color, player_color, game_result);
             if (player_color == current_color) {
                 process_player_action(game);

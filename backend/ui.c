@@ -381,7 +381,7 @@ void initialize_game_ui() {
     refresh();
 }
 
-void draw_rest_of_panel() {
+void draw_right_panel() {
     draw_controls_manual();
     draw_current_player_title();
     refresh();

@@ -50,7 +50,7 @@ void update_position_highlights(const int current_position, const int previous_p
 void draw_move(const int position, const TETRALATH_COLOR color, const bool is_latest_move);
 void draw_ai_info(const TETRALATH_AI_INFO_STATE ai_info_state, const int64_t processing_start_time, const int64_t processing_end_time, const int minimax_depth, const double minimax_time_taken);
 void initialize_game_ui();
-void draw_rest_of_panel();
+void draw_right_panel();
 void start_turn_ui(const TETRALATH_COLOR current_color, const TETRALATH_COLOR player_color, const TETRALATH_RESULT result);
 void finish_game_ui(const TETRALATH_RESULT result);
 void destroy_game_ui();

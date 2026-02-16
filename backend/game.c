@@ -28,7 +28,7 @@ static TETRALATH_GAME *initialize_game_data() {
     game->next_color = TETRALATH_COLOR_NONE;
     game->player_color = TETRALATH_COLOR_NONE;
     game->ai_mode = TETRALATH_AI_MODE_NONE;
-    game->state = TETRALATH_STATE_RUNNING;
+    game->state = TETRALATH_STATE_NONE;
     game->result = TETRALATH_RESULT_NONE_MAX;
     index_sequence_values();
     return game;
@@ -41,47 +41,6 @@ static void destroy_game_data(TETRALATH_GAME *game) {
     free(game);
 }
 
-void start_new_turn_data(TETRALATH_GAME *game) {
-    if (game->next_color == TETRALATH_COLOR_NONE) {
-        game->next_color = TETRALATH_COLOR_WHITE;
-    }
-    game->current_color = game->next_color;
-    game->next_color = flip_color(game->current_color);
-}
-
-void set_move(TETRALATH_GAME *game, const int position, const TETRALATH_COLOR color) {
-    game->board[position] = color;
-    game->moves->moves_list[game->moves->moves_count].position = position;
-    game->moves->moves_list[game->moves->moves_count].color = color;
-    game->moves->moves_count += 1;
-}
-
-int set_move_undoing(TETRALATH_GAME *game) {
-    const int position_to_undo = game->moves->moves_list[game->moves->moves_count - 1].position;
-    game->board[position_to_undo] = TETRALATH_COLOR_NONE;
-    game->moves->moves_count -= 1;
-    return position_to_undo;
-}
-
-int get_number_of_moves_to_undo(TETRALATH_GAME *game) {
-    int number_of_moves_to_undo = 0;
-    if (game->state == TETRALATH_STATE_ENDING) {
-        if (game->current_color == game->player_color) {
-            number_of_moves_to_undo = 1;
-        } else {
-            number_of_moves_to_undo = 2;
-        }
-    } else {
-        number_of_moves_to_undo = 2;
-    }
-    if (game->moves->moves_count < number_of_moves_to_undo) {
-        number_of_moves_to_undo = game->moves->moves_count;
-    }
-    if (game->moves->moves_count == 1 && game->current_color == game->player_color) {
-        number_of_moves_to_undo = 0;
-    }
-    return number_of_moves_to_undo;
-}
 
 static void initialize_minimax_outputs(TETRALATH_MINIMAX_OUTPUT *minimax_outputs) {
     for (int i = 0; i < TETRALATH_BOARD_SIZE; i += 1) {
@@ -128,6 +87,118 @@ static TETRALATH_MINIMAX_OUTPUT *get_best_ai_move(TETRALATH_MINIMAX_OUTPUT *mini
     return best_minimax_output;
 }
 
+static TETRALATH_RESULT get_simplified_game_result(const TETRALATH_GAME *game) {
+    TETRALATH_RESULT simplified_game_result = TETRALATH_RESULT_NONE_MAX;
+
+    TETRALATH_RESULT game_result = check_game_result(game->board, game->moves->moves_count, game->player_color, flip_color(game->player_color));
+    switch (game_result) {
+        case TETRALATH_RESULT_WIN:
+        case TETRALATH_RESULT_LOSS:
+        case TETRALATH_RESULT_DRAW_MAX:
+            simplified_game_result = game_result;
+            break;
+        default:
+            break;
+    }
+
+    return simplified_game_result;
+}
+
+TETRALATH_GAME *init_headless_game() {
+    TETRALATH_GAME *game = initialize_game_data();
+    return game;
+}
+
+void teardown_headless_game(TETRALATH_GAME *game) {
+    destroy_game_data(game);
+}
+
+void set_ai_mode(TETRALATH_GAME *game, const TETRALATH_AI_MODE ai_mode) {
+    game->ai_mode = ai_mode;
+}
+
+void set_player_color(TETRALATH_GAME *game, const TETRALATH_COLOR player_color) {
+    game->player_color = player_color;
+}
+
+TETRALATH_COLOR get_player_color(const TETRALATH_GAME *game) {
+    return game->player_color;
+}
+
+void set_game_state(TETRALATH_GAME *game, const TETRALATH_STATE state) {
+    game->state = state;
+}
+
+TETRALATH_STATE get_game_state(const TETRALATH_GAME *game) {
+    return game->state;
+}
+
+void update_game_result(TETRALATH_GAME *game) {
+    game->result = get_simplified_game_result(game);
+}
+
+TETRALATH_RESULT get_game_result(const TETRALATH_GAME *game) {
+    return game->result;
+}
+
+void start_new_turn_data(TETRALATH_GAME *game) {
+    if (game->next_color == TETRALATH_COLOR_NONE) {
+        game->next_color = TETRALATH_COLOR_WHITE;
+    }
+    game->current_color = game->next_color;
+    game->next_color = flip_color(game->current_color);
+}
+
+TETRALATH_COLOR get_current_color(const TETRALATH_GAME *game) {
+    return game->current_color;
+}
+
+void set_next_color(TETRALATH_GAME *game, const TETRALATH_COLOR next_color) {
+    game->next_color = next_color;
+}
+
+void set_move(TETRALATH_GAME *game, const int position, const TETRALATH_COLOR color) {
+    game->board[position] = color;
+    game->moves->moves_list[game->moves->moves_count].position = position;
+    game->moves->moves_list[game->moves->moves_count].color = color;
+    game->moves->moves_count += 1;
+}
+
+int set_move_undoing(TETRALATH_GAME *game) {
+    const int position_to_undo = game->moves->moves_list[game->moves->moves_count - 1].position;
+    game->board[position_to_undo] = TETRALATH_COLOR_NONE;
+    game->moves->moves_count -= 1;
+    return position_to_undo;
+}
+
+int get_moves_count(const TETRALATH_GAME *game) {
+    return game->moves->moves_count;
+}
+
+int get_number_of_moves_to_undo(TETRALATH_GAME *game) {
+    int number_of_moves_to_undo = 0;
+    if (game->state == TETRALATH_STATE_ENDING) {
+        if (game->current_color == game->player_color) {
+            number_of_moves_to_undo = 1;
+        } else {
+            number_of_moves_to_undo = 2;
+        }
+    } else {
+        number_of_moves_to_undo = 2;
+    }
+    if (game->moves->moves_count < number_of_moves_to_undo) {
+        number_of_moves_to_undo = game->moves->moves_count;
+    }
+    if (game->moves->moves_count == 1 && game->current_color == game->player_color) {
+        number_of_moves_to_undo = 0;
+    }
+    return number_of_moves_to_undo;
+}
+
+TETRALATH_MOVE get_latest_move(const TETRALATH_GAME *game) {
+    return game->moves->moves_list[game->moves->moves_count - 1];
+}
+
 int compute_ai_move(TETRALATH_GAME *game) {
     const int64_t computing_start_time = get_current_time_nsec();
     const int64_t target_end_time = computing_start_time + seconds_to_nsec(TETRALATH_DEFAULT_TIME_LIMIT_IN_SECONDS);
@@ -139,7 +210,7 @@ int compute_ai_move(TETRALATH_GAME *game) {
     initialize_move_values(initial_move_values);
 
     const int shallow_minimax_depth = 3;
-    const int first_ai_move = shallow_minimax(get_board(game), initial_move_values, get_current_color(game), get_moves_count(game));
+    const int first_ai_move = shallow_minimax(game->board, initial_move_values, get_current_color(game), get_moves_count(game));
     minimax_outputs[shallow_minimax_depth - 1].minimax_depth = shallow_minimax_depth;
     minimax_outputs[shallow_minimax_depth - 1].ai_move = first_ai_move;
     minimax_outputs[shallow_minimax_depth - 1].time_taken_nsec = get_current_time_nsec() - computing_start_time;
@@ -181,23 +252,6 @@ int compute_ai_move(TETRALATH_GAME *game) {
     return best_minimax_output->ai_move;
 }
 
-TETRALATH_RESULT get_simplified_game_result(const TETRALATH_GAME *game) {
-    TETRALATH_RESULT simplified_game_result = TETRALATH_RESULT_NONE_MAX;
-
-    TETRALATH_RESULT game_result = check_game_result(game->board, game->moves->moves_count, game->player_color, flip_color(game->player_color));
-    switch (game_result) {
-        case TETRALATH_RESULT_WIN:
-        case TETRALATH_RESULT_LOSS:
-        case TETRALATH_RESULT_DRAW_MAX:
-            simplified_game_result = game_result;
-            break;
-        default:
-            break;
-    }
-
-    return simplified_game_result;
-}
-
 int get_next_empty_position(const TETRALATH_GAME *game, const int position, const int increment) {
     int found_empty_position = TETRALATH_POSITION_NONE;
     int next_position = position + increment;
@@ -208,70 +262,6 @@ int get_next_empty_position(const TETRALATH_GAME *game, const int position, cons
         next_position += increment;
     }
     return found_empty_position;
-}
-
-int get_position_color(const TETRALATH_GAME *game, const int position) {
-    if (position >= TETRALATH_FIRST_POSITION && position <= TETRALATH_LAST_POSITION) {
-        return game->board[position];
-    }
-    return TETRALATH_COLOR_NONE;
-}
-
-TETRALATH_GAME *init_headless_game() {
-    TETRALATH_GAME *game = initialize_game_data();
-    return game;
-}
-
-void teardown_headless_game(TETRALATH_GAME *game) {
-    destroy_game_data(game);
-}
-
-void set_ai_mode(TETRALATH_GAME *game, const TETRALATH_AI_MODE ai_mode) {
-    game->ai_mode = ai_mode;
-}
-
-TETRALATH_COLOR get_player_color(const TETRALATH_GAME *game) {
-    return game->player_color;
-}
-
-void set_player_color(TETRALATH_GAME *game, const TETRALATH_COLOR player_color) {
-    game->player_color = player_color;
-}
-
-TETRALATH_STATE get_game_state(const TETRALATH_GAME *game) {
-    return game->state;
-}
-
-void set_game_state(TETRALATH_GAME *game, const TETRALATH_STATE state) {
-    game->state = state;
-}
-
-TETRALATH_RESULT get_game_result(const TETRALATH_GAME *game) {
-    return game->result;
-}
-
-void update_game_result(TETRALATH_GAME *game) {
-    game->result = get_simplified_game_result(game);
-}
-
-TETRALATH_COLOR get_current_color(const TETRALATH_GAME *game) {
-    return game->current_color;
-}
-
-int get_moves_count(const TETRALATH_GAME *game) {
-    return game->moves->moves_count;
-}
-
-TETRALATH_MOVE get_latest_move(const TETRALATH_GAME *game) {
-    return game->moves->moves_list[game->moves->moves_count - 1];
-}
-
-TETRALATH_COLOR *get_board(const TETRALATH_GAME *game) {
-    return game->board;
-}
-
-void set_next_color(TETRALATH_GAME *game, const TETRALATH_COLOR next_color) {
-    game->next_color = next_color;
 }
 
 int get_latest_minimax_depth(const TETRALATH_GAME *game) {
