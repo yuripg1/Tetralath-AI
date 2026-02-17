@@ -16,7 +16,8 @@ LIBTETRALATH {
     set_move_undoing;
     get_moves_count;
     get_number_of_moves_to_undo;
-    get_latest_move;
+    get_latest_move_position;
+    get_latest_move_color;
     compute_ai_move;
     get_next_empty_position;
     get_latest_minimax_depth;

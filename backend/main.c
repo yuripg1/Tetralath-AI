@@ -73,15 +73,16 @@ static void process_player_action(TETRALATH_GAME *game) {
     const int player_action = get_player_action(game);
     if (player_action >= TETRALATH_FIRST_POSITION && player_action <= TETRALATH_LAST_POSITION) {
         if (get_moves_count(game) >= 1) {
-            TETRALATH_MOVE previous_move = get_latest_move(game);
-            draw_move(previous_move.position, previous_move.color, false);
+            const int previous_move_position = get_latest_move_position(game);
+            const TETRALATH_COLOR previous_move_color = get_latest_move_color(game);
+            draw_move(previous_move_position, previous_move_color, false);
         }
         player_move = player_action;
         set_move(game, player_move, player_color);
         draw_move(player_move, player_color, true);
         draw_ai_info(TETRALATH_AI_INFO_STATE_NONE, 0, 0, 0, 0);
     } else if (player_action == TETRALATH_UNDO_LAST_MOVE) {
-        int number_of_moves_to_undo = get_number_of_moves_to_undo(game);
+        const int number_of_moves_to_undo = get_number_of_moves_to_undo(game);
         set_game_state(game, TETRALATH_STATE_RUNNING);
         int position_to_undo = TETRALATH_POSITION_NONE;
         for (int i = 0; i < number_of_moves_to_undo; i += 1) {
@@ -90,8 +91,9 @@ static void process_player_action(TETRALATH_GAME *game) {
         }
         draw_ai_info(TETRALATH_AI_INFO_STATE_NONE, 0, 0, 0, 0);
         if (get_moves_count(game) >= 1) {
-            TETRALATH_MOVE latest_move = get_latest_move(game);
-            draw_move(latest_move.position, latest_move.color, true);
+            const int latest_move_position = get_latest_move_position(game);
+            const TETRALATH_COLOR latest_move_color = get_latest_move_color(game);
+            draw_move(latest_move_position, latest_move_color, true);
         }
         set_next_color(game, player_color);
     } else if (player_action == TETRALATH_QUIT_GAME) {
@@ -104,11 +106,12 @@ static void process_ai_move(TETRALATH_GAME *game) {
 
     draw_ai_info(TETRALATH_AI_INFO_STATE_THINKING, 0, 0, 0, 0);
 
-    int ai_move = compute_ai_move(game);
+    const int ai_move = compute_ai_move(game);
 
     if (get_moves_count(game) >= 1) {
-        TETRALATH_MOVE previous_move = get_latest_move(game);
-        draw_move(previous_move.position, previous_move.color, false);
+        const int previous_move_position = get_latest_move_position(game);
+        const TETRALATH_COLOR previous_move_color = get_latest_move_color(game);
+        draw_move(previous_move_position, previous_move_color, false);
     }
 
     TETRALATH_COLOR current_color = get_current_color(game);

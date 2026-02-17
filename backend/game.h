@@ -65,7 +65,8 @@ void set_move(TETRALATH_GAME *game, const int position, const TETRALATH_COLOR co
 int set_move_undoing(TETRALATH_GAME *game);
 int get_moves_count(const TETRALATH_GAME *game);
 int get_number_of_moves_to_undo(TETRALATH_GAME *game);
-TETRALATH_MOVE get_latest_move(const TETRALATH_GAME *game);
+int get_latest_move_position(const TETRALATH_GAME *game);
+TETRALATH_COLOR get_latest_move_color(const TETRALATH_GAME *game);
 int compute_ai_move(TETRALATH_GAME *game);
 int get_next_empty_position(const TETRALATH_GAME *game, const int position, const int increment);
 int get_latest_minimax_depth(const TETRALATH_GAME *game);

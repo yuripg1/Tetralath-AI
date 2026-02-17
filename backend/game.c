@@ -196,8 +196,12 @@ int get_number_of_moves_to_undo(TETRALATH_GAME *game) {
     return number_of_moves_to_undo;
 }
 
-TETRALATH_MOVE get_latest_move(const TETRALATH_GAME *game) {
-    return game->moves->moves_list[game->moves->moves_count - 1];
+int get_latest_move_position(const TETRALATH_GAME *game) {
+    return game->moves->moves_list[game->moves->moves_count - 1].position;
+}
+
+TETRALATH_COLOR get_latest_move_color(const TETRALATH_GAME *game) {
+    return game->moves->moves_list[game->moves->moves_count - 1].color;
 }
 
 int compute_ai_move(TETRALATH_GAME *game) {
