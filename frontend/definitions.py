@@ -7,6 +7,7 @@ class TetralathEventType(enum.Enum):
     QUIT = 1
     START_GAME = 2
     BOARD_POSITION_CLICKED = 3
+    UNDO_LAST_MOVE = 4
 
 
 class TetralathColor(enum.Enum):
@@ -38,6 +39,7 @@ class TetralathGame(typing.TypedDict):
     is_started: bool
     advance_turn: bool
     board: list[TetralathColor]
+    moves_count: int
     current_color: TetralathColor
     player_color: TetralathColor
     ai_mode: TetralathAIMode

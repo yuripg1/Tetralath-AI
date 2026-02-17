@@ -8,6 +8,7 @@ import ui
 
 
 def update_game_result(game: definitions.TetralathGame, game_backend: ctypes.c_void_p, libtetralath_instance: libtetralath.LibTetralath) -> None:
+    game["moves_count"] = libtetralath_instance.get_moves_count(game_backend)
     libtetralath_instance.update_game_result(game_backend)
     game["result"] = libtetralath_instance.get_game_result(game_backend)
 
@@ -38,6 +39,11 @@ def set_move(game: definitions.TetralathGame, game_backend: ctypes.c_void_p, lib
     libtetralath_instance.set_move(game_backend, board_position_index, color)
 
 
+def set_move_undoing(game: definitions.TetralathGame, game_backend: ctypes.c_void_p, libtetralath_instance: libtetralath.LibTetralath) -> None:
+    position_to_undo = libtetralath_instance.set_move_undoing(game_backend)
+    game["board"][position_to_undo] = definitions.TetralathColor.NONE
+
+
 def handle_player_move(game: definitions.TetralathGame, game_backend: ctypes.c_void_p, libtetralath_instance: libtetralath.LibTetralath, board_position_index: int) -> None:
     game["advance_turn"] = True
     set_move(game, game_backend, libtetralath_instance, board_position_index, game["current_color"])
@@ -64,12 +70,24 @@ def handle_ai_move_end(game: definitions.TetralathGame, game_backend: ctypes.c_v
     update_game_result(game, game_backend, libtetralath_instance)
 
 
+def handle_undo_last_move(game: definitions.TetralathGame, game_backend: ctypes.c_void_p, libtetralath_instance: libtetralath.LibTetralath) -> None:
+    game["advance_turn"] = True
+    number_of_moves_to_undo = libtetralath_instance.get_number_of_moves_to_undo(game_backend)
+    libtetralath_instance.set_game_state(game_backend, definitions.TetralathState.RUNNING)
+    game["state"] = definitions.TetralathState.RUNNING
+    for i in range(number_of_moves_to_undo):
+        set_move_undoing(game, game_backend, libtetralath_instance)
+    libtetralath_instance.set_next_color(game_backend, game["player_color"])
+    update_game_result(game, game_backend, libtetralath_instance)
+
+
 def graphical_game() -> None:
     libtetralath_instance = libtetralath.LibTetralath()
     game_backend = libtetralath_instance.init_headless_game()
     game: definitions.TetralathGame = {
         "advance_turn": False,
         "board": [definitions.TetralathColor.NONE] * 61,
+        "moves_count": 0,
         "current_color": definitions.TetralathColor.NONE,
         "player_color": definitions.TetralathColor.NONE,
         "ai_mode": definitions.TetralathAIMode.NONE,
@@ -79,6 +97,8 @@ def graphical_game() -> None:
     game_window, clock = ui.initialize_game_ui()
     pending_tetralath_ui_events: list[definitions.TetralathUIEvent] = []
     left_panel, ai_mode_selector, player_color_selector, start_game_button = ui.draw_left_panel(game, pending_tetralath_ui_events)
+    right_panel, undo_last_move_button = ui.draw_right_panel(game, pending_tetralath_ui_events)
+    ui.disable_right_panel(right_panel, undo_last_move_button)
     game["state"] = libtetralath_instance.get_game_state(game_backend)
     ai_move_processing_data: definitions.TetralathAIMoveProcessingData = {
         "thread": None,
@@ -89,15 +109,20 @@ def graphical_game() -> None:
     while running:
         if game["state"] == definitions.TetralathState.RUNNING and game["result"] is not definitions.TetralathResult.NONE:
             handle_game_ending(game, game_backend, libtetralath_instance)
+            ui.enable_right_panel(right_panel, undo_last_move_button)
         if game["state"] == definitions.TetralathState.RUNNING and game["advance_turn"] is True:
             handle_new_turn(game, game_backend, libtetralath_instance)
+            if game["current_color"] == game["player_color"]:
+                ui.enable_right_panel(right_panel, undo_last_move_button)
+            else:
+                ui.disable_right_panel(right_panel, undo_last_move_button)
         if game["state"] == definitions.TetralathState.RUNNING and game["current_color"] != game["player_color"]:
             if ai_move_processing_data["thread"] is None:
                 handle_ai_move_start(game_backend, libtetralath_instance, ai_move_processing_data)
             if ai_move_processing_data["thread"] is not None and not ai_move_processing_data["thread"].is_alive():
                 handle_ai_move_end(game, game_backend, libtetralath_instance, ai_move_processing_data)
         tetralath_ui_event, pygame_events = ui.get_events(pending_tetralath_ui_events)
-        ui.update_left_panel(left_panel, pygame_events)
+        ui.update_panels([left_panel, right_panel], pygame_events)
         if tetralath_ui_event is not None:
             if tetralath_ui_event["type"] == definitions.TetralathEventType.QUIT:
                 if running is not False:
@@ -110,8 +135,10 @@ def graphical_game() -> None:
                 if game["state"] == definitions.TetralathState.RUNNING and game["current_color"] == game["player_color"]:
                     board_position_index = tetralath_ui_event["board_position_index"]
                     handle_player_move(game, game_backend, libtetralath_instance, board_position_index)
-        ui.refresh_game_ui(game_window, clock, left_panel, game["board"])
-        # print("state:", game["state"], "- result:", game["result"], "- ai_mode:", game["ai_mode"], "- player_color:", game["player_color"], "- current_color:", game["current_color"])
+            elif tetralath_ui_event["type"] == definitions.TetralathEventType.UNDO_LAST_MOVE:
+                if game["state"] == definitions.TetralathState.ENDING or (game["state"] == definitions.TetralathState.RUNNING and game["current_color"] == game["player_color"]):
+                    handle_undo_last_move(game, game_backend, libtetralath_instance)
+        ui.refresh_game_ui(game_window, clock, [left_panel, right_panel], game["board"])
     if running is False:
         libtetralath_instance.teardown_headless_game(game_backend)
         ui.destroy_game_ui()

@@ -21,6 +21,16 @@ TETRALATH_LEFT_PANEL_WIDGET_BACKGROUND_COLOR = (240, 240, 240)
 TETRALATH_LEFT_PANEL_WIDGET_BORDER_COLOR = (192, 192, 192)
 TETRALATH_LEFT_PANEL_WIDGET_BORDER_WIDTH = 2
 TETRALATH_LEFT_PANEL_WIDGET_FONT_COLOR = (0, 0, 0)
+TETRALATH_LEFT_PANEL_POSITION = (0, 0, False)
+TETRALATH_RIGHT_PANEL_WIDTH = 266
+TETRALATH_RIGHT_PANEL_HEIGHT = 691
+TETRALATH_RIGHT_PANEL_BACKGROUND_COLOR = (224, 224, 224)
+TETRALATH_RIGHT_PANEL_READONLY_FONT_COLOR = (128, 128, 128)
+TETRALATH_RIGHT_PANEL_WIDGET_BACKGROUND_COLOR = (240, 240, 240)
+TETRALATH_RIGHT_PANEL_WIDGET_BORDER_COLOR = (192, 192, 192)
+TETRALATH_RIGHT_PANEL_WIDGET_BORDER_WIDTH = 2
+TETRALATH_RIGHT_PANEL_WIDGET_FONT_COLOR = (0, 0, 0)
+TETRALATH_RIGHT_PANEL_POSITION = (958, 0, False)
 TETRALATH_BOARD_HEXAGON_RADIUS = 43
 TETRALATH_BOARD_PIECE_RADIUS = 29
 TETRALATH_BOARD_PIECE_COLORS = {
@@ -37,10 +47,11 @@ def initialize_game_ui() -> tuple[pygame.surface.Surface, pygame.time.Clock]:
     return game_window, clock
 
 
-def refresh_game_ui(game_window: pygame.surface.Surface, clock: pygame.time.Clock, menu: pygame_menu.Menu, game_board: list[definitions.TetralathColor]) -> None:
+def refresh_game_ui(game_window: pygame.surface.Surface, clock: pygame.time.Clock, menus: list[pygame_menu.Menu], game_board: list[definitions.TetralathColor]) -> None:
     game_window.fill(TETRALATH_BACKGROUND_COLOR)
     draw_board(game_window, game_board)
-    menu.draw(game_window)
+    for menu in menus:
+        menu.draw(game_window)
     pygame.display.flip()
     clock.tick(TETRALATH_FPS)
 
@@ -97,7 +108,7 @@ def draw_left_panel(game: definitions.TetralathGame, pending_tetralath_ui_events
         height=TETRALATH_LEFT_PANEL_HEIGHT,
         title=TETRALATH_LEFT_PANEL_TITLE,
         theme=theme,
-        position=(0, 0, False),
+        position=TETRALATH_LEFT_PANEL_POSITION,
         screen_dimension=(TETRALATH_WINDOW_WIDTH, TETRALATH_WINDOW_HEIGHT),
     )
 
@@ -159,15 +170,63 @@ def draw_left_panel(game: definitions.TetralathGame, pending_tetralath_ui_events
     return menu, ai_mode_selector, player_color_selector, start_game_button
 
 
-def update_left_panel(menu: pygame_menu.Menu, events: list[pygame.event.Event]) -> None:
-    menu.update(events)
-
-
 def disable_left_panel(menu: pygame_menu.Menu, ai_mode_selector: pygame_menu.widgets.Selector, player_color_selector: pygame_menu.widgets.Selector, start_game_button: pygame_menu.widgets.Button) -> None:
     ai_mode_selector.readonly = True
     player_color_selector.readonly = True
     start_game_button.readonly = True
     menu.render()
+
+
+def draw_right_panel(game: definitions.TetralathGame, pending_tetralath_ui_events: list[definitions.TetralathUIEvent]) -> tuple[pygame_menu.Menu, pygame_menu.widgets.Button]:
+    theme = pygame_menu.themes.THEME_DEFAULT.copy()
+    theme.title = False
+    theme.border_width = 0
+    theme.widget_border_width = 0
+    theme.widget_border_color = TETRALATH_RIGHT_PANEL_WIDGET_BORDER_COLOR
+    theme.background_color = TETRALATH_RIGHT_PANEL_BACKGROUND_COLOR
+    theme.widget_background_color = TETRALATH_RIGHT_PANEL_BACKGROUND_COLOR
+    theme.widget_font_color = TETRALATH_RIGHT_PANEL_WIDGET_FONT_COLOR
+    theme.readonly_color = TETRALATH_RIGHT_PANEL_READONLY_FONT_COLOR
+    theme.readonly_selected_color = TETRALATH_RIGHT_PANEL_READONLY_FONT_COLOR
+    theme.widget_selection_effect = pygame_menu.widgets.NoneSelection()
+    menu = pygame_menu.Menu(
+        width=TETRALATH_RIGHT_PANEL_WIDTH,
+        height=TETRALATH_RIGHT_PANEL_HEIGHT,
+        title="",
+        theme=theme,
+        position=TETRALATH_RIGHT_PANEL_POSITION,
+        screen_dimension=(TETRALATH_WINDOW_WIDTH, TETRALATH_WINDOW_HEIGHT),
+    )
+
+    def on_undo_last_move() -> None:
+        ui_event: definitions.TetralathUIEvent = {
+            "type": definitions.TetralathEventType.UNDO_LAST_MOVE,
+        }
+        pending_tetralath_ui_events.append(ui_event)
+
+    undo_last_move_button = menu.add.button(
+        "Undo last move",
+        on_undo_last_move,
+        background_color=TETRALATH_RIGHT_PANEL_WIDGET_BACKGROUND_COLOR,
+        border_width=TETRALATH_RIGHT_PANEL_WIDGET_BORDER_WIDTH,
+    )
+
+    return menu, undo_last_move_button
+
+
+def enable_right_panel(menu: pygame_menu.Menu, undo_last_move_button: pygame_menu.widgets.Button) -> None:
+    undo_last_move_button.readonly = False
+    menu.render()
+
+
+def disable_right_panel(menu: pygame_menu.Menu, undo_last_move_button: pygame_menu.widgets.Button) -> None:
+    undo_last_move_button.readonly = True
+    menu.render()
+
+
+def update_panels(menus: pygame_menu.Menu, events: list[pygame.event.Event]) -> None:
+    for menu in menus:
+        menu.update(events)
 
 
 def draw_hexagons(game_window: pygame.surface.Surface, hexagon_radius: float, board_center_x: int, board_center_y: int) -> None:
