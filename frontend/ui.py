@@ -5,7 +5,7 @@ import board
 import definitions
 
 
-TETRALATH_FPS = 25
+TETRALATH_FPS = 60
 TETRALATH_WINDOW_WIDTH = 1224
 TETRALATH_WINDOW_HEIGHT = 691
 TETRALATH_WINDOW_TITLE = "Tetralath"
@@ -177,7 +177,7 @@ def disable_left_panel(menu: pygame_menu.Menu, ai_mode_selector: pygame_menu.wid
     menu.render()
 
 
-def draw_right_panel(game: definitions.TetralathGame, pending_tetralath_ui_events: list[definitions.TetralathUIEvent]) -> tuple[pygame_menu.Menu, pygame_menu.widgets.Button]:
+def draw_right_panel(game: definitions.TetralathGame, pending_tetralath_ui_events: list[definitions.TetralathUIEvent]) -> tuple[pygame_menu.Menu, pygame_menu.widgets.Button, pygame_menu.widgets.Label]:
     theme = pygame_menu.themes.THEME_DEFAULT.copy()
     theme.title = False
     theme.border_width = 0
@@ -211,7 +211,17 @@ def draw_right_panel(game: definitions.TetralathGame, pending_tetralath_ui_event
         border_width=TETRALATH_RIGHT_PANEL_WIDGET_BORDER_WIDTH,
     )
 
-    return menu, undo_last_move_button
+    menu.add.label("")
+
+    menu.add.label("Current player:")
+    current_player_label = menu.add.label("-")
+
+    menu.add.label("")
+
+    ai_info_label = menu.add.label("", wordwrap=True, max_nlines=2)
+    ai_info_label.set_title(" \n ")
+
+    return menu, undo_last_move_button, current_player_label, ai_info_label
 
 
 def enable_right_panel(menu: pygame_menu.Menu, undo_last_move_button: pygame_menu.widgets.Button) -> None:
@@ -227,6 +237,33 @@ def disable_right_panel(menu: pygame_menu.Menu, undo_last_move_button: pygame_me
 def update_panels(menus: pygame_menu.Menu, events: list[pygame.event.Event]) -> None:
     for menu in menus:
         menu.update(events)
+
+
+def update_current_player_label(game: definitions.TetralathGame, current_player_label: pygame_menu.widgets.Label) -> None:
+    new_title = ""
+    if game["current_color"] == definitions.TetralathColor.WHITE:
+        new_title = "White"
+    elif game["current_color"] == definitions.TetralathColor.BLACK:
+        new_title = "Black"
+    if game["current_color"] == game["player_color"]:
+        new_title = new_title + " (You)"
+    else:
+        new_title = new_title + " (AI)"
+    if new_title == "":
+        new_title = "-"
+    current_player_label.set_title(new_title)
+
+
+def update_ai_info_label(ai_move_processing_data: definitions.TetralathAIMoveProcessingData, ai_info_label: pygame_menu.widgets.Label, clear: bool = False) -> None:
+    new_title = ""
+    if clear:
+        ai_info_label.set_title("")
+    else:
+        if ai_move_processing_data["end_time"] is None:
+            new_title = "AI thinking...\n "
+        else:
+            new_title = "AI thought for\n%.3f seconds" % (ai_move_processing_data["end_time"] - ai_move_processing_data["start_time"])
+    ai_info_label.set_title(new_title)
 
 
 def draw_hexagons(game_window: pygame.surface.Surface, hexagon_radius: float, board_center_x: int, board_center_y: int) -> None:
@@ -252,6 +289,7 @@ def draw_pieces(game_window: pygame.surface.Surface, hexagon_radius: float, boar
         if color != definitions.TetralathColor.NONE:
             hexagon_center_x, hexagon_center_y = board.get_single_hexagon_center_from_index(position, board.TETRALATH_BOARD_ROW_LENGTHS, board.TETRALATH_BOARD_MIDDLE_ROW_INDEX, hexagon_radius, board_center_x, board_center_y)
             pygame.draw.circle(game_window, TETRALATH_BOARD_PIECE_COLORS[color], (hexagon_center_x, hexagon_center_y), piece_radius)
+            pygame.draw.circle(game_window, board.TETRALATH_BOARD_PIECE_BORDER_COLOR, (hexagon_center_x, hexagon_center_y), piece_radius, board.TETRALATH_BOARD_PIECE_BORDER_WIDTH)
 
 
 def draw_board(game_window: pygame.surface.Surface, game_board: list[definitions.TetralathColor]) -> None:

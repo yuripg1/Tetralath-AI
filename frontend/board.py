@@ -8,7 +8,7 @@ TETRALATH_BOARD_POSITION_FILL_COLOR = (255, 255, 0)
 TETRALATH_BOARD_POSITION_BORDER_COLOR = (128, 128, 128)
 TETRALATH_BOARD_POSITION_BORDER_WIDTH = 3
 TETRALATH_BOARD_EDGE_BORDER_COLOR = (0, 0, 0)
-TETRALATH_BOARD_EDGE_BORDER_WIDTH = 6
+TETRALATH_BOARD_EDGE_BORDER_WIDTH = 5
 TETRALATH_BOARD_EDGES: dict[int, list[tuple[int, int]]] = {
     1: [(5, 0), (0, 1)],
     2: [(5, 0), (0, 1)],
@@ -35,6 +35,8 @@ TETRALATH_BOARD_EDGES: dict[int, list[tuple[int, int]]] = {
     56: [(1, 2), (2, 3), (3, 4)],
     60: [(2, 3), (3, 4), (4, 5)],
 }
+TETRALATH_BOARD_PIECE_BORDER_COLOR = (128, 128, 128)
+TETRALATH_BOARD_PIECE_BORDER_WIDTH = 1
 
 
 def get_hexagon_vertices(center_x: float, center_y: float, radius: float) -> list[tuple[float, float]]:
