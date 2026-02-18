@@ -40,6 +40,7 @@ class TetralathGame(typing.TypedDict):
     advance_turn: bool
     board: list[TetralathColor]
     moves_count: int
+    latest_move_position: int
     current_color: TetralathColor
     player_color: TetralathColor
     ai_mode: TetralathAIMode

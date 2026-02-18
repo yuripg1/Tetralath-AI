@@ -33,6 +33,8 @@ TETRALATH_RIGHT_PANEL_WIDGET_FONT_COLOR = (0, 0, 0)
 TETRALATH_RIGHT_PANEL_POSITION = (958, 0, False)
 TETRALATH_BOARD_HEXAGON_RADIUS = 43
 TETRALATH_BOARD_PIECE_RADIUS = 29
+TETRALATH_BOARD_PIECE_LAST_MOVE_BORDER_WIDTH = 5
+TETRALATH_BOARD_PIECE_LAST_MOVE_BORDER_COLOR = (128, 128, 128)
 TETRALATH_BOARD_PIECE_COLORS = {
     definitions.TetralathColor.WHITE: (255, 255, 255),
     definitions.TetralathColor.BLACK: (0, 0, 0),
@@ -47,9 +49,9 @@ def initialize_game_ui() -> tuple[pygame.surface.Surface, pygame.time.Clock]:
     return game_window, clock
 
 
-def refresh_game_ui(game_window: pygame.surface.Surface, clock: pygame.time.Clock, menus: list[pygame_menu.Menu], game_board: list[definitions.TetralathColor]) -> None:
+def refresh_game_ui(game_window: pygame.surface.Surface, clock: pygame.time.Clock, menus: list[pygame_menu.Menu], game_board: list[definitions.TetralathColor], last_move_position: int) -> None:
     game_window.fill(TETRALATH_BACKGROUND_COLOR)
-    draw_board(game_window, game_board)
+    draw_board(game_window, game_board, last_move_position)
     for menu in menus:
         menu.draw(game_window)
     pygame.display.flip()
@@ -254,10 +256,10 @@ def update_current_player_label(game: definitions.TetralathGame, current_player_
     current_player_label.set_title(new_title)
 
 
-def update_ai_info_label(ai_move_processing_data: definitions.TetralathAIMoveProcessingData, ai_info_label: pygame_menu.widgets.Label, clear: bool = False) -> None:
+def update_ai_info_label(ai_move_processing_data: definitions.TetralathAIMoveProcessingData, ai_info_label: pygame_menu.widgets.Label, clear: bool) -> None:
     new_title = ""
     if clear:
-        ai_info_label.set_title("")
+        new_title = " \n "
     else:
         if ai_move_processing_data["end_time"] is None:
             new_title = "AI thinking...\n "
@@ -284,18 +286,20 @@ def draw_board_edges(game_window: pygame.surface.Surface, hexagon_radius: float,
             pygame.draw.line(game_window, board.TETRALATH_BOARD_EDGE_BORDER_COLOR, line_start, line_end, board.TETRALATH_BOARD_EDGE_BORDER_WIDTH)
 
 
-def draw_pieces(game_window: pygame.surface.Surface, hexagon_radius: float, board_center_x: int, board_center_y: int, game_board: list[definitions.TetralathColor], piece_radius: float) -> None:
+def draw_pieces(game_window: pygame.surface.Surface, hexagon_radius: float, board_center_x: int, board_center_y: int, game_board: list[definitions.TetralathColor], last_move_position: int, piece_radius: float) -> None:
     for position, color in enumerate(game_board):
         if color != definitions.TetralathColor.NONE:
             hexagon_center_x, hexagon_center_y = board.get_single_hexagon_center_from_index(position, board.TETRALATH_BOARD_ROW_LENGTHS, board.TETRALATH_BOARD_MIDDLE_ROW_INDEX, hexagon_radius, board_center_x, board_center_y)
             pygame.draw.circle(game_window, TETRALATH_BOARD_PIECE_COLORS[color], (hexagon_center_x, hexagon_center_y), piece_radius)
-            pygame.draw.circle(game_window, board.TETRALATH_BOARD_PIECE_BORDER_COLOR, (hexagon_center_x, hexagon_center_y), piece_radius, board.TETRALATH_BOARD_PIECE_BORDER_WIDTH)
+            if position == last_move_position:
+                pygame.draw.circle(game_window, TETRALATH_BOARD_PIECE_LAST_MOVE_BORDER_COLOR, (hexagon_center_x, hexagon_center_y), piece_radius, TETRALATH_BOARD_PIECE_LAST_MOVE_BORDER_WIDTH)
+            else:
+                pygame.draw.circle(game_window, board.TETRALATH_BOARD_PIECE_BORDER_COLOR, (hexagon_center_x, hexagon_center_y), piece_radius, board.TETRALATH_BOARD_PIECE_BORDER_WIDTH)
 
-
-def draw_board(game_window: pygame.surface.Surface, game_board: list[definitions.TetralathColor]) -> None:
+def draw_board(game_window: pygame.surface.Surface, game_board: list[definitions.TetralathColor], last_move_position: int) -> None:
     draw_hexagons(game_window, TETRALATH_BOARD_HEXAGON_RADIUS, round(TETRALATH_WINDOW_WIDTH / 2), round(TETRALATH_WINDOW_HEIGHT / 2))
     draw_board_edges(game_window, TETRALATH_BOARD_HEXAGON_RADIUS, round(TETRALATH_WINDOW_WIDTH / 2), round(TETRALATH_WINDOW_HEIGHT / 2))
-    draw_pieces(game_window, TETRALATH_BOARD_HEXAGON_RADIUS, round(TETRALATH_WINDOW_WIDTH / 2), round(TETRALATH_WINDOW_HEIGHT / 2), game_board, TETRALATH_BOARD_PIECE_RADIUS)
+    draw_pieces(game_window, TETRALATH_BOARD_HEXAGON_RADIUS, round(TETRALATH_WINDOW_WIDTH / 2), round(TETRALATH_WINDOW_HEIGHT / 2), game_board, last_move_position, TETRALATH_BOARD_PIECE_RADIUS)
 
 
 def destroy_game_ui() -> None:
