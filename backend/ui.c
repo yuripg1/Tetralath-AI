@@ -135,14 +135,15 @@ TETRALATH_COLOR choose_player_color() {
 
     while (chosen_color == TETRALATH_COLOR_NONE) {
         mvprintw(y, x, "Choose your color:");
+        mvprintw(y + 1, x, "(White starts the game)");
 
         for (int i = 0; i < TETRALATH_NUMBER_OF_COLORS; i += 1) {
-            int option_y = y + 1 + i;
+            int option_y = y + 2 + i;
             if (i == highlighted_option) {
                 attron(A_REVERSE);
             }
             if (i == 0) {
-                mvprintw(option_y, x, "- White (starts the game)");
+                mvprintw(option_y, x, "- White");
             } else {
                 mvprintw(option_y, x, "- Black");
             }
