@@ -91,7 +91,7 @@ static TETRALATH_MINIMAX_OUTPUT *get_best_ai_move(TETRALATH_MINIMAX_OUTPUT *mini
 static TETRALATH_RESULT get_simplified_game_result(const TETRALATH_GAME *game) {
     TETRALATH_RESULT simplified_game_result = TETRALATH_RESULT_NONE_MAX;
 
-    TETRALATH_RESULT game_result = check_game_result(game->board, game->moves->moves_count, game->player_color, flip_color(game->player_color));
+    TETRALATH_RESULT game_result = check_game_result(game->board, game->moves->moves_count, game->player_color, flip_color(game->player_color), false);
     switch (game_result) {
         case TETRALATH_RESULT_WIN:
         case TETRALATH_RESULT_LOSS:

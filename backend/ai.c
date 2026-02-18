@@ -203,7 +203,7 @@ static void add_near_sequence_per_color(int *near_sequences_per_color_count, int
 
 // This function returns the result of the game for the perspective color
 // Important: the perspective color must be the one who made the most recent move and the opponent color must be the one who is going to make the next move
-TETRALATH_RESULT check_game_result(const TETRALATH_COLOR *board, const int moves_count, const TETRALATH_COLOR perspective_color, const TETRALATH_COLOR opponent_color) {
+TETRALATH_RESULT check_game_result(const TETRALATH_COLOR *board, const int moves_count, const TETRALATH_COLOR perspective_color, const TETRALATH_COLOR opponent_color, const bool apply_strategy) {
     int triplets_per_color_count[TETRALATH_NUMBER_OF_COLORS] = {0, 0};
     int near_quadruplets_per_color_count[TETRALATH_NUMBER_OF_COLORS] = {0, 0};
     int near_quadruplets_per_color_empty_positions[TETRALATH_NUMBER_OF_COLORS][TETRALATH_MAXIMUM_NEAR_SEQUENCES];
@@ -281,7 +281,9 @@ TETRALATH_RESULT check_game_result(const TETRALATH_COLOR *board, const int moves
             }
 
         }
-        return TETRALATH_RESULT_CLOSER_TO_WINNING;
+        if (apply_strategy) {
+            return TETRALATH_RESULT_CLOSER_TO_WINNING;
+        }
     }
 
     return TETRALATH_RESULT_NONE_MAX;
@@ -290,7 +292,7 @@ TETRALATH_RESULT check_game_result(const TETRALATH_COLOR *board, const int moves
 static int min_level(const int alpha, const int previous_beta, TETRALATH_COLOR *board_copy, const int moves_count, const TETRALATH_COLOR perspective_color, const TETRALATH_AI_MODE ai_mode, const int previous_remaining_depth, const int64_t target_end_time, const bool use_strict_pruning);
 
 static int max_level(const int previous_alpha, const int beta, TETRALATH_COLOR *board_copy, const int moves_count, const TETRALATH_COLOR perspective_color, const TETRALATH_AI_MODE ai_mode, const int previous_remaining_depth, const int64_t target_end_time) {
-    const int result = (int)flip_result(check_game_result(board_copy, moves_count, flip_color(perspective_color), perspective_color));
+    const int result = (int)flip_result(check_game_result(board_copy, moves_count, flip_color(perspective_color), perspective_color, false));
 
     switch (result) {
         case TETRALATH_RESULT_WIN:
@@ -340,7 +342,7 @@ static int max_level(const int previous_alpha, const int beta, TETRALATH_COLOR *
 static int min_level(const int alpha, const int previous_beta, TETRALATH_COLOR *board_copy, const int moves_count, const TETRALATH_COLOR perspective_color, const TETRALATH_AI_MODE ai_mode, const int previous_remaining_depth, const int64_t target_end_time, const bool use_strict_pruning) {
     const TETRALATH_COLOR opponent_color = flip_color(perspective_color);
 
-    const int result = (int)check_game_result(board_copy, moves_count, perspective_color, opponent_color);
+    const int result = (int)check_game_result(board_copy, moves_count, perspective_color, opponent_color, false);
 
     switch (result) {
         case TETRALATH_RESULT_WIN:
@@ -531,7 +533,7 @@ int shallow_minimax(const TETRALATH_COLOR *original_board, TETRALATH_MOVE_VALUE 
         int evaluated_position_1 = new_move_values[i].position;
         if (board_copy[evaluated_position_1] == TETRALATH_COLOR_NONE) {
             board_copy[evaluated_position_1] = perspective_color;
-            int evaluated_result_1 = check_game_result(board_copy, moves_count_1, perspective_color, opponent_color);
+            int evaluated_result_1 = check_game_result(board_copy, moves_count_1, perspective_color, opponent_color, true);
             int is_terminal_result_1 = false;
             switch (evaluated_result_1) {
                 case TETRALATH_RESULT_WIN:
@@ -564,7 +566,7 @@ int shallow_minimax(const TETRALATH_COLOR *original_board, TETRALATH_MOVE_VALUE 
                     int evaluated_position_2 = new_move_values[j].position;
                     if (board_copy[evaluated_position_2] == TETRALATH_COLOR_NONE) {
                         board_copy[evaluated_position_2] = opponent_color;
-                        int evaluated_result_2 = flip_result(check_game_result(board_copy, moves_count_2, opponent_color, perspective_color));
+                        int evaluated_result_2 = flip_result(check_game_result(board_copy, moves_count_2, opponent_color, perspective_color, false));
                         int is_terminal_result_2 = false;
                         switch (evaluated_result_2) {
                             case TETRALATH_RESULT_WIN:
@@ -601,7 +603,7 @@ int shallow_minimax(const TETRALATH_COLOR *original_board, TETRALATH_MOVE_VALUE 
                                 int evaluated_position_3 = new_move_values[k].position;
                                 if (board_copy[evaluated_position_3] == TETRALATH_COLOR_NONE) {
                                     board_copy[evaluated_position_3] = perspective_color;
-                                    int evaluated_result_3 = check_game_result(board_copy, moves_count_3, perspective_color, opponent_color);
+                                    int evaluated_result_3 = check_game_result(board_copy, moves_count_3, perspective_color, opponent_color, true);
                                     switch (evaluated_result_3) {
                                         case TETRALATH_RESULT_WIN:
                                             evaluated_result_3 = TETRALATH_RESULT_WIN - moves_count_3;
