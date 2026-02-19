@@ -1,47 +1,86 @@
 # Tetralath AI
 
-Tetralath AI is a terminal game written in C using ncurses. You play Tetralath against an AI: the board is drawn in the terminal, you choose your color and an AI mode, then take turns placing pieces until someone wins, loses, or the board is full.
+A two-player turn-based board game where you play against an AI on a hexagonal board. You can run it as a graphical (GUI) or terminal (TUI) application.
 
-## Game rules
+## How to play
 
-The board has 61 positions arranged in a diamond. Each row has a different number of cells: 5, 6, 7, 8, 9, 8, 7, 6, 5 from top to bottom. You can form lines only along the horizontal or the diagonals; the layout does not allow vertical lines.
+- **Pieces:** Two colors, **white** and **black**. You choose your color; the AI uses the other.
+- **Turns:** Players alternate. **White always moves first.** On your turn, you place one piece of your color on any empty cell.
+- **Winning:** You win by forming a **line of 4** pieces of your color (horizontal or along a diagonal).
+- **Losing:** If you form a **line of 3** pieces of your color *without* also having a line of 4, you **lose** (your opponent wins). So 4-in-a-row wins; 3-in-a-row alone loses.
+- **Draw:** If the board is full and neither player has won or lost, the game is a tie.
 
-White always moves first. Players alternate. On your turn you place one piece of your color on an empty cell.
+You can also win by forcing the opponent to complete a line of 3 (without 4).
 
-- **Win:** Be the first to form a line of four pieces of your color (horizontal or diagonal).
-- **Lose:** Form a line of three pieces of your color without also having a line of four. Your opponent wins.
-- **Draw:** The board is filled with no win and no loss.
+## How to run
 
-You can also win by forcing your opponent to complete a line of three (and thus lose).
+### Graphical version (GUI)
 
-## Build and run
-
-You need a C compiler, ncurses, and pthread. On Debian or Ubuntu, install `build-essential` and `libncurses-dev`; pthread is usually provided by the toolchain.
-
-Build:
+From the project root:
 
 ```bash
-make
+./run_frontend.sh
 ```
 
-Run:
+This builds the shared library (`make -C backend lib` → `backend/libtetralath.so`), creates a Python virtual environment in `frontend/.venv`, installs dependencies from `frontend/requirements.txt`, and runs the GUI.
+
+![Graphical UI (GUI)](img/tetralath_gui.png)
+
+### Terminal version (TUI)
+
+From the project root:
 
 ```bash
-./tetralath_ai
+./run_backend.sh
 ```
 
-Developed on Linux. It may work on macOS. On Windows you would need pthread and ncurses (e.g. MinGW, MSYS2) and possibly different timing code.
+This builds the backend (`make` in `backend/`) and runs the terminal executable.
 
-## Controls
+![Terminal UI (TUI)](img/tetralath_tui.png)
 
-Before the game you choose your color (black or white) and the AI mode (Friendly or Ruthless) with the arrow keys; press Enter to confirm each choice.
+### Manual build (backend)
 
-During the game, use the arrow keys to move the blue highlight over the board. Press Enter to place your piece on the highlighted cell. Press **U** to undo (the full move history is kept, so you can undo back to the start). Press **Q** to quit.
+- **Shared library (for GUI):**  
+  `cd backend && make lib`  
+  Produces: `backend/libtetralath.so`
 
-## Technical notes
+- **Standalone TUI:**  
+  `cd backend && make`  
+  Run: `./backend/tetralath`
 
-The AI uses minimax with alpha-beta pruning. It searches by iterative deepening: depth 1, then 2, then 3, and so on until a time limit (about 5 seconds per move). Two threads run in parallel, one handling odd depths and the other even depths.
+## Requirements
 
-There are two modes. In Friendly mode the AI prefers faster wins and later losses when the minimax score is otherwise equal. In Ruthless mode it only cares about winning or losing, not how many moves it takes, and uses more aggressive pruning so it can search deeper within the same time.
+**Backend (TUI and shared library):**
 
-When several moves have the same minimax score, the AI breaks ties using a short-term evaluation (e.g. restricting the opponent’s options) so it does not default to passive play.
+- C compiler (e.g. GCC)
+- **ncurses** (development headers and library)
+- **pthreads** (usually provided by the system)
+
+**Frontend (GUI):**
+
+- **Python 3**
+- **pygame-ce** and **pygame-menu-ce** (see `frontend/requirements.txt`)
+
+On a Debian/Ubuntu-style system you can install ncurses for building with:
+
+```bash
+sudo apt-get install libncurses-dev
+```
+
+## AI modes
+
+- **Friendly:** The AI tries to win as soon as it can and to delay losing. Generally easier for a human.
+- **Ruthless:** The AI only cares about winning, not how many moves it takes. It can afford to search deeper and is typically harder to beat.
+
+The AI uses **minimax** with **alpha–beta pruning** and a **5-second** limit per move. Only completed search results within that time are used.
+
+## Undo
+
+Undo is available in both versions: it removes your last move and the AI’s reply. Full move history is kept, so you can undo repeatedly to the start of the game.
+
+## Project layout
+
+- **`backend/`** — C game engine and AI (minimax, alpha–beta, time limit, threading). Also the TUI (ncurses) and the build for `libtetralath.so`.
+- **`frontend/`** — Python GUI using pygame-ce; calls into `libtetralath.so` for all game and AI logic.
+- **`img/`** — Screenshots: `tetralath_gui.png`, `tetralath_tui.png`.
+- **`archive/v1/`** — Original C implementation (reference only; not required to run the current versions).
