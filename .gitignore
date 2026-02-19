@@ -1,2 +1,7 @@
-tetralath_ai
-*.o
+/backend/tetralath
+/backend/tetralath_debug
+/backend/libtetralath.so
+/backend/libtetralath_debug.so
+/backend/*.o
+/frontend/.venv/
+/frontend/__pycache__/

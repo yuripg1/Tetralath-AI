@@ -1,0 +1,2 @@
+pygame-ce~=2.5.6
+pygame-menu-ce~=4.5.4
