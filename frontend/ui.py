@@ -17,10 +17,12 @@ TETRALATH_LEFT_PANEL_BACKGROUND_COLOR = (224, 224, 224)
 TETRALATH_LEFT_PANEL_READONLY_FONT_COLOR = (128, 128, 128)
 TETRALATH_LEFT_PANEL_TITLE_BACKGROUND_COLOR = (32, 32, 32)
 TETRALATH_LEFT_PANEL_TITLE_FONT_COLOR = (255, 255, 255)
+TETRALATH_LEFT_PANEL_TITLE_FONT_SIZE = 40
 TETRALATH_LEFT_PANEL_WIDGET_BACKGROUND_COLOR = (240, 240, 240)
 TETRALATH_LEFT_PANEL_WIDGET_BORDER_COLOR = (192, 192, 192)
 TETRALATH_LEFT_PANEL_WIDGET_BORDER_WIDTH = 2
 TETRALATH_LEFT_PANEL_WIDGET_FONT_COLOR = (0, 0, 0)
+TETRALATH_LEFT_PANEL_WIDGET_FONT_SIZE = 30
 TETRALATH_LEFT_PANEL_POSITION = (0, 0, False)
 TETRALATH_RIGHT_PANEL_WIDTH = 266
 TETRALATH_RIGHT_PANEL_HEIGHT = 691
@@ -30,6 +32,7 @@ TETRALATH_RIGHT_PANEL_WIDGET_BACKGROUND_COLOR = (240, 240, 240)
 TETRALATH_RIGHT_PANEL_WIDGET_BORDER_COLOR = (192, 192, 192)
 TETRALATH_RIGHT_PANEL_WIDGET_BORDER_WIDTH = 2
 TETRALATH_RIGHT_PANEL_WIDGET_FONT_COLOR = (0, 0, 0)
+TETRALATH_RIGHT_PANEL_WIDGET_FONT_SIZE = 30
 TETRALATH_RIGHT_PANEL_POSITION = (958, 0, False)
 TETRALATH_BOARD_HEXAGON_RADIUS = 43
 TETRALATH_BOARD_PIECE_RADIUS = 29
@@ -104,6 +107,8 @@ def draw_left_panel(game: definitions.TetralathGame, pending_tetralath_ui_events
     theme.title_background_color = TETRALATH_LEFT_PANEL_TITLE_BACKGROUND_COLOR
     theme.widget_font_color = TETRALATH_LEFT_PANEL_WIDGET_FONT_COLOR
     theme.title_font_color = TETRALATH_LEFT_PANEL_TITLE_FONT_COLOR
+    theme.title_font_size = TETRALATH_LEFT_PANEL_TITLE_FONT_SIZE
+    theme.widget_font_size = TETRALATH_LEFT_PANEL_WIDGET_FONT_SIZE
     theme.readonly_color = TETRALATH_LEFT_PANEL_READONLY_FONT_COLOR
     theme.readonly_selected_color = TETRALATH_LEFT_PANEL_READONLY_FONT_COLOR
     theme.title_bar_style = pygame_menu.widgets.MENUBAR_STYLE_TITLE_ONLY_DIAGONAL
@@ -191,6 +196,7 @@ def draw_right_panel(game: definitions.TetralathGame, pending_tetralath_ui_event
     theme.background_color = TETRALATH_RIGHT_PANEL_BACKGROUND_COLOR
     theme.widget_background_color = TETRALATH_RIGHT_PANEL_BACKGROUND_COLOR
     theme.widget_font_color = TETRALATH_RIGHT_PANEL_WIDGET_FONT_COLOR
+    theme.widget_font_size = TETRALATH_RIGHT_PANEL_WIDGET_FONT_SIZE
     theme.readonly_color = TETRALATH_RIGHT_PANEL_READONLY_FONT_COLOR
     theme.readonly_selected_color = TETRALATH_RIGHT_PANEL_READONLY_FONT_COLOR
     theme.widget_selection_effect = pygame_menu.widgets.NoneSelection()
@@ -226,7 +232,11 @@ def draw_right_panel(game: definitions.TetralathGame, pending_tetralath_ui_event
     ai_info_label = menu.add.label("", wordwrap=True, max_nlines=2)
     ai_info_label.set_title(" \n ")
 
-    return menu, undo_last_move_button, current_player_label, ai_info_label
+    menu.add.label("")
+
+    game_result_label = menu.add.label("")
+
+    return menu, undo_last_move_button, current_player_label, ai_info_label, game_result_label
 
 
 def enable_right_panel(menu: pygame_menu.Menu, undo_last_move_button: pygame_menu.widgets.Button) -> None:
@@ -270,6 +280,15 @@ def update_ai_info_label(ai_move_processing_data: definitions.TetralathAIMovePro
             new_title = "AI thought for\n%.3f seconds" % (ai_move_processing_data["end_time"] - ai_move_processing_data["start_time"])
     ai_info_label.set_title(new_title)
 
+def update_game_result_label(game: definitions.TetralathGame, game_result_label: pygame_menu.widgets.Label) -> None:
+    new_title = ""
+    if game["result"] == definitions.TetralathResult.WIN:
+        new_title = "You won"
+    elif game["result"] == definitions.TetralathResult.LOSS:
+        new_title = "You lost"
+    elif game["result"] == definitions.TetralathResult.DRAW:
+        new_title = "It's a tie"
+    game_result_label.set_title(new_title)
 
 def draw_hexagons(game_window: pygame.surface.Surface, hexagon_radius: float, board_center_x: int, board_center_y: int) -> None:
     hexagon_centers = board.get_all_hexagon_centers(board.TETRALATH_BOARD_ROW_LENGTHS, board.TETRALATH_BOARD_MIDDLE_ROW_INDEX, hexagon_radius, board_center_x, board_center_y)
@@ -286,7 +305,7 @@ def draw_board_edges(game_window: pygame.surface.Surface, hexagon_radius: float,
         for start_vertex, end_vertex in edges:
             line_start: tuple[int, int] = (round(hexagon_vertices[start_vertex][0]), round(hexagon_vertices[start_vertex][1]))
             line_end: tuple[int, int] = (round(hexagon_vertices[end_vertex][0]), round(hexagon_vertices[end_vertex][1]))
-            pygame.draw.line(game_window, board.TETRALATH_BOARD_EDGE_BORDER_COLOR, line_start, line_end, board.TETRALATH_BOARD_EDGE_BORDER_WIDTH)
+            pygame.draw.aaline(game_window, board.TETRALATH_BOARD_EDGE_BORDER_COLOR, line_start, line_end, board.TETRALATH_BOARD_EDGE_BORDER_WIDTH)
 
 
 def draw_pieces(game_window: pygame.surface.Surface, hexagon_radius: float, board_center_x: int, board_center_y: int, game_board: list[definitions.TetralathColor], last_move_position: int, piece_radius: float) -> None:
