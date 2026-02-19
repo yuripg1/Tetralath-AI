@@ -52,11 +52,13 @@ def handle_player_move(game: definitions.TetralathGame, game_backend: ctypes.c_v
 
 
 def ai_move_processing_thread(game_backend: ctypes.c_void_p, libtetralath_instance: libtetralath.LibTetralath, ai_move_processing_data: definitions.TetralathAIMoveProcessingData) -> None:
+    ai_move_processing_data["start_time"] = time.time()
     ai_move_processing_data["move"] = libtetralath_instance.compute_ai_move(game_backend)
+    ai_move_processing_data["end_time"] = time.time()
 
 
 def handle_ai_move_start(game_backend: ctypes.c_void_p, libtetralath_instance: libtetralath.LibTetralath, ai_move_processing_data: definitions.TetralathAIMoveProcessingData) -> None:
-    ai_move_processing_data["start_time"] = time.time()
+    ai_move_processing_data["start_time"] = None
     ai_move_processing_data["end_time"] = None
     ai_move_processing_data["move"] = None
     ai_move_processing_data["thread"] = threading.Thread(target=ai_move_processing_thread, args=(game_backend, libtetralath_instance, ai_move_processing_data))
@@ -65,7 +67,6 @@ def handle_ai_move_start(game_backend: ctypes.c_void_p, libtetralath_instance: l
 
 def handle_ai_move_end(game: definitions.TetralathGame, game_backend: ctypes.c_void_p, libtetralath_instance: libtetralath.LibTetralath, ai_move_processing_data: definitions.TetralathAIMoveProcessingData) -> None:
     game["advance_turn"] = True
-    ai_move_processing_data["end_time"] = time.time()
     ai_move_processing_data["thread"] = None
     set_move(game, game_backend, libtetralath_instance, ai_move_processing_data["move"], game["current_color"])
     update_game_result(game, game_backend, libtetralath_instance)
@@ -143,6 +144,7 @@ def graphical_game() -> None:
             elif tetralath_ui_event["type"] == definitions.TetralathEventType.UNDO_LAST_MOVE:
                 if game["state"] == definitions.TetralathState.ENDING or (game["state"] == definitions.TetralathState.RUNNING and game["current_color"] == game["player_color"]):
                     handle_undo_last_move(game, game_backend, libtetralath_instance)
+                    ui.update_ai_info_label(ai_move_processing_data, ai_info_label, True)
         ui.update_panels([left_panel, right_panel], pygame_events)
         ui.refresh_game_ui(game_window, clock, [left_panel, right_panel], game["board"], game["latest_move_position"])
     if running is False:

@@ -5,7 +5,7 @@ import board
 import definitions
 
 
-TETRALATH_FPS = 60
+TETRALATH_FPS = 30
 TETRALATH_WINDOW_WIDTH = 1224
 TETRALATH_WINDOW_HEIGHT = 691
 TETRALATH_WINDOW_TITLE = "Tetralath"
@@ -33,8 +33,11 @@ TETRALATH_RIGHT_PANEL_WIDGET_FONT_COLOR = (0, 0, 0)
 TETRALATH_RIGHT_PANEL_POSITION = (958, 0, False)
 TETRALATH_BOARD_HEXAGON_RADIUS = 43
 TETRALATH_BOARD_PIECE_RADIUS = 29
+TETRALATH_BOARD_PIECE_BORDER_COLOR = {
+    definitions.TetralathColor.WHITE: (64, 64, 64),
+    definitions.TetralathColor.BLACK: (192, 192, 192),
+}
 TETRALATH_BOARD_PIECE_LAST_MOVE_BORDER_WIDTH = 5
-TETRALATH_BOARD_PIECE_LAST_MOVE_BORDER_COLOR = (128, 128, 128)
 TETRALATH_BOARD_PIECE_COLORS = {
     definitions.TetralathColor.WHITE: (255, 255, 255),
     definitions.TetralathColor.BLACK: (0, 0, 0),
@@ -292,9 +295,10 @@ def draw_pieces(game_window: pygame.surface.Surface, hexagon_radius: float, boar
             hexagon_center_x, hexagon_center_y = board.get_single_hexagon_center_from_index(position, board.TETRALATH_BOARD_ROW_LENGTHS, board.TETRALATH_BOARD_MIDDLE_ROW_INDEX, hexagon_radius, board_center_x, board_center_y)
             pygame.draw.circle(game_window, TETRALATH_BOARD_PIECE_COLORS[color], (hexagon_center_x, hexagon_center_y), piece_radius)
             if position == last_move_position:
-                pygame.draw.circle(game_window, TETRALATH_BOARD_PIECE_LAST_MOVE_BORDER_COLOR, (hexagon_center_x, hexagon_center_y), piece_radius, TETRALATH_BOARD_PIECE_LAST_MOVE_BORDER_WIDTH)
+                pygame.draw.circle(game_window, TETRALATH_BOARD_PIECE_BORDER_COLOR[color], (hexagon_center_x, hexagon_center_y), piece_radius, TETRALATH_BOARD_PIECE_LAST_MOVE_BORDER_WIDTH)
             else:
-                pygame.draw.circle(game_window, board.TETRALATH_BOARD_PIECE_BORDER_COLOR, (hexagon_center_x, hexagon_center_y), piece_radius, board.TETRALATH_BOARD_PIECE_BORDER_WIDTH)
+                pygame.draw.circle(game_window, TETRALATH_BOARD_PIECE_BORDER_COLOR[color], (hexagon_center_x, hexagon_center_y), piece_radius, board.TETRALATH_BOARD_PIECE_BORDER_WIDTH)
+
 
 def draw_board(game_window: pygame.surface.Surface, game_board: list[definitions.TetralathColor], last_move_position: int) -> None:
     draw_hexagons(game_window, TETRALATH_BOARD_HEXAGON_RADIUS, round(TETRALATH_WINDOW_WIDTH / 2), round(TETRALATH_WINDOW_HEIGHT / 2))

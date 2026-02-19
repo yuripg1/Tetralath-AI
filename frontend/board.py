@@ -35,7 +35,6 @@ TETRALATH_BOARD_EDGES: dict[int, list[tuple[int, int]]] = {
     56: [(1, 2), (2, 3), (3, 4)],
     60: [(2, 3), (3, 4), (4, 5)],
 }
-TETRALATH_BOARD_PIECE_BORDER_COLOR = (128, 128, 128)
 TETRALATH_BOARD_PIECE_BORDER_WIDTH = 1
 
 
