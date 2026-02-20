@@ -3,7 +3,7 @@
 
 #include "time.h"
 
-int64_t timespec_to_nsec(const struct timespec *ts) {
+int64_t timespec_to_nsec(const struct timespec * const ts) {
     return (int64_t)ts->tv_sec * 1000000000LL + (int64_t)ts->tv_nsec;
 }
 

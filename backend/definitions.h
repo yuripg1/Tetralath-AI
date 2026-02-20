@@ -3,16 +3,16 @@
 
 typedef enum {
     // 00 binary
-    TETRALATH_COLOR_NONE = 0,
+    TETRALATH_COLOR_NONE = 0, // Can represent an empty position
 
     // 01 binary
-    TETRALATH_COLOR_WHITE = 1,
+    TETRALATH_COLOR_WHITE = 1, // Can represent a position occupied by a white piece
 
     // 10 binary
-    TETRALATH_COLOR_BLACK = 2,
+    TETRALATH_COLOR_BLACK = 2, // Can represent a position occupied by a black piece
 
     // 11 binary
-    TETRALATH_COLOR_INVALID = 3,
+    TETRALATH_COLOR_INVALID = 3, // Can represent a position outside the board
 } TETRALATH_COLOR;
 
 // 11 binary
@@ -23,38 +23,38 @@ static inline TETRALATH_COLOR flip_color(TETRALATH_COLOR color) {
 }
 
 typedef enum {
-    // 000000000 binary
+    // 00000000 binary
     TETRALATH_RESULT_ALPHA_MIN = 0,
 
-    // 000000001 binary
+    // 00000001 binary
     TETRALATH_RESULT_LOSS = 1,
 
-    // 001000001 binary
+    // 01000001 binary
     TETRALATH_RESULT_ABOUT_TO_LOSE = 65,
 
-    // 011111111 binary
-    TETRALATH_RESULT_NONE_MIN = 254,
+    // 01111110 binary
+    TETRALATH_RESULT_NONE_MIN = 126,
 
-    // 011111110 binary
-    TETRALATH_RESULT_DRAW_MIN = 255,
+    // 01111111 binary
+    TETRALATH_RESULT_DRAW_MIN = 127,
 
-    // 100000000 binary
-    TETRALATH_RESULT_DRAW_MAX = 256,
+    // 10000000 binary
+    TETRALATH_RESULT_DRAW_MAX = 128,
 
-    // 100000001 binary
-    TETRALATH_RESULT_NONE_MAX = 257,
+    // 10000001 binary
+    TETRALATH_RESULT_NONE_MAX = 129,
 
-    // 110111110 binary
-    TETRALATH_RESULT_ABOUT_TO_WIN = 446,
+    // 10111110 binary
+    TETRALATH_RESULT_ABOUT_TO_WIN = 190,
 
-    // 111111110 binary
-    TETRALATH_RESULT_WIN = 510,
+    // 11111110 binary
+    TETRALATH_RESULT_WIN = 254,
 
-    // 111111111 binary
-    TETRALATH_RESULT_BETA_MAX = 511,
+    // 11111111 binary
+    TETRALATH_RESULT_BETA_MAX = 255,
 } TETRALATH_RESULT;
 
-#define TETRALATH_RESULT_MASK 511
+#define TETRALATH_RESULT_MASK 255
 
 static inline TETRALATH_RESULT flip_result(TETRALATH_RESULT result) {
     return (TETRALATH_RESULT)(result ^ TETRALATH_RESULT_MASK);

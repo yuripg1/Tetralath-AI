@@ -50,26 +50,26 @@ typedef struct {
 #define TETRALATH_LAST_POSITION 60
 
 TETRALATH_GAME *init_headless_game();
-void teardown_headless_game(TETRALATH_GAME *game);
-void set_ai_mode(TETRALATH_GAME *game, const TETRALATH_AI_MODE ai_mode);
-void set_player_color(TETRALATH_GAME *game, const TETRALATH_COLOR player_color);
-TETRALATH_COLOR get_player_color(const TETRALATH_GAME *game);
-void set_game_state(TETRALATH_GAME *game, const TETRALATH_STATE state);
-TETRALATH_STATE get_game_state(const TETRALATH_GAME *game);
-void update_game_result(TETRALATH_GAME *game);
-TETRALATH_RESULT get_game_result(const TETRALATH_GAME *game);
-void start_new_turn_data(TETRALATH_GAME *game);
-TETRALATH_COLOR get_current_color(const TETRALATH_GAME *game);
-void set_next_color(TETRALATH_GAME *game, const TETRALATH_COLOR next_color);
-void set_move(TETRALATH_GAME *game, const int position, const TETRALATH_COLOR color);
-int set_move_undoing(TETRALATH_GAME *game);
-int get_moves_count(const TETRALATH_GAME *game);
-int get_number_of_moves_to_undo(TETRALATH_GAME *game);
-int get_latest_move_position(const TETRALATH_GAME *game);
-TETRALATH_COLOR get_latest_move_color(const TETRALATH_GAME *game);
-int compute_ai_move(TETRALATH_GAME *game);
-int get_next_empty_position(const TETRALATH_GAME *game, const int position, const int increment);
-int get_latest_minimax_depth(const TETRALATH_GAME *game);
-double get_latest_minimax_time_taken(const TETRALATH_GAME *game);
+void teardown_headless_game(TETRALATH_GAME * const game);
+void set_ai_mode(TETRALATH_GAME * const game, const TETRALATH_AI_MODE ai_mode);
+void set_player_color(TETRALATH_GAME * const game, const TETRALATH_COLOR player_color);
+TETRALATH_COLOR get_player_color(const TETRALATH_GAME * const game);
+void set_game_state(TETRALATH_GAME * const game, const TETRALATH_STATE state);
+TETRALATH_STATE get_game_state(const TETRALATH_GAME * const game);
+void update_game_result(TETRALATH_GAME * const game);
+TETRALATH_RESULT get_game_result(const TETRALATH_GAME * const game);
+void start_new_turn_data(TETRALATH_GAME * const game);
+TETRALATH_COLOR get_current_color(const TETRALATH_GAME * const game);
+void set_next_color(TETRALATH_GAME * const game, const TETRALATH_COLOR next_color);
+void set_move(TETRALATH_GAME * const game, const int position, const TETRALATH_COLOR color);
+int set_move_undoing(TETRALATH_GAME * const game);
+int get_moves_count(const TETRALATH_GAME * const game);
+int get_number_of_moves_to_undo(TETRALATH_GAME * const game);
+int get_latest_move_position(const TETRALATH_GAME * const game);
+TETRALATH_COLOR get_latest_move_color(const TETRALATH_GAME * const game);
+int compute_ai_move(TETRALATH_GAME * const game);
+int get_next_empty_position(const TETRALATH_GAME * const game, const int position, const int increment);
+int get_latest_minimax_depth(const TETRALATH_GAME * const game);
+double get_latest_minimax_time_taken(const TETRALATH_GAME * const game);
 
 #endif
