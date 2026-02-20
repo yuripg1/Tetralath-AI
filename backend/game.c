@@ -57,18 +57,19 @@ static void *process_ai_move_thread(void *arg) {
     TETRALATH_MOVE_VALUE move_values[TETRALATH_BOARD_SIZE];
     copy_move_values(move_values, thread_input->initial_move_values);
 
-    TETRALATH_AI_MODE ai_mode = thread_input->game->ai_mode;
-
     int minimax_depth = thread_input->minimax_depth_remainder + thread_input->minimum_minimax_depth;
     int64_t current_time = get_current_time_nsec();
     while (minimax_depth <= thread_input->maximum_minimax_depth && current_time < thread_input->target_end_time) {
-        const int current_ai_move = minimax(thread_input->game->board, move_values, thread_input->game->current_color, thread_input->game->moves->moves_count, minimax_depth, ai_mode, thread_input->target_end_time);
+        const int current_ai_move = minimax(thread_input->game->board, move_values, thread_input->game->current_color, thread_input->game->moves->moves_count, minimax_depth, thread_input->game->ai_mode, thread_input->target_end_time);
         current_time = get_current_time_nsec();
         if (current_time < thread_input->target_end_time) {
             thread_input->minimax_outputs[minimax_depth - 1].minimax_depth = minimax_depth;
             thread_input->minimax_outputs[minimax_depth - 1].ai_move = current_ai_move;
             thread_input->minimax_outputs[minimax_depth - 1].time_taken_nsec = current_time - thread_input->computing_start_time;
             minimax_depth += thread_input->minimax_depth_divisor;
+            if (thread_input->game->ai_mode == TETRALATH_AI_MODE_RUTHLESS && found_winning_move(move_values)) {
+                break;
+            }
         }
     }
 

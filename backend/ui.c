@@ -67,6 +67,110 @@ static const TETRALATH_UI_POSITION board_ui_positions[TETRALATH_BOARD_SIZE] = {
     {TETRALATH_BOARD_X + (TETRALATH_POSITION_OFFSET * 4) + (TETRALATH_ROW_OFFSET * 4) + 1, TETRALATH_BOARD_Y + 17}
 };
 
+static void unhighlight_position(const int position) {
+    int position_x = board_ui_positions[position].x;
+    int position_y = board_ui_positions[position].y;
+    attron(COLOR_PAIR(TETRALATH_BLACK_YELLOW));
+    mvprintw(position_y, position_x, "   ");
+    attroff(COLOR_PAIR(TETRALATH_BLACK_YELLOW));
+}
+
+static void highlight_position(const int position, const TETRALATH_COLOR player_color) {
+    int position_x = board_ui_positions[position].x;
+    int position_y = board_ui_positions[position].y;
+    int highlight_color = TETRALATH_WHITE_BLUE;
+    if (player_color == TETRALATH_COLOR_BLACK) {
+        highlight_color = TETRALATH_BLACK_BLUE;
+    }
+    attron(COLOR_PAIR(highlight_color));
+    mvprintw(position_y, position_x, "___");
+    attroff(COLOR_PAIR(highlight_color));
+}
+
+static void draw_board() {
+    const int x = TETRALATH_BOARD_X;
+    const int y = TETRALATH_BOARD_Y;
+
+    attron(COLOR_PAIR(TETRALATH_BLACK_YELLOW));
+
+    mvprintw(y, x + (TETRALATH_ROW_OFFSET * 4), "---------------------");
+	mvprintw(y + 1, x + (TETRALATH_ROW_OFFSET * 4), "|   |   |   |   |   |");
+	mvprintw(y + 2, x + (TETRALATH_ROW_OFFSET * 3), "-------------------------");
+	mvprintw(y + 3, x + (TETRALATH_ROW_OFFSET * 3), "|   |   |   |   |   |   |");
+	mvprintw(y + 4, x + (TETRALATH_ROW_OFFSET * 2), "-----------------------------");
+	mvprintw(y + 5, x + (TETRALATH_ROW_OFFSET * 2), "|   |   |   |   |   |   |   |");
+	mvprintw(y + 6, x + (TETRALATH_ROW_OFFSET * 1), "---------------------------------");
+	mvprintw(y + 7, x + (TETRALATH_ROW_OFFSET * 1), "|   |   |   |   |   |   |   |   |");
+	mvprintw(y + 8, x + (TETRALATH_ROW_OFFSET * 0), "-------------------------------------");
+	mvprintw(y + 9, x + (TETRALATH_ROW_OFFSET * 0), "|   |   |   |   |   |   |   |   |   |");
+	mvprintw(y + 10, x + (TETRALATH_ROW_OFFSET * 0), "-------------------------------------");
+	mvprintw(y + 11, x + (TETRALATH_ROW_OFFSET * 1), "|   |   |   |   |   |   |   |   |");
+	mvprintw(y + 12, x + (TETRALATH_ROW_OFFSET * 1), "---------------------------------");
+	mvprintw(y + 13, x + (TETRALATH_ROW_OFFSET * 2), "|   |   |   |   |   |   |   |");
+	mvprintw(y + 14, x + (TETRALATH_ROW_OFFSET * 2), "-----------------------------");
+	mvprintw(y + 15, x + (TETRALATH_ROW_OFFSET * 3), "|   |   |   |   |   |   |");
+	mvprintw(y + 16, x + (TETRALATH_ROW_OFFSET * 3), "-------------------------");
+	mvprintw(y + 17, x + (TETRALATH_ROW_OFFSET * 4), "|   |   |   |   |   |");
+	mvprintw(y + 18, x + (TETRALATH_ROW_OFFSET * 4), "---------------------");
+
+    attroff(COLOR_PAIR(TETRALATH_BLACK_YELLOW));
+}
+
+static void draw_controls_manual() {
+    const int x = TETRALATH_RIGHT_PANEL_X;
+    const int y = TETRALATH_RIGHT_PANEL_Y;
+
+    mvprintw(y, x, "Controls:");
+    mvprintw(y + 1, x, "[U] : Undo last move");
+    mvprintw(y + 2, x, "[Q] : Quit");
+}
+
+static void draw_current_player_title() {
+    const int x = TETRALATH_RIGHT_PANEL_X;
+    const int y = TETRALATH_RIGHT_PANEL_Y + 5;
+
+    mvprintw(y, x, "Current player:");
+}
+
+static void update_current_player(const TETRALATH_COLOR current_color, const TETRALATH_COLOR player_color) {
+    const int x = TETRALATH_RIGHT_PANEL_X;
+    const int y = TETRALATH_RIGHT_PANEL_Y + 6;
+
+    char *color_name = NULL;
+    if (current_color == TETRALATH_COLOR_WHITE) {
+        color_name = "White";
+    } else if (current_color == TETRALATH_COLOR_BLACK) {
+        color_name = "Black";
+    }
+
+
+    char *role = NULL;
+    if (current_color == player_color) {
+        role = "(You)";
+    } else {
+        role = "(AI)";
+    }
+
+    mvprintw(y, x, "           ");
+    mvprintw(y, x, "%s %s", color_name, role);
+}
+
+static void update_game_result(const TETRALATH_RESULT result) {
+    const int x = TETRALATH_RIGHT_PANEL_X;
+    const int y = TETRALATH_RIGHT_PANEL_Y + 12;
+
+    mvprintw(y, x, "          ");
+
+    attron(A_REVERSE);
+    if (result == TETRALATH_RESULT_WIN) {
+        mvprintw(y, x, "You won");
+    } else if (result == TETRALATH_RESULT_LOSS) {
+        mvprintw(y, x, "You lost");
+    } else if (result == TETRALATH_RESULT_DRAW_MAX) {
+        mvprintw(y, x, "It's a tie");
+    }
+    attroff(A_REVERSE);
+}
 
 TETRALATH_AI_MODE choose_ai_mode() {
     const int x = TETRALATH_LEFT_PANEL_X;
@@ -202,26 +306,6 @@ TETRALATH_PLAYER_ACTION choose_player_action() {
     return chosen_action;
 }
 
-static void unhighlight_position(const int position) {
-    int position_x = board_ui_positions[position].x;
-    int position_y = board_ui_positions[position].y;
-    attron(COLOR_PAIR(TETRALATH_BLACK_YELLOW));
-    mvprintw(position_y, position_x, "   ");
-    attroff(COLOR_PAIR(TETRALATH_BLACK_YELLOW));
-}
-
-static void highlight_position(const int position, const TETRALATH_COLOR player_color) {
-    int position_x = board_ui_positions[position].x;
-    int position_y = board_ui_positions[position].y;
-    int highlight_color = TETRALATH_WHITE_BLUE;
-    if (player_color == TETRALATH_COLOR_BLACK) {
-        highlight_color = TETRALATH_BLACK_BLUE;
-    }
-    attron(COLOR_PAIR(highlight_color));
-    mvprintw(position_y, position_x, "___");
-    attroff(COLOR_PAIR(highlight_color));
-}
-
 void update_position_highlights(const int current_position, const int previous_position, const TETRALATH_COLOR player_color) {
     if (previous_position != TETRALATH_POSITION_NONE) {
         unhighlight_position(previous_position);
@@ -276,91 +360,6 @@ void draw_ai_info(const TETRALATH_AI_INFO_STATE ai_info_state, const int64_t pro
     }
 
     refresh();
-}
-
-static void draw_board() {
-    const int x = TETRALATH_BOARD_X;
-    const int y = TETRALATH_BOARD_Y;
-
-    attron(COLOR_PAIR(TETRALATH_BLACK_YELLOW));
-
-    mvprintw(y, x + (TETRALATH_ROW_OFFSET * 4), "---------------------");
-	mvprintw(y + 1, x + (TETRALATH_ROW_OFFSET * 4), "|   |   |   |   |   |");
-	mvprintw(y + 2, x + (TETRALATH_ROW_OFFSET * 3), "-------------------------");
-	mvprintw(y + 3, x + (TETRALATH_ROW_OFFSET * 3), "|   |   |   |   |   |   |");
-	mvprintw(y + 4, x + (TETRALATH_ROW_OFFSET * 2), "-----------------------------");
-	mvprintw(y + 5, x + (TETRALATH_ROW_OFFSET * 2), "|   |   |   |   |   |   |   |");
-	mvprintw(y + 6, x + (TETRALATH_ROW_OFFSET * 1), "---------------------------------");
-	mvprintw(y + 7, x + (TETRALATH_ROW_OFFSET * 1), "|   |   |   |   |   |   |   |   |");
-	mvprintw(y + 8, x + (TETRALATH_ROW_OFFSET * 0), "-------------------------------------");
-	mvprintw(y + 9, x + (TETRALATH_ROW_OFFSET * 0), "|   |   |   |   |   |   |   |   |   |");
-	mvprintw(y + 10, x + (TETRALATH_ROW_OFFSET * 0), "-------------------------------------");
-	mvprintw(y + 11, x + (TETRALATH_ROW_OFFSET * 1), "|   |   |   |   |   |   |   |   |");
-	mvprintw(y + 12, x + (TETRALATH_ROW_OFFSET * 1), "---------------------------------");
-	mvprintw(y + 13, x + (TETRALATH_ROW_OFFSET * 2), "|   |   |   |   |   |   |   |");
-	mvprintw(y + 14, x + (TETRALATH_ROW_OFFSET * 2), "-----------------------------");
-	mvprintw(y + 15, x + (TETRALATH_ROW_OFFSET * 3), "|   |   |   |   |   |   |");
-	mvprintw(y + 16, x + (TETRALATH_ROW_OFFSET * 3), "-------------------------");
-	mvprintw(y + 17, x + (TETRALATH_ROW_OFFSET * 4), "|   |   |   |   |   |");
-	mvprintw(y + 18, x + (TETRALATH_ROW_OFFSET * 4), "---------------------");
-
-    attroff(COLOR_PAIR(TETRALATH_BLACK_YELLOW));
-}
-
-static void draw_controls_manual() {
-    const int x = TETRALATH_RIGHT_PANEL_X;
-    const int y = TETRALATH_RIGHT_PANEL_Y;
-
-    mvprintw(y, x, "Controls:");
-    mvprintw(y + 1, x, "[U] : Undo last move");
-    mvprintw(y + 2, x, "[Q] : Quit");
-}
-
-static void draw_current_player_title() {
-    const int x = TETRALATH_RIGHT_PANEL_X;
-    const int y = TETRALATH_RIGHT_PANEL_Y + 5;
-
-    mvprintw(y, x, "Current player:");
-}
-
-static void update_current_player(const TETRALATH_COLOR current_color, const TETRALATH_COLOR player_color) {
-    const int x = TETRALATH_RIGHT_PANEL_X;
-    const int y = TETRALATH_RIGHT_PANEL_Y + 6;
-
-    char *color_name = NULL;
-    if (current_color == TETRALATH_COLOR_WHITE) {
-        color_name = "White";
-    } else if (current_color == TETRALATH_COLOR_BLACK) {
-        color_name = "Black";
-    }
-
-
-    char *role = NULL;
-    if (current_color == player_color) {
-        role = "(You)";
-    } else {
-        role = "(AI)";
-    }
-
-    mvprintw(y, x, "           ");
-    mvprintw(y, x, "%s %s", color_name, role);
-}
-
-static void update_game_result(const TETRALATH_RESULT result) {
-    const int x = TETRALATH_RIGHT_PANEL_X;
-    const int y = TETRALATH_RIGHT_PANEL_Y + 12;
-
-    mvprintw(y, x, "          ");
-
-    attron(A_REVERSE);
-    if (result == TETRALATH_RESULT_WIN) {
-        mvprintw(y, x, "You won");
-    } else if (result == TETRALATH_RESULT_LOSS) {
-        mvprintw(y, x, "You lost");
-    } else if (result == TETRALATH_RESULT_DRAW_MAX) {
-        mvprintw(y, x, "It's a tie");
-    }
-    attroff(A_REVERSE);
 }
 
 void initialize_game_ui() {
