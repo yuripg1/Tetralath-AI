@@ -13,22 +13,26 @@ TETRALATH_BACKGROUND_COLOR = (255, 255, 255)
 TETRALATH_LEFT_PANEL_WIDTH = 266
 TETRALATH_LEFT_PANEL_HEIGHT = 691
 TETRALATH_LEFT_PANEL_TITLE = "Tetralath"
+TETRALATH_LEFT_PANEL_BASE_THEME = "THEME_DEFAULT"
 TETRALATH_LEFT_PANEL_BACKGROUND_COLOR = (224, 224, 224)
 TETRALATH_LEFT_PANEL_READONLY_FONT_COLOR = (128, 128, 128)
 TETRALATH_LEFT_PANEL_TITLE_BACKGROUND_COLOR = (32, 32, 32)
 TETRALATH_LEFT_PANEL_TITLE_FONT_COLOR = (255, 255, 255)
 TETRALATH_LEFT_PANEL_TITLE_FONT_SIZE = 40
 TETRALATH_LEFT_PANEL_WIDGET_BACKGROUND_COLOR = (240, 240, 240)
+TETRALATH_LEFT_PANEL_WIDGET_BACKGROUND_COLOR_HOVER = (255, 255, 255)
 TETRALATH_LEFT_PANEL_WIDGET_BORDER_COLOR = (192, 192, 192)
 TETRALATH_LEFT_PANEL_WIDGET_BORDER_WIDTH = 2
 TETRALATH_LEFT_PANEL_WIDGET_FONT_COLOR = (0, 0, 0)
 TETRALATH_LEFT_PANEL_WIDGET_FONT_SIZE = 30
 TETRALATH_LEFT_PANEL_POSITION = (0, 0, False)
+TETRALATH_RIGHT_PANEL_BASE_THEME = "THEME_DEFAULT"
 TETRALATH_RIGHT_PANEL_WIDTH = 266
 TETRALATH_RIGHT_PANEL_HEIGHT = 691
 TETRALATH_RIGHT_PANEL_BACKGROUND_COLOR = (224, 224, 224)
 TETRALATH_RIGHT_PANEL_READONLY_FONT_COLOR = (128, 128, 128)
 TETRALATH_RIGHT_PANEL_WIDGET_BACKGROUND_COLOR = (240, 240, 240)
+TETRALATH_RIGHT_PANEL_WIDGET_BACKGROUND_COLOR_HOVER = (255, 255, 255)
 TETRALATH_RIGHT_PANEL_WIDGET_BORDER_COLOR = (192, 192, 192)
 TETRALATH_RIGHT_PANEL_WIDGET_BORDER_WIDTH = 2
 TETRALATH_RIGHT_PANEL_WIDGET_FONT_COLOR = (0, 0, 0)
@@ -98,7 +102,7 @@ def get_events(pending_tetralath_ui_events: list[definitions.TetralathUIEvent]) 
 
 
 def draw_left_panel(game: definitions.TetralathGame, pending_tetralath_ui_events: list[definitions.TetralathUIEvent]) -> tuple[pygame_menu.Menu, pygame_menu.widgets.Selector, pygame_menu.widgets.Selector, pygame_menu.widgets.Button]:
-    theme = pygame_menu.themes.THEME_DEFAULT.copy()
+    theme = getattr(pygame_menu.themes, TETRALATH_LEFT_PANEL_BASE_THEME).copy()
     theme.border_width = 0
     theme.widget_border_width = 0
     theme.widget_border_color = TETRALATH_LEFT_PANEL_WIDGET_BORDER_COLOR
@@ -122,6 +126,12 @@ def draw_left_panel(game: definitions.TetralathGame, pending_tetralath_ui_events
         screen_dimension=(TETRALATH_WINDOW_WIDTH, TETRALATH_WINDOW_HEIGHT),
     )
 
+    def on_mouse_over_widget(widget: pygame_menu.widgets.Button, menu: pygame_menu.Menu) -> None:
+        widget.set_background_color(TETRALATH_LEFT_PANEL_WIDGET_BACKGROUND_COLOR_HOVER)
+
+    def on_mouse_leave_widget(widget: pygame_menu.widgets.Button, menu: pygame_menu.Menu) -> None:
+        widget.set_background_color(TETRALATH_LEFT_PANEL_WIDGET_BACKGROUND_COLOR)
+
     def on_ai_mode_change(selected: tuple, index: int) -> None:
         game["ai_mode"] = selected[0][1]
 
@@ -140,6 +150,8 @@ def draw_left_panel(game: definitions.TetralathGame, pending_tetralath_ui_events
         background_color=TETRALATH_LEFT_PANEL_WIDGET_BACKGROUND_COLOR,
         border_width=TETRALATH_LEFT_PANEL_WIDGET_BORDER_WIDTH,
     )
+    ai_mode_selector.set_onmouseover(on_mouse_over_widget)
+    ai_mode_selector.set_onmouseleave(on_mouse_leave_widget)
 
     menu.add.label("")
 
@@ -161,6 +173,8 @@ def draw_left_panel(game: definitions.TetralathGame, pending_tetralath_ui_events
         background_color=TETRALATH_LEFT_PANEL_WIDGET_BACKGROUND_COLOR,
         border_width=TETRALATH_LEFT_PANEL_WIDGET_BORDER_WIDTH,
     )
+    player_color_selector.set_onmouseover(on_mouse_over_widget)
+    player_color_selector.set_onmouseleave(on_mouse_leave_widget)
 
     menu.add.label("")
 
@@ -176,6 +190,8 @@ def draw_left_panel(game: definitions.TetralathGame, pending_tetralath_ui_events
         background_color=TETRALATH_LEFT_PANEL_WIDGET_BACKGROUND_COLOR,
         border_width=TETRALATH_LEFT_PANEL_WIDGET_BORDER_WIDTH,
     )
+    start_game_button.set_onmouseover(on_mouse_over_widget)
+    start_game_button.set_onmouseleave(on_mouse_leave_widget)
 
     return menu, ai_mode_selector, player_color_selector, start_game_button
 
@@ -188,7 +204,7 @@ def disable_left_panel(menu: pygame_menu.Menu, ai_mode_selector: pygame_menu.wid
 
 
 def draw_right_panel(game: definitions.TetralathGame, pending_tetralath_ui_events: list[definitions.TetralathUIEvent]) -> tuple[pygame_menu.Menu, pygame_menu.widgets.Button, pygame_menu.widgets.Label]:
-    theme = pygame_menu.themes.THEME_DEFAULT.copy()
+    theme = getattr(pygame_menu.themes, TETRALATH_RIGHT_PANEL_BASE_THEME).copy()
     theme.title = False
     theme.border_width = 0
     theme.widget_border_width = 0
@@ -209,6 +225,12 @@ def draw_right_panel(game: definitions.TetralathGame, pending_tetralath_ui_event
         screen_dimension=(TETRALATH_WINDOW_WIDTH, TETRALATH_WINDOW_HEIGHT),
     )
 
+    def on_mouse_over_widget(widget: pygame_menu.widgets.Button, menu: pygame_menu.Menu) -> None:
+        widget.set_background_color(TETRALATH_LEFT_PANEL_WIDGET_BACKGROUND_COLOR_HOVER)
+
+    def on_mouse_leave_widget(widget: pygame_menu.widgets.Button, menu: pygame_menu.Menu) -> None:
+        widget.set_background_color(TETRALATH_LEFT_PANEL_WIDGET_BACKGROUND_COLOR)
+
     def on_undo_last_move() -> None:
         ui_event: definitions.TetralathUIEvent = {
             "type": definitions.TetralathEventType.UNDO_LAST_MOVE,
@@ -221,6 +243,8 @@ def draw_right_panel(game: definitions.TetralathGame, pending_tetralath_ui_event
         background_color=TETRALATH_RIGHT_PANEL_WIDGET_BACKGROUND_COLOR,
         border_width=TETRALATH_RIGHT_PANEL_WIDGET_BORDER_WIDTH,
     )
+    undo_last_move_button.set_onmouseover(on_mouse_over_widget)
+    undo_last_move_button.set_onmouseleave(on_mouse_leave_widget)
 
     menu.add.label("")
 
