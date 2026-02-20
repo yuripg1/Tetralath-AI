@@ -24,9 +24,9 @@ class TetralathAIMode(enum.Enum):
 
 class TetralathResult(enum.Enum):
     LOSS = 1
-    DRAW = 256
-    NONE = 257
-    WIN = 510
+    DRAW = 128
+    NONE = 129
+    WIN = 254
 
 
 class TetralathState(enum.Enum):
