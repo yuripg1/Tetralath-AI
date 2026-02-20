@@ -143,9 +143,10 @@ def graphical_game() -> None:
             elif tetralath_ui_event["type"] == definitions.TetralathEventType.BOARD_POSITION_CLICKED:
                 if game["state"] == definitions.TetralathState.RUNNING and game["current_color"] == game["player_color"]:
                     board_position_index = tetralath_ui_event["board_position_index"]
-                    handle_player_move(game, game_backend, libtetralath_instance, board_position_index)
-                    ui.update_ai_info_label(ai_move_processing_data, ai_info_label, True)
-                    ui.update_game_result_label(game, game_result_label)
+                    if game["board"][board_position_index] == definitions.TetralathColor.NONE:
+                        handle_player_move(game, game_backend, libtetralath_instance, board_position_index)
+                        ui.update_ai_info_label(ai_move_processing_data, ai_info_label, True)
+                        ui.update_game_result_label(game, game_result_label)
             elif tetralath_ui_event["type"] == definitions.TetralathEventType.UNDO_LAST_MOVE:
                 if game["state"] == definitions.TetralathState.ENDING or (game["state"] == definitions.TetralathState.RUNNING and game["current_color"] == game["player_color"]):
                     handle_undo_last_move(game, game_backend, libtetralath_instance)
