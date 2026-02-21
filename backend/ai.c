@@ -266,7 +266,14 @@ static int max_level(const TETRALATH_MINIMAX_STATIC_DATA * const minimax_static_
             minimax_static_data->board_copy[evaluated_position] = TETRALATH_COLOR_NONE;
             if (evaluated_result > alpha) {
                 alpha = evaluated_result;
-                if (minimax_static_data->ai_mode == TETRALATH_AI_MODE_RUTHLESS) {
+
+                /*
+
+                Here's it's not a matter of expectation, but rather a preference
+                to hint the compiler to prioritize the ruthless AI mode
+
+                */
+                if (__builtin_expect(minimax_static_data->ai_mode == TETRALATH_AI_MODE_RUTHLESS, 1)) {
 
                     /*
 
@@ -283,6 +290,7 @@ static int max_level(const TETRALATH_MINIMAX_STATIC_DATA * const minimax_static_
                         return evaluated_result;
                     }
                 }
+
             }
         }
     }
