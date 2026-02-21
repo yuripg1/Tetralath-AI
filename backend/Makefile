@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -O2 -flto -Wall -fPIC
+CFLAGS = -Wall -Werror -O2 -flto
 
 LDLIBS_STANDALONE = -lncurses -lpthread
 LDLIBS_LIBRARY    = -lpthread

@@ -1,6 +1,6 @@
 # Tetralath AI
 
-**Tetralath** is a two-player turn-based board game played on a hexagonal board of 61 positions. This project lets you play against an AI that uses minimax search with alpha-beta pruning and iterative deepening. You can run it as a graphical (GUI) application - the recommended way - or as a terminal (TUI) application.
+Tetralath is a two-player turn-based board game played on a hexagonal board of 61 positions. This project lets you play against an AI that uses minimax search with alpha-beta pruning and iterative deepening. You can run it as a graphical (GUI) application - the recommended way - or as a terminal (TUI) application.
 
 ---
 
@@ -46,8 +46,8 @@ This builds the standalone application and runs the TUI.
 
 ## Why 2 languages?
 
-- **C:** In a project with no security concerns, C's low-level nature make it the obvious choice for eeking out every bit of performance from the AI. At first, it was a standalone application with the game engine and the terminal (TUI) interface tightly coupled. It was later refactored to decouple those components and expose a headless game engine via shared library. Makes use of pthreads for multi-threading and ncurses for the TUI.
-- **Python:** Python's ease-of-use, code legibility and plethora of libraries make it a good choice for implementing a graphical interface that only manages simple interactive logic and integrates well with the headless game engine for everything else. Make use of pygame-ce and pygame-menu-ce for the GUI.
+- **C:** In a project with no security concerns, C's low-level nature makes it the obvious choice for eeking out every bit of performance from the AI. At first, it was a standalone application with the game engine and the terminal (TUI) interface tightly coupled. It was later refactored to decouple those components and expose a headless game engine via shared library. Makes use of pthreads for multi-threading and ncurses for the TUI.
+- **Python:** Python's ease-of-use, code legibility and plethora of libraries make it a good choice for implementing a graphical interface that only manages simple interactive logic and integrates well with the headless game engine for everything else. Makes use of pygame-ce and pygame-menu-ce for the GUI.
 
 ---
 
