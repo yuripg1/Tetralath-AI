@@ -59,7 +59,13 @@ def initialize_game_ui() -> tuple[pygame.surface.Surface, pygame.time.Clock]:
     return game_window, clock
 
 
-def refresh_game_ui(game_window: pygame.surface.Surface, clock: pygame.time.Clock, menus: list[pygame_menu.Menu], game_board: list[definitions.TetralathColor], last_move_position: int) -> None:
+def refresh_game_ui(
+    game_window: pygame.surface.Surface,
+    clock: pygame.time.Clock,
+    menus: list[pygame_menu.Menu],
+    game_board: list[definitions.TetralathColor],
+    last_move_position: int,
+) -> None:
     game_window.fill(TETRALATH_BACKGROUND_COLOR)
     draw_board(game_window, game_board, last_move_position)
     for menu in menus:
@@ -68,7 +74,9 @@ def refresh_game_ui(game_window: pygame.surface.Surface, clock: pygame.time.Cloc
     clock.tick(TETRALATH_FPS)
 
 
-def get_events(pending_tetralath_ui_events: list[definitions.TetralathUIEvent]) -> tuple[definitions.TetralathUIEvent | None, list[pygame.event.Event]]:
+def get_events(
+    pending_tetralath_ui_events: list[definitions.TetralathUIEvent],
+) -> tuple[definitions.TetralathUIEvent | None, list[pygame.event.Event]]:
     tetralath_event: definitions.TetralathUIEvent | None = None
     pygame_events = pygame.event.get()
     for event in pygame_events:
@@ -101,7 +109,9 @@ def get_events(pending_tetralath_ui_events: list[definitions.TetralathUIEvent]) 
     return tetralath_event, pygame_events
 
 
-def draw_left_panel(game: definitions.TetralathGame, pending_tetralath_ui_events: list[definitions.TetralathUIEvent]) -> tuple[pygame_menu.Menu, pygame_menu.widgets.Selector, pygame_menu.widgets.Selector, pygame_menu.widgets.Button]:
+def draw_left_panel(
+    game: definitions.TetralathGame, pending_tetralath_ui_events: list[definitions.TetralathUIEvent]
+) -> tuple[pygame_menu.Menu, pygame_menu.widgets.Selector, pygame_menu.widgets.Selector, pygame_menu.widgets.Button]:
     theme = getattr(pygame_menu.themes, TETRALATH_LEFT_PANEL_BASE_THEME).copy()
     theme.border_width = 0
     theme.widget_border_width = 0
@@ -196,14 +206,21 @@ def draw_left_panel(game: definitions.TetralathGame, pending_tetralath_ui_events
     return menu, ai_mode_selector, player_color_selector, start_game_button
 
 
-def disable_left_panel(menu: pygame_menu.Menu, ai_mode_selector: pygame_menu.widgets.Selector, player_color_selector: pygame_menu.widgets.Selector, start_game_button: pygame_menu.widgets.Button) -> None:
+def disable_left_panel(
+    menu: pygame_menu.Menu,
+    ai_mode_selector: pygame_menu.widgets.Selector,
+    player_color_selector: pygame_menu.widgets.Selector,
+    start_game_button: pygame_menu.widgets.Button,
+) -> None:
     ai_mode_selector.readonly = True
     player_color_selector.readonly = True
     start_game_button.readonly = True
     menu.render()
 
 
-def draw_right_panel(game: definitions.TetralathGame, pending_tetralath_ui_events: list[definitions.TetralathUIEvent]) -> tuple[pygame_menu.Menu, pygame_menu.widgets.Button, pygame_menu.widgets.Label]:
+def draw_right_panel(
+    game: definitions.TetralathGame, pending_tetralath_ui_events: list[definitions.TetralathUIEvent]
+) -> tuple[pygame_menu.Menu, pygame_menu.widgets.Button, pygame_menu.widgets.Label]:
     theme = getattr(pygame_menu.themes, TETRALATH_RIGHT_PANEL_BASE_THEME).copy()
     theme.title = False
     theme.border_width = 0
@@ -278,7 +295,9 @@ def update_panels(menus: pygame_menu.Menu, events: list[pygame.event.Event]) -> 
         menu.update(events)
 
 
-def update_current_player_label(game: definitions.TetralathGame, current_player_label: pygame_menu.widgets.Label) -> None:
+def update_current_player_label(
+    game: definitions.TetralathGame, current_player_label: pygame_menu.widgets.Label
+) -> None:
     new_title = ""
     if game["current_color"] == definitions.TetralathColor.WHITE:
         new_title = "White"
@@ -293,7 +312,11 @@ def update_current_player_label(game: definitions.TetralathGame, current_player_
     current_player_label.set_title(new_title)
 
 
-def update_ai_info_label(ai_move_processing_data: definitions.TetralathAIMoveProcessingData, ai_info_label: pygame_menu.widgets.Label, clear: bool) -> None:
+def update_ai_info_label(
+    ai_move_processing_data: definitions.TetralathAIMoveProcessingData,
+    ai_info_label: pygame_menu.widgets.Label,
+    clear: bool,
+) -> None:
     new_title = ""
     if clear:
         new_title = " \n "
@@ -301,8 +324,11 @@ def update_ai_info_label(ai_move_processing_data: definitions.TetralathAIMovePro
         if ai_move_processing_data["end_time"] is None:
             new_title = "AI thinking...\n "
         else:
-            new_title = "AI thought for\n%.3f seconds" % (ai_move_processing_data["end_time"] - ai_move_processing_data["start_time"])
+            new_title = "AI thought for\n%.3f seconds" % (
+                ai_move_processing_data["end_time"] - ai_move_processing_data["start_time"]
+            )
     ai_info_label.set_title(new_title)
+
 
 def update_game_result_label(game: definitions.TetralathGame, game_result_label: pygame_menu.widgets.Label) -> None:
     new_title = ""
@@ -314,39 +340,120 @@ def update_game_result_label(game: definitions.TetralathGame, game_result_label:
         new_title = "It's a tie"
     game_result_label.set_title(new_title)
 
-def draw_hexagons(game_window: pygame.surface.Surface, hexagon_radius: float, board_center_x: int, board_center_y: int) -> None:
-    hexagon_centers = board.get_all_hexagon_centers(board.TETRALATH_BOARD_ROW_LENGTHS, board.TETRALATH_BOARD_MIDDLE_ROW_INDEX, hexagon_radius, board_center_x, board_center_y)
+
+def draw_hexagons(
+    game_window: pygame.surface.Surface, hexagon_radius: float, board_center_x: int, board_center_y: int
+) -> None:
+    hexagon_centers = board.get_all_hexagon_centers(
+        board.TETRALATH_BOARD_ROW_LENGTHS,
+        board.TETRALATH_BOARD_MIDDLE_ROW_INDEX,
+        hexagon_radius,
+        board_center_x,
+        board_center_y,
+    )
     for center_x, center_y in hexagon_centers:
         hexagon_vertices = board.get_hexagon_vertices(center_x, center_y, hexagon_radius)
         pygame.draw.polygon(game_window, board.TETRALATH_BOARD_POSITION_FILL_COLOR, hexagon_vertices)
-        pygame.draw.polygon(game_window, board.TETRALATH_BOARD_POSITION_BORDER_COLOR, hexagon_vertices, board.TETRALATH_BOARD_POSITION_BORDER_WIDTH)
+        pygame.draw.polygon(
+            game_window,
+            board.TETRALATH_BOARD_POSITION_BORDER_COLOR,
+            hexagon_vertices,
+            board.TETRALATH_BOARD_POSITION_BORDER_WIDTH,
+        )
 
 
-def draw_board_edges(game_window: pygame.surface.Surface, hexagon_radius: float, board_center_x: int, board_center_y: int) -> None:
+def draw_board_edges(
+    game_window: pygame.surface.Surface, hexagon_radius: float, board_center_x: int, board_center_y: int
+) -> None:
     for index, edges in board.TETRALATH_BOARD_EDGES.items():
-        center_x, center_y = board.get_single_hexagon_center_from_index(index, board.TETRALATH_BOARD_ROW_LENGTHS, board.TETRALATH_BOARD_MIDDLE_ROW_INDEX, hexagon_radius, board_center_x, board_center_y)
+        center_x, center_y = board.get_single_hexagon_center_from_index(
+            index,
+            board.TETRALATH_BOARD_ROW_LENGTHS,
+            board.TETRALATH_BOARD_MIDDLE_ROW_INDEX,
+            hexagon_radius,
+            board_center_x,
+            board_center_y,
+        )
         hexagon_vertices = board.get_hexagon_vertices(center_x, center_y, hexagon_radius)
         for start_vertex, end_vertex in edges:
-            line_start: tuple[int, int] = (round(hexagon_vertices[start_vertex][0]), round(hexagon_vertices[start_vertex][1]))
+            line_start: tuple[int, int] = (
+                round(hexagon_vertices[start_vertex][0]),
+                round(hexagon_vertices[start_vertex][1]),
+            )
             line_end: tuple[int, int] = (round(hexagon_vertices[end_vertex][0]), round(hexagon_vertices[end_vertex][1]))
-            pygame.draw.aaline(game_window, board.TETRALATH_BOARD_EDGE_BORDER_COLOR, line_start, line_end, board.TETRALATH_BOARD_EDGE_BORDER_WIDTH)
+            pygame.draw.aaline(
+                game_window,
+                board.TETRALATH_BOARD_EDGE_BORDER_COLOR,
+                line_start,
+                line_end,
+                board.TETRALATH_BOARD_EDGE_BORDER_WIDTH,
+            )
 
 
-def draw_pieces(game_window: pygame.surface.Surface, hexagon_radius: float, board_center_x: int, board_center_y: int, game_board: list[definitions.TetralathColor], last_move_position: int, piece_radius: float) -> None:
+def draw_pieces(
+    game_window: pygame.surface.Surface,
+    hexagon_radius: float,
+    board_center_x: int,
+    board_center_y: int,
+    game_board: list[definitions.TetralathColor],
+    last_move_position: int,
+    piece_radius: float,
+) -> None:
     for position, color in enumerate(game_board):
         if color != definitions.TetralathColor.NONE:
-            hexagon_center_x, hexagon_center_y = board.get_single_hexagon_center_from_index(position, board.TETRALATH_BOARD_ROW_LENGTHS, board.TETRALATH_BOARD_MIDDLE_ROW_INDEX, hexagon_radius, board_center_x, board_center_y)
-            pygame.draw.circle(game_window, TETRALATH_BOARD_PIECE_COLORS[color], (hexagon_center_x, hexagon_center_y), piece_radius)
+            hexagon_center_x, hexagon_center_y = board.get_single_hexagon_center_from_index(
+                position,
+                board.TETRALATH_BOARD_ROW_LENGTHS,
+                board.TETRALATH_BOARD_MIDDLE_ROW_INDEX,
+                hexagon_radius,
+                board_center_x,
+                board_center_y,
+            )
+            pygame.draw.circle(
+                game_window, TETRALATH_BOARD_PIECE_COLORS[color], (hexagon_center_x, hexagon_center_y), piece_radius
+            )
             if position == last_move_position:
-                pygame.draw.circle(game_window, TETRALATH_BOARD_PIECE_BORDER_COLOR[color], (hexagon_center_x, hexagon_center_y), piece_radius, TETRALATH_BOARD_PIECE_LAST_MOVE_BORDER_WIDTH)
+                pygame.draw.circle(
+                    game_window,
+                    TETRALATH_BOARD_PIECE_BORDER_COLOR[color],
+                    (hexagon_center_x, hexagon_center_y),
+                    piece_radius,
+                    TETRALATH_BOARD_PIECE_LAST_MOVE_BORDER_WIDTH,
+                )
             else:
-                pygame.draw.circle(game_window, TETRALATH_BOARD_PIECE_BORDER_COLOR[color], (hexagon_center_x, hexagon_center_y), piece_radius, board.TETRALATH_BOARD_PIECE_BORDER_WIDTH)
+                pygame.draw.circle(
+                    game_window,
+                    TETRALATH_BOARD_PIECE_BORDER_COLOR[color],
+                    (hexagon_center_x, hexagon_center_y),
+                    piece_radius,
+                    board.TETRALATH_BOARD_PIECE_BORDER_WIDTH,
+                )
 
 
-def draw_board(game_window: pygame.surface.Surface, game_board: list[definitions.TetralathColor], last_move_position: int) -> None:
-    draw_hexagons(game_window, TETRALATH_BOARD_HEXAGON_RADIUS, round(TETRALATH_WINDOW_WIDTH / 2), round(TETRALATH_WINDOW_HEIGHT / 2))
-    draw_board_edges(game_window, TETRALATH_BOARD_HEXAGON_RADIUS, round(TETRALATH_WINDOW_WIDTH / 2), round(TETRALATH_WINDOW_HEIGHT / 2))
-    draw_pieces(game_window, TETRALATH_BOARD_HEXAGON_RADIUS, round(TETRALATH_WINDOW_WIDTH / 2), round(TETRALATH_WINDOW_HEIGHT / 2), game_board, last_move_position, TETRALATH_BOARD_PIECE_RADIUS)
+def draw_board(
+    game_window: pygame.surface.Surface, game_board: list[definitions.TetralathColor], last_move_position: int
+) -> None:
+    draw_hexagons(
+        game_window,
+        TETRALATH_BOARD_HEXAGON_RADIUS,
+        round(TETRALATH_WINDOW_WIDTH / 2),
+        round(TETRALATH_WINDOW_HEIGHT / 2),
+    )
+    draw_board_edges(
+        game_window,
+        TETRALATH_BOARD_HEXAGON_RADIUS,
+        round(TETRALATH_WINDOW_WIDTH / 2),
+        round(TETRALATH_WINDOW_HEIGHT / 2),
+    )
+    draw_pieces(
+        game_window,
+        TETRALATH_BOARD_HEXAGON_RADIUS,
+        round(TETRALATH_WINDOW_WIDTH / 2),
+        round(TETRALATH_WINDOW_HEIGHT / 2),
+        game_board,
+        last_move_position,
+        TETRALATH_BOARD_PIECE_RADIUS,
+    )
 
 
 def destroy_game_ui() -> None:

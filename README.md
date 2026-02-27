@@ -22,8 +22,11 @@ Tetralath is a two-player turn-based board game played on a hexagonal board of 6
 
 From the project root:
 
-```bash
-./run_frontend.sh
+```shell
+$ sudo apt update
+$ sudo apt install -y build-essential python3-dev python3-pip python3-venv
+$ chmod +x ./run_frontend.sh
+$ ./run_frontend.sh
 ```
 
 This script builds the shared library in `backend/` (`libtetralath.so`), sets up a Python virtual environment in `frontend/.venv`, installs dependencies from `frontend/requirements.txt`, and runs the GUI. The game engine and AI run in the shared library.
@@ -34,8 +37,11 @@ This script builds the shared library in `backend/` (`libtetralath.so`), sets up
 
 From the project root:
 
-```bash
-./run_backend.sh
+```shell
+$ sudo apt update
+$ sudo apt install build-essential libncurses-dev
+$ chmod +x ./run_backend.sh
+$ ./run_backend.sh
 ```
 
 This builds the standalone application and runs the TUI.
