@@ -1,16 +1,10 @@
 #include <stdint.h>
 #include <time.h>
 
-#include "time.h"
-
-int64_t timespec_to_nsec(const struct timespec * const ts) {
-    return (int64_t)ts->tv_sec * 1000000000LL + (int64_t)ts->tv_nsec;
-}
-
 int64_t get_current_time_nsec() {
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
-    return timespec_to_nsec(&ts);
+    return (int64_t)ts.tv_sec * 1000000000LL + (int64_t)ts.tv_nsec;
 }
 
 int64_t seconds_to_nsec(const double seconds) {

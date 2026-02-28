@@ -23,6 +23,7 @@ typedef struct {
 #define TETRALATH_NO_NEXT_POSITION 61
 #define TETRALATH_SEQUENCE_START_POSITIONS_PER_DIRECTION_COUNT 43
 #define TETRALATH_MAXIMUM_NEAR_SEQUENCES 21
+#define SEQUENCES_LOOKUP_TABLE_LENGTH 172
 
 void index_sequence_values();
 void initialize_move_values(TETRALATH_MOVE_VALUE * const move_values);

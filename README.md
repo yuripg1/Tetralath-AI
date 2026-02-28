@@ -6,7 +6,7 @@ Tetralath is a two-player turn-based board game played on a hexagonal board of 6
 
 ## How to play
 
-- **Pieces:** Two colors, white and black. You choose your color. the AI uses the other.
+- **Pieces:** Two colors, white and black. You choose your color. The AI uses the other.
 - **Turns:** Players alternate every turn. On your turn, you place one piece of your color on any empty cell.
 - **Start:** White always make the first move to start the game.
 - **Winning:** You win by forming a line of 4 pieces of your color (horizontal or along a diagonal).
@@ -50,7 +50,7 @@ This builds the standalone application and runs the TUI.
 
 ---
 
-## Why 2 languages?
+## Why two different languages?
 
 - **C:** In a project with no security concerns, C's low-level nature makes it the obvious choice for eeking out every bit of performance from the AI. At first, it was a standalone application with the game engine and the terminal (TUI) interface tightly coupled. It was later refactored to decouple those components and expose a headless game engine via shared library. Makes use of pthreads for multi-threading and ncurses for the TUI.
 - **Python:** Python's ease-of-use, code legibility and plethora of libraries make it a good choice for implementing a graphical interface that only manages simple interactive logic and integrates well with the headless game engine for everything else. Makes use of pygame-ce and pygame-menu-ce for the GUI.
@@ -59,10 +59,10 @@ This builds the standalone application and runs the TUI.
 
 ## AI behaviour
 
-- **Friendly mode:** The AI tries to win as soon as it can and to delay losing as much as possible. Generally easier for a human to beat.
-- **Ruthless mode:** The AI only cares about winning, without optimizing for the earliest win. This makes it perform better and also harder for a human to beat.
+- **Friendly mode:** The AI tries to win as soon as it can and to delay losing as much as possible. It's generally easier for a human to beat.
+- **Ruthless mode:** The AI looks for the first winning scenario it can find, without optimizing for the earliest win. This makes it perform better and therefore also harder for a human to beat.
 
-The AI uses minimax with alpha-beta pruning with iterative deepening. It has a 5-second limit per move. It searches at depth 1, then 2, then 3, and so on until time runs out. Only fully completed search depths are used. Any run still in progress when the limit is hit is discarded, so no result from beyond the time window is ever used. With multi-threading enabled (default), two threads share the work (e.g. one does odd depths, one even depths) to use the 5 seconds more effectively.
+The AI uses minimax with alpha-beta pruning and iterative deepening. It also optimizes the search by looking for forced moves/traps and by improving the order of the evaluated moves at each depth. It has a 5-second limit per move. It searches at depth 1, then 2, then 3, and so on until time runs out. Only fully completed search depths are considered. Any run still in progress when the time limit is hit is discarded, so no result from beyond the time window is ever used. With multi-threading enabled by default, two threads share the work (e.g. one does odd depths, one even depths) to use the 5 seconds more effectively.
 
 ---
 

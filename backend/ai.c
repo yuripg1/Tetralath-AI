@@ -154,7 +154,7 @@ static const alignas(64) uint8_t sequence_next_positions[TETRALATH_NUMBER_OF_DIR
     }
 };
 
-static alignas(64) uint8_t indexed_sequence_values[192];
+static alignas(64) uint8_t indexed_sequence_values[SEQUENCES_LOOKUP_TABLE_LENGTH];
 
 static int check_sequence_from_position(const TETRALATH_COLOR * const board, const TETRALATH_COLOR sequence_first_color, const int sequence_second_position, const int sequence_third_position, const int sequence_fourth_position) {
     const int sequence_value = (sequence_first_color << 6) | (board[sequence_second_position] << 4) | (board[sequence_third_position] << 2) | board[sequence_fourth_position];
@@ -464,7 +464,7 @@ Position values:
     Invalid: 3 (the position is outside the board)
 */
 void index_sequence_values() {
-    for (int i = 0; i < 192; i += 1) {
+    for (int i = 0; i < SEQUENCES_LOOKUP_TABLE_LENGTH; i += 1) {
         indexed_sequence_values[i] = (uint8_t)TETRALATH_SEQUENCE_NONE;
     }
 
