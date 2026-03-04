@@ -154,7 +154,7 @@ static const alignas(64) uint8_t sequence_next_positions[TETRALATH_NUMBER_OF_DIR
     }
 };
 
-static alignas(64) uint8_t indexed_sequence_values[SEQUENCES_LOOKUP_TABLE_LENGTH];
+static alignas(64) uint8_t indexed_sequence_values[TETRALATH_SEQUENCES_LOOKUP_TABLE_LENGTH];
 
 static int check_sequence_from_position(const TETRALATH_COLOR * const board, const TETRALATH_COLOR sequence_first_color, const int sequence_second_position, const int sequence_third_position, const int sequence_fourth_position) {
     const int sequence_value = (sequence_first_color << 6) | (board[sequence_second_position] << 4) | (board[sequence_third_position] << 2) | board[sequence_fourth_position];
@@ -175,7 +175,7 @@ static void add_near_sequence_per_color(int * const near_sequences_per_color_cou
 static int min_level(const TETRALATH_MINIMAX_STATIC_DATA * const minimax_static_data, const int alpha, int beta, const int moves_count, const int previous_remaining_depth, const bool use_strict_pruning);
 
 static int max_level(const TETRALATH_MINIMAX_STATIC_DATA * const minimax_static_data, int alpha, const int beta, const int moves_count, const int previous_remaining_depth) {
-    const int result = (int)flip_result(check_game_result(minimax_static_data->board_copy, moves_count, flip_color(minimax_static_data->perspective_color), minimax_static_data->perspective_color));
+    const int result = flip_result(check_game_result(minimax_static_data->board_copy, moves_count, flip_color(minimax_static_data->perspective_color), minimax_static_data->perspective_color));
 
     switch (result) {
         case TETRALATH_RESULT_WIN:
@@ -240,35 +240,42 @@ static int max_level(const TETRALATH_MINIMAX_STATIC_DATA * const minimax_static_
 
     const int next_moves_count = moves_count + 1;
     for (int i = 0; i < TETRALATH_BOARD_SIZE; i += 1) {
-        int evaluated_position = (int)(default_move_order[i]);
-        if (minimax_static_data->board_copy[evaluated_position] == TETRALATH_COLOR_NONE) {
-            minimax_static_data->board_copy[evaluated_position] = minimax_static_data->perspective_color;
-            int evaluated_result = min_level(minimax_static_data, alpha, beta, next_moves_count, remaining_depth, false);
-            minimax_static_data->board_copy[evaluated_position] = TETRALATH_COLOR_NONE;
-            if (evaluated_result > alpha) {
-                alpha = evaluated_result;
+        const int evaluated_position = (int)(default_move_order[i]);
+
+        /*
+        Hints the compiler to prioritize the costlier path.
+        */
+        if (__builtin_expect(minimax_static_data->board_copy[evaluated_position] != TETRALATH_COLOR_NONE, 0)) {
+            continue;
+        }
+
+        minimax_static_data->board_copy[evaluated_position] = minimax_static_data->perspective_color;
+        const int evaluated_result = min_level(minimax_static_data, alpha, beta, next_moves_count, remaining_depth, false);
+        minimax_static_data->board_copy[evaluated_position] = TETRALATH_COLOR_NONE;
+        if (evaluated_result > alpha) {
+            alpha = evaluated_result;
+
+            /*
+            Here's it's not a matter of expectation, but rather a preference
+            to hint the compiler to prioritize the ruthless AI mode.
+            */
+            if (__builtin_expect(minimax_static_data->ai_mode == TETRALATH_AI_MODE_RUTHLESS, 1)) {
 
                 /*
-                Here's it's not a matter of expectation, but rather a preference
-                to hint the compiler to prioritize the ruthless AI mode.
+                Besides the regular pruning, when using the ruthless AI
+                mode we can also stop the search as soon as we find any
+                winning move.
                 */
-                if (__builtin_expect(minimax_static_data->ai_mode == TETRALATH_AI_MODE_RUTHLESS, 1)) {
-
-                    /*
-                    Besides the regular pruning, when using the ruthless AI
-                    mode we can also stop the search as soon as we find any
-                    winning move.
-                    */
-                    if (beta <= evaluated_result || evaluated_result == TETRALATH_RESULT_WIN) {
-                        return evaluated_result;
-                    }
-                } else {
-                    if (beta <= evaluated_result) {
-                        return evaluated_result;
-                    }
+                if (beta <= evaluated_result || evaluated_result == TETRALATH_RESULT_WIN) {
+                    return evaluated_result;
                 }
 
+            } else {
+                if (beta <= evaluated_result) {
+                    return evaluated_result;
+                }
             }
+
         }
     }
 
@@ -278,7 +285,7 @@ static int max_level(const TETRALATH_MINIMAX_STATIC_DATA * const minimax_static_
 static int min_level(const TETRALATH_MINIMAX_STATIC_DATA * const minimax_static_data, const int alpha, int beta, const int moves_count, const int previous_remaining_depth, const bool use_strict_pruning) {
     const TETRALATH_COLOR opponent_color = flip_color(minimax_static_data->perspective_color);
 
-    const int result = (int)check_game_result(minimax_static_data->board_copy, moves_count, minimax_static_data->perspective_color, opponent_color);
+    const int result = check_game_result(minimax_static_data->board_copy, moves_count, minimax_static_data->perspective_color, opponent_color);
 
     switch (result) {
         case TETRALATH_RESULT_WIN:
@@ -336,31 +343,37 @@ static int min_level(const TETRALATH_MINIMAX_STATIC_DATA * const minimax_static_
 
     const int next_moves_count = moves_count + 1;
     for (int i = 0; i < TETRALATH_BOARD_SIZE; i += 1) {
-        int evaluated_position = (int)(default_move_order[i]);
-        if (minimax_static_data->board_copy[evaluated_position] == TETRALATH_COLOR_NONE) {
-            minimax_static_data->board_copy[evaluated_position] = opponent_color;
-            int evaluated_result = max_level(minimax_static_data, alpha, beta, next_moves_count, remaining_depth);
-            minimax_static_data->board_copy[evaluated_position] = TETRALATH_COLOR_NONE;
-            if (evaluated_result < beta) {
-                beta = evaluated_result;
+        const int evaluated_position = (int)(default_move_order[i]);
 
-                /*
-                Given that the "use_strict_pruning" flag can only be true in the
-                first min level at most (which means it will be false in the
-                vast majority of the time), expecting it to be false gives us
-                better performance.
-                */
-                if (__builtin_expect(use_strict_pruning, 0)) {
-                    if (evaluated_result < alpha) {
-                        return evaluated_result;
-                    }
-                } else {
-                    if (evaluated_result <= alpha) {
-                        return evaluated_result;
-                    }
+        /*
+        Hints the compiler to prioritize the costlier path.
+        */
+        if (__builtin_expect(minimax_static_data->board_copy[evaluated_position] != TETRALATH_COLOR_NONE, 0)) {
+            continue;
+        }
+
+        minimax_static_data->board_copy[evaluated_position] = opponent_color;
+        const int evaluated_result = max_level(minimax_static_data, alpha, beta, next_moves_count, remaining_depth);
+        minimax_static_data->board_copy[evaluated_position] = TETRALATH_COLOR_NONE;
+        if (evaluated_result < beta) {
+            beta = evaluated_result;
+
+            /*
+            Given that the "use_strict_pruning" flag can only be true in the
+            first min level at most (which means it will be false in the
+            vast majority of the time), expecting it to be false gives us
+            better performance.
+            */
+            if (__builtin_expect(use_strict_pruning, 0)) {
+                if (evaluated_result < alpha) {
+                    return evaluated_result;
                 }
-
+            } else {
+                if (evaluated_result <= alpha) {
+                    return evaluated_result;
+                }
             }
+
         }
     }
 
@@ -464,7 +477,7 @@ Position values:
     Invalid: 3 (the position is outside the board)
 */
 void index_sequence_values() {
-    for (int i = 0; i < SEQUENCES_LOOKUP_TABLE_LENGTH; i += 1) {
+    for (int i = 0; i < TETRALATH_SEQUENCES_LOOKUP_TABLE_LENGTH; i += 1) {
         indexed_sequence_values[i] = (uint8_t)TETRALATH_SEQUENCE_NONE;
     }
 
@@ -574,7 +587,7 @@ If you do not intend on using these predictive results, then you are free to use
 any color as the perspective color (and the opposite color as the opponent
 color).
 */
-TETRALATH_RESULT check_game_result(const TETRALATH_COLOR * const board, const int moves_count, const TETRALATH_COLOR perspective_color, const TETRALATH_COLOR opponent_color) {
+int check_game_result(const TETRALATH_COLOR * const board, const int moves_count, const TETRALATH_COLOR perspective_color, const TETRALATH_COLOR opponent_color) {
     int triplets_per_color_count[TETRALATH_NUMBER_OF_COLORS] = {0, 0};
 
     /*
@@ -768,29 +781,35 @@ int minimax(const TETRALATH_COLOR * const original_board, TETRALATH_MOVE_VALUE *
 
     for (int i = 0; i < TETRALATH_BOARD_SIZE; i += 1) {
         const int evaluated_position = new_move_values[i].position;
-        if (board_copy[evaluated_position] == TETRALATH_COLOR_NONE) {
-            board_copy[evaluated_position] = ai_color;
-            const int result = min_level(&static_data, alpha, TETRALATH_RESULT_BETA_MAX, next_moves_count, minimax_depth, use_strict_pruning);
-            board_copy[evaluated_position] = TETRALATH_COLOR_NONE;
-            new_move_values[i].minimax_result = result;
-            if (result > alpha) {
-                alpha = result;
+
+        /*
+        Hints the compiler to prioritize the costlier path.
+        */
+        if (__builtin_expect(board_copy[evaluated_position] != TETRALATH_COLOR_NONE, 0)) {
+            continue;
+        }
+
+        board_copy[evaluated_position] = ai_color;
+        const int result = min_level(&static_data, alpha, TETRALATH_RESULT_BETA_MAX, next_moves_count, minimax_depth, use_strict_pruning);
+        board_copy[evaluated_position] = TETRALATH_COLOR_NONE;
+        new_move_values[i].minimax_result = result;
+        if (result > alpha) {
+            alpha = result;
+
+            /*
+            Given that this condition can only be satisfied once as most,
+            expecting it to be false gives us better performance.
+            */
+            if (__builtin_expect(ai_mode == TETRALATH_AI_MODE_RUTHLESS && result == TETRALATH_RESULT_WIN, 0)) {
 
                 /*
-                Given that this condition can only be satisfied once as most,
-                expecting it to be false gives us better performance.
+                When using the ruthless AI mode, we can break out of the
+                loop as soon as we find any winning move.
                 */
-                if (__builtin_expect(ai_mode == TETRALATH_AI_MODE_RUTHLESS && result == TETRALATH_RESULT_WIN, 0)) {
-
-                    /*
-                    When using the ruthless AI mode, we can break out of the
-                    loop as soon as we find any winning move.
-                    */
-                    break;
-
-                }
+                break;
 
             }
+
         }
     }
 

@@ -6,7 +6,7 @@
 #include "time.h"
 
 static TETRALATH_COLOR *initialize_board() {
-    TETRALATH_COLOR *board = (TETRALATH_COLOR *)malloc((TETRALATH_BOARD_SIZE + 1) * sizeof(TETRALATH_COLOR));
+    TETRALATH_COLOR *board = (TETRALATH_COLOR*)malloc((TETRALATH_BOARD_SIZE + 1) * sizeof(TETRALATH_COLOR));
     for (int i = 0; i < TETRALATH_BOARD_SIZE; i += 1) {
         board[i] = TETRALATH_COLOR_NONE;
     }
@@ -15,14 +15,14 @@ static TETRALATH_COLOR *initialize_board() {
 }
 
 static TETRALATH_MOVES *initialize_moves() {
-    TETRALATH_MOVES *moves = (TETRALATH_MOVES *)malloc(sizeof(TETRALATH_MOVES));
-    moves->moves_list = (TETRALATH_MOVE *)malloc(TETRALATH_BOARD_SIZE * sizeof(TETRALATH_MOVE));
+    TETRALATH_MOVES *moves = (TETRALATH_MOVES*)malloc(sizeof(TETRALATH_MOVES));
+    moves->moves_list = (TETRALATH_MOVE*)malloc(TETRALATH_BOARD_SIZE * sizeof(TETRALATH_MOVE));
     moves->moves_count = 0;
     return moves;
 }
 
 static TETRALATH_GAME *initialize_game_data() {
-    TETRALATH_GAME *game = (TETRALATH_GAME *)malloc(sizeof(TETRALATH_GAME));
+    TETRALATH_GAME *game = (TETRALATH_GAME*)malloc(sizeof(TETRALATH_GAME));
     game->board = initialize_board();
     game->moves = initialize_moves();
     game->current_color = TETRALATH_COLOR_NONE;
@@ -91,12 +91,16 @@ static TETRALATH_MINIMAX_OUTPUT *get_best_ai_move(TETRALATH_MINIMAX_OUTPUT * con
 static TETRALATH_RESULT get_simplified_game_result(const TETRALATH_GAME * const game) {
     TETRALATH_RESULT simplified_game_result = TETRALATH_RESULT_NONE_MAX;
 
-    TETRALATH_RESULT game_result = check_game_result(game->board, game->moves->moves_count, game->player_color, flip_color(game->player_color));
+    const int game_result = check_game_result(game->board, game->moves->moves_count, game->player_color, flip_color(game->player_color));
     switch (game_result) {
         case TETRALATH_RESULT_WIN:
+            simplified_game_result = TETRALATH_RESULT_WIN;
+            break;
         case TETRALATH_RESULT_LOSS:
+            simplified_game_result = TETRALATH_RESULT_LOSS;
+            break;
         case TETRALATH_RESULT_DRAW_MAX:
-            simplified_game_result = game_result;
+            simplified_game_result = TETRALATH_RESULT_DRAW_MAX;
             break;
         default:
             break;
