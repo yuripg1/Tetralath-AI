@@ -444,7 +444,7 @@ static void reset_move_values(TETRALATH_MOVE_VALUE * const move_values) {
     }
 }
 
-static void sort_move_values(TETRALATH_MOVE_VALUE * const move_values) {
+static void sort_move_values(TETRALATH_MOVE_VALUE * const move_values, const bool use_weights) {
     for (int i = 1; i < TETRALATH_BOARD_SIZE; i += 1) {
         TETRALATH_MOVE_VALUE current_move_value = move_values[i];
         int j = i - 1;
@@ -455,7 +455,7 @@ static void sort_move_values(TETRALATH_MOVE_VALUE * const move_values) {
             if (move_values[j].minimax_result < current_move_value.minimax_result) {
                 move_ahead = true;
             } else if (move_values[j].minimax_result == current_move_value.minimax_result) {
-                if (move_values[j].weight < current_move_value.weight) {
+                if (use_weights == true && move_values[j].weight < current_move_value.weight) {
                     move_ahead = true;
                 }
             }
@@ -823,7 +823,9 @@ int minimax(const TETRALATH_COLOR * const original_board, TETRALATH_MOVE_VALUE *
     }
 
     int ai_move;
+    bool use_weights_when_sorting;
     if (ai_mode == TETRALATH_AI_MODE_RUTHLESS) {
+        use_weights_when_sorting = false;
 
         /*
         When using the ruthless AI mode, we apply a more extreme pruning to find
@@ -833,6 +835,7 @@ int minimax(const TETRALATH_COLOR * const original_board, TETRALATH_MOVE_VALUE *
         ai_move = get_first_best_move_by_minimax_result(new_move_values);
 
     } else {
+        use_weights_when_sorting = true;
 
         /*
         When NOT using the ruthless AI mode, we apply a strict pruning in the
@@ -850,7 +853,7 @@ int minimax(const TETRALATH_COLOR * const original_board, TETRALATH_MOVE_VALUE *
         algorithm (if one is performed) can start with the best known moves
         first.
         */
-        sort_move_values(new_move_values);
+        sort_move_values(new_move_values, use_weights_when_sorting);
 
         copy_move_values(move_values, new_move_values);
     }
