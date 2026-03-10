@@ -2,56 +2,71 @@
 #define DEFINITIONS_H
 
 typedef enum {
+    // Can represent an empty position.
     // 00 binary
-    TETRALATH_COLOR_NONE = 0, // Can represent an empty position
+    TETRALATH_COLOR_NONE = 0, //
 
+    // Can represent a position occupied by a white piece.
     // 01 binary
-    TETRALATH_COLOR_WHITE = 1, // Can represent a position occupied by a white piece
+    TETRALATH_COLOR_WHITE = 1,
 
+    // Can represent a position occupied by a black piece.
     // 10 binary
-    TETRALATH_COLOR_BLACK = 2, // Can represent a position occupied by a black piece
+    TETRALATH_COLOR_BLACK = 2,
 
+    // Can represent a position outside the board.
     // 11 binary
-    TETRALATH_COLOR_INVALID = 3, // Can represent a position outside the board
+    TETRALATH_COLOR_INVALID = 3,
 } TETRALATH_COLOR;
 
+// Mask used with XOR to flip between colors.
 // 11 binary
 #define TETRALATH_COLOR_MASK 3
 
+// Flips between white and black colors with a simple XOR operation, without the
+// need for if/else conditionals.
 static inline TETRALATH_COLOR flip_color(TETRALATH_COLOR color) {
     return (TETRALATH_COLOR)(color ^ TETRALATH_COLOR_MASK);
 }
 
+#define TETRALATH_MINIMUM_RESULT_VALUE 64
+
 typedef enum {
-    // 00000000 binary
-    TETRALATH_RESULT_ALPHA_MIN = 0,
+    /*
+    Numbers less than 64 (TETRALATH_MINIMUM_RESULT_VALUE) are reserved to
+    represent the next move in board states where the game is ongoing but the
+    next move is known due to some kind of forced move/trap situation.
+    */
 
-    // 00000001 binary
-    TETRALATH_RESULT_LOSS = 1,
+    // 001000000 binary
+    TETRALATH_RESULT_ALPHA_MIN = 64,
 
-    // 01000001 binary
-    TETRALATH_RESULT_ABOUT_TO_LOSE = 65,
+    // 001000001 binary
+    TETRALATH_RESULT_LOSS = 65,
 
-    // 01111110 binary
-    TETRALATH_RESULT_NONE_MIN = 126,
+    // 010000001 binary
+    TETRALATH_RESULT_ABOUT_TO_LOSE = 129,
 
-    // 01111111 binary
-    TETRALATH_RESULT_DRAW_MIN = 127,
+    // 011111110 binary
+    TETRALATH_RESULT_NONE_MIN = 254,
 
-    // 10000000 binary
-    TETRALATH_RESULT_DRAW_MAX = 128,
+    // 011111111 binary
+    TETRALATH_RESULT_DRAW_MIN = 255,
 
-    // 10000001 binary
-    TETRALATH_RESULT_NONE_MAX = 129,
+    // 100000000 binary
+    TETRALATH_RESULT_DRAW_MAX = 256,
 
-    // 10111110 binary
-    TETRALATH_RESULT_ABOUT_TO_WIN = 190,
+    // 100000001 binary
+    TETRALATH_RESULT_NONE_MAX = 257,
 
-    // 11111110 binary
-    TETRALATH_RESULT_WIN = 254,
+    // 101111110 binary
+    TETRALATH_RESULT_ABOUT_TO_WIN = 382,
 
-    // 11111111 binary
-    TETRALATH_RESULT_BETA_MAX = 255,
+    // 110111110 binary
+    TETRALATH_RESULT_WIN = 446,
+
+    // 110111111 binary
+    TETRALATH_RESULT_BETA_MAX = 447,
 } TETRALATH_RESULT;
 
 typedef enum {

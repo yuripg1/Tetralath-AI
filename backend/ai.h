@@ -30,6 +30,7 @@ void initialize_move_values(TETRALATH_MOVE_VALUE * const move_values);
 void copy_move_values(TETRALATH_MOVE_VALUE * const new_move_values, const TETRALATH_MOVE_VALUE * const move_values);
 bool found_winning_move(const TETRALATH_MOVE_VALUE * const move_values);
 int check_game_result(const TETRALATH_COLOR * const board, const int moves_count, const TETRALATH_COLOR perspective_color, const TETRALATH_COLOR opponent_color);
-int minimax(const TETRALATH_COLOR * const original_board, TETRALATH_MOVE_VALUE * const move_values, const TETRALATH_COLOR ai_color, const int moves_count, const int minimax_depth, const TETRALATH_AI_MODE ai_mode, const int64_t target_end_time);
+int get_forced_next_move(const TETRALATH_COLOR * const original_board, const TETRALATH_COLOR perspective_color, const int moves_count);
+int minimax(const TETRALATH_COLOR * const original_board, TETRALATH_MOVE_VALUE * const move_values, const TETRALATH_COLOR perspective_color, const int moves_count, const int minimax_depth, const TETRALATH_AI_MODE ai_mode, const int64_t target_end_time);
 
 #endif

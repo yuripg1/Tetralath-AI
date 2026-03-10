@@ -29,10 +29,8 @@ Board position indexes:
         --------------------------
 */
 
-/*
-Lookup table assigning a weight to each position based on how many nearby
-positions it can interact with to form sequences of interest.
-*/
+// Lookup table assigning a weight to each position based on how many nearby
+// positions it can interact with to form sequences of interest.
 
 static const int default_move_weights[TETRALATH_BOARD_SIZE] = {
             15, 16, 16, 16, 15,
@@ -46,10 +44,8 @@ static const int default_move_weights[TETRALATH_BOARD_SIZE] = {
             15, 16, 16, 16, 15
 };
 
-/*
-Lookup table signaling the default move order when evaluating moves in the
-minimax algorithm.
-*/
+// Lookup table signaling the default move order when evaluating moves in the
+// minimax algorithm.
 
 static const alignas(64) uint8_t default_move_order[TETRALATH_BOARD_SIZE] = {
     21, 39, 22, 38, 29, 31, 30,
@@ -227,25 +223,31 @@ static int max_level(const TETRALATH_MINIMAX_STATIC_DATA * const minimax_static_
     const int remaining_depth = previous_remaining_depth - 1;
 
     // Hints the compiler to prioritize the costlier path.
-    if (__builtin_expect(remaining_depth == 0 || get_current_time_nsec() >= minimax_static_data->target_end_time, 0)) {
+    if (__builtin_expect(remaining_depth <= 0 || get_current_time_nsec() >= minimax_static_data->target_end_time, 0)) {
         return TETRALATH_RESULT_NONE_MAX;
     }
 
     const int next_moves_count = moves_count + 1;
 
     int forced_next_move = TETRALATH_POSITION_NONE;
-    if (result < 0) {
-        const int most_probable_next_move = (result * (-1)) - 1;
-        minimax_static_data->board_copy[most_probable_next_move] = minimax_static_data->perspective_color;
+    if (result < TETRALATH_MINIMUM_RESULT_VALUE) {
+        minimax_static_data->board_copy[result] = minimax_static_data->perspective_color;
         const int next_move_result = check_game_result(minimax_static_data->board_copy, next_moves_count, minimax_static_data->perspective_color, opponent_color);
-        minimax_static_data->board_copy[most_probable_next_move] = TETRALATH_COLOR_NONE;
+        minimax_static_data->board_copy[result] = TETRALATH_COLOR_NONE;
 
         // Hints the compiler to prioritize the costlier path.
         if (__builtin_expect(next_move_result == TETRALATH_RESULT_LOSS, 0)) {
+
+            /*
+            We give more value to losing scenarios that require more moves (in
+            the hopes that the opponent is not as capable and will make a bad
+            move until then).
+            */
             return TETRALATH_RESULT_LOSS + next_moves_count + 1;
+
         }
 
-        forced_next_move = most_probable_next_move;
+        forced_next_move = result;
     }
 
     for (int i = 0; i < TETRALATH_BOARD_SIZE; i += 1) {
@@ -261,10 +263,8 @@ static int max_level(const TETRALATH_MINIMAX_STATIC_DATA * const minimax_static_
         if (evaluated_result > alpha) {
             alpha = evaluated_result;
 
-            /*
-            Here's it's not a matter of expectation, but rather a preference to
-            hint the compiler to prioritize the ruthless AI mode.
-            */
+            // Here's it's not a matter of expectation, but rather a preference
+            // to hint the compiler to prioritize the ruthless AI mode.
             if (__builtin_expect(minimax_static_data->ai_mode == TETRALATH_AI_MODE_RUTHLESS, 1)) {
 
                 /*
@@ -340,25 +340,32 @@ static int min_level(const TETRALATH_MINIMAX_STATIC_DATA * const minimax_static_
     const int remaining_depth = previous_remaining_depth - 1;
 
     // Hints the compiler to prioritize the costlier path.
-    if (__builtin_expect(remaining_depth == 0 || get_current_time_nsec() >= minimax_static_data->target_end_time, 0)) {
+    if (__builtin_expect(remaining_depth <= 0 || get_current_time_nsec() >= minimax_static_data->target_end_time, 0)) {
         return TETRALATH_RESULT_NONE_MAX;
     }
 
     const int next_moves_count = moves_count + 1;
 
     int forced_next_move = TETRALATH_POSITION_NONE;
-    if (result < 0) {
-        const int most_probable_next_move = (result * (-1)) - 1;
-        minimax_static_data->board_copy[most_probable_next_move] = opponent_color;
+    if (result < TETRALATH_MINIMUM_RESULT_VALUE) {
+        minimax_static_data->board_copy[result] = opponent_color;
         const int next_move_result = check_game_result(minimax_static_data->board_copy, next_moves_count, opponent_color, minimax_static_data->perspective_color);
-        minimax_static_data->board_copy[most_probable_next_move] = TETRALATH_COLOR_NONE;
+        minimax_static_data->board_copy[result] = TETRALATH_COLOR_NONE;
 
         // Hints the compiler to prioritize the costlier path.
         if (__builtin_expect(next_move_result == TETRALATH_RESULT_LOSS, 0)) {
-            return TETRALATH_RESULT_WIN - ((minimax_static_data->ai_mode != TETRALATH_AI_MODE_RUTHLESS) * (next_moves_count + 1));
+
+            /*
+            When using the ruthless AI mode, we only care about the winning
+            scenario, regardless of how distant it is.
+            Otherwise, we give more value to winning scenarios that require
+            fewer moves.
+            */
+           return TETRALATH_RESULT_WIN - ((minimax_static_data->ai_mode != TETRALATH_AI_MODE_RUTHLESS) * (next_moves_count + 1));
+
         }
 
-        forced_next_move = most_probable_next_move;
+        forced_next_move = result;
     }
 
     for (int i = 0; i < TETRALATH_BOARD_SIZE; i += 1) {
@@ -592,7 +599,9 @@ bool found_winning_move(const TETRALATH_MOVE_VALUE * const move_values) {
 }
 
 /*
-This function returns the result of the game for the perspective color.
+This function returns either a TETRALATH_RESULT signaling the result of the game
+for the perspective color or a number less than 64 representing a forced move
+for the opponent in the next turn.
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! IMPORTANT !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -607,10 +616,9 @@ color).
 int check_game_result(const TETRALATH_COLOR * const board, const int moves_count, const TETRALATH_COLOR perspective_color, const TETRALATH_COLOR opponent_color) {
     int triplets_per_color_count[TETRALATH_NUMBER_OF_COLORS] = {0, 0};
 
-    /*
-    Stores the counts as well as the empty positions of the near quadruplets for
-    each color.
-    */
+
+    // Stores the counts as well as the empty positions of the near quadruplets
+    // for each color.
     int near_quadruplets_per_color_count[TETRALATH_NUMBER_OF_COLORS] = {0, 0};
     int near_quadruplets_per_color_empty_positions[TETRALATH_NUMBER_OF_COLORS][TETRALATH_MAXIMUM_NEAR_SEQUENCES];
 
@@ -641,10 +649,8 @@ int check_game_result(const TETRALATH_COLOR * const board, const int moves_count
             switch (sequence_value) {
                 case TETRALATH_SEQUENCE_QUADRUPLET:
 
-                    /*
-                    If we find any quadruplet, we can immediately return the
-                    result because the game is over.
-                    */
+                    // If we find any quadruplet, we can immediately return the
+                    // result because the game is over.
                     return (sequence_first_color == perspective_color) ? TETRALATH_RESULT_WIN : TETRALATH_RESULT_LOSS;
 
                 case TETRALATH_SEQUENCE_TRIPLET:
@@ -704,17 +710,16 @@ int check_game_result(const TETRALATH_COLOR * const board, const int moves_count
     */
     if (__builtin_expect(moves_count == TETRALATH_BOARD_SIZE, 0)) {
 
-        /*
-        If the board is full and no one won the game, the game has ended in a
-        draw.
-        */
+        // If the board is full and no one won the game, the game has ended in a
+        // draw.
         return TETRALATH_RESULT_DRAW_MAX;
 
     }
 
     const int opponent_near_quadruplets_count = near_quadruplets_per_color_count[opponent_color_index];
 
-    if (opponent_near_quadruplets_count >= 1) {
+    // Hints the compiler to prioritize the costlier path.
+    if (__builtin_expect(opponent_near_quadruplets_count >= 1, 0)) {
 
         /*
         If the opponent color (who is going to make the next move) already has a
@@ -727,7 +732,8 @@ int check_game_result(const TETRALATH_COLOR * const board, const int moves_count
 
     const int perspective_near_quadruplets_count = near_quadruplets_per_color_count[perspective_color_index];
 
-    if (perspective_near_quadruplets_count >= 2) {
+    // Hints the compiler to prioritize the costlier path.
+    if (__builtin_expect(perspective_near_quadruplets_count >= 2, 0)) {
 
         /*
         If the perspective color (that has just made a move) has two or more
@@ -764,13 +770,35 @@ int check_game_result(const TETRALATH_COLOR * const board, const int moves_count
                 }
             }
         }
-        return (candidate_for_winning_move + 1) * (-1);
+        return candidate_for_winning_move;
     }
 
     return TETRALATH_RESULT_NONE_MAX;
 }
 
-int minimax(const TETRALATH_COLOR * const original_board, TETRALATH_MOVE_VALUE * const move_values, const TETRALATH_COLOR ai_color, const int moves_count, const int minimax_depth, const TETRALATH_AI_MODE ai_mode, const int64_t target_end_time) {
+int get_forced_next_move(const TETRALATH_COLOR * const original_board, const TETRALATH_COLOR perspective_color, const int moves_count) {
+    TETRALATH_COLOR board_copy[TETRALATH_BOARD_SIZE + 1];
+    copy_board(board_copy, original_board);
+
+    const TETRALATH_COLOR opponent_color = flip_color(perspective_color);
+
+    const int result = check_game_result(board_copy, moves_count, opponent_color, perspective_color);
+
+    int forced_next_move = TETRALATH_POSITION_NONE;
+    if (result < TETRALATH_MINIMUM_RESULT_VALUE) {
+        board_copy[result] = perspective_color;
+        const int next_move_result = check_game_result(board_copy, moves_count + 1, perspective_color, opponent_color);
+        board_copy[result] = TETRALATH_COLOR_NONE;
+
+        if (next_move_result != TETRALATH_RESULT_LOSS) {
+            forced_next_move = result;
+        }
+    }
+
+    return forced_next_move;
+}
+
+int minimax(const TETRALATH_COLOR * const original_board, TETRALATH_MOVE_VALUE * const move_values, const TETRALATH_COLOR perspective_color, const int moves_count, const int minimax_depth, const TETRALATH_AI_MODE ai_mode, const int64_t target_end_time) {
     TETRALATH_COLOR board_copy[TETRALATH_BOARD_SIZE + 1];
     copy_board(board_copy, original_board);
 
@@ -778,15 +806,13 @@ int minimax(const TETRALATH_COLOR * const original_board, TETRALATH_MOVE_VALUE *
     copy_move_values(new_move_values, move_values);
     reset_move_values(new_move_values);
 
-    /*
-    When using the ruthless AI mode, we don't need to use strict pruning in the
-    first min level.
-    */
+    // When using the ruthless AI mode, we don't need to use strict pruning in
+    // the first min level.
     const bool use_strict_pruning = (ai_mode == TETRALATH_AI_MODE_RUTHLESS) ? false : true;
 
     const TETRALATH_MINIMAX_STATIC_DATA static_data = {
         .board_copy = board_copy,
-        .perspective_color = ai_color,
+        .perspective_color = perspective_color,
         .ai_mode = ai_mode,
         .target_end_time = target_end_time,
     };
@@ -802,7 +828,7 @@ int minimax(const TETRALATH_COLOR * const original_board, TETRALATH_MOVE_VALUE *
             continue;
         }
 
-        board_copy[evaluated_position] = ai_color;
+        board_copy[evaluated_position] = perspective_color;
         const int result = min_level(&static_data, alpha, TETRALATH_RESULT_BETA_MAX, next_moves_count, minimax_depth, use_strict_pruning);
         board_copy[evaluated_position] = TETRALATH_COLOR_NONE;
         new_move_values[i].minimax_result = result;
@@ -811,10 +837,8 @@ int minimax(const TETRALATH_COLOR * const original_board, TETRALATH_MOVE_VALUE *
 
             if (ai_mode == TETRALATH_AI_MODE_RUTHLESS && result == TETRALATH_RESULT_WIN) {
 
-                /*
-                When using the ruthless AI mode, we can break out of the loop as
-                soon as we find any winning move.
-                */
+                // When using the ruthless AI mode, we can break out of the loop
+                // as soon as we find any winning move.
                 break;
 
             }

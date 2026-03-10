@@ -215,35 +215,43 @@ int compute_ai_move(TETRALATH_GAME * const game) {
     TETRALATH_MINIMAX_OUTPUT minimax_outputs[TETRALATH_BOARD_SIZE];
     initialize_minimax_outputs(minimax_outputs);
 
-    TETRALATH_MOVE_VALUE initial_move_values[TETRALATH_BOARD_SIZE];
-    initialize_move_values(initial_move_values);
+    const int forced_next_move = get_forced_next_move(game->board, game->current_color, game->moves->moves_count);
 
-    int minimum_minimax_depth = TETRALATH_DEFAULT_MINIMAX_MINIMUM_DEPTH;
-    int maximum_minimax_depth = TETRALATH_DEFAULT_MINIMAX_MAXIMUM_DEPTH;
-    if (maximum_minimax_depth > (TETRALATH_BOARD_SIZE - get_moves_count(game))) {
-        maximum_minimax_depth = TETRALATH_BOARD_SIZE - get_moves_count(game);
-    }
+    if (forced_next_move != TETRALATH_POSITION_NONE) {
+        minimax_outputs[0].minimax_depth = 1;
+        minimax_outputs[0].ai_move = forced_next_move;
+        minimax_outputs[0].time_taken_nsec = get_current_time_nsec() - computing_start_time;
+    } else {
+        TETRALATH_MOVE_VALUE initial_move_values[TETRALATH_BOARD_SIZE];
+        initialize_move_values(initial_move_values);
 
-    const int number_of_threads = TETRALATH_DEFAULT_NUMBER_OF_THREADS;
-    TETRALATH_THREAD_INPUT thread_inputs[number_of_threads];
-    for (int i = 0; i < number_of_threads; i += 1) {
-        thread_inputs[i].game = game;
-        thread_inputs[i].minimax_depth_divisor = number_of_threads;
-        thread_inputs[i].minimax_depth_remainder = i;
-        thread_inputs[i].minimum_minimax_depth = minimum_minimax_depth;
-        thread_inputs[i].maximum_minimax_depth = maximum_minimax_depth;
-        thread_inputs[i].computing_start_time = computing_start_time;
-        thread_inputs[i].target_end_time = target_end_time;
-        thread_inputs[i].initial_move_values = initial_move_values;
-        thread_inputs[i].minimax_outputs = minimax_outputs;
-    }
+        int minimum_minimax_depth = TETRALATH_DEFAULT_MINIMAX_MINIMUM_DEPTH;
+        int maximum_minimax_depth = TETRALATH_DEFAULT_MINIMAX_MAXIMUM_DEPTH;
+        if (maximum_minimax_depth > (TETRALATH_BOARD_SIZE - get_moves_count(game))) {
+            maximum_minimax_depth = TETRALATH_BOARD_SIZE - get_moves_count(game);
+        }
 
-    pthread_t threads[number_of_threads];
-    for (int i = 0; i < number_of_threads; i++) {
-        pthread_create(&threads[i], NULL, process_ai_move_thread, &thread_inputs[i]);
-    }
-    for (int i = 0; i < number_of_threads; i++) {
-        pthread_join(threads[i], NULL);
+        const int number_of_threads = TETRALATH_DEFAULT_NUMBER_OF_THREADS;
+        TETRALATH_THREAD_INPUT thread_inputs[number_of_threads];
+        for (int i = 0; i < number_of_threads; i += 1) {
+            thread_inputs[i].game = game;
+            thread_inputs[i].minimax_depth_divisor = number_of_threads;
+            thread_inputs[i].minimax_depth_remainder = i;
+            thread_inputs[i].minimum_minimax_depth = minimum_minimax_depth;
+            thread_inputs[i].maximum_minimax_depth = maximum_minimax_depth;
+            thread_inputs[i].computing_start_time = computing_start_time;
+            thread_inputs[i].target_end_time = target_end_time;
+            thread_inputs[i].initial_move_values = initial_move_values;
+            thread_inputs[i].minimax_outputs = minimax_outputs;
+        }
+
+        pthread_t threads[number_of_threads];
+        for (int i = 0; i < number_of_threads; i++) {
+            pthread_create(&threads[i], NULL, process_ai_move_thread, &thread_inputs[i]);
+        }
+        for (int i = 0; i < number_of_threads; i++) {
+            pthread_join(threads[i], NULL);
+        }
     }
 
     TETRALATH_MINIMAX_OUTPUT *best_minimax_output = get_best_ai_move(minimax_outputs);
