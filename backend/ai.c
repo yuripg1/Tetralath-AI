@@ -31,7 +31,6 @@ Board position indexes:
 
 // Lookup table assigning a weight to each position based on how many nearby
 // positions it can interact with to form sequences of interest.
-
 static const int default_move_weights[TETRALATH_BOARD_SIZE] = {
             15, 16, 16, 16, 15,
           16, 18, 19, 19, 18, 16,
@@ -46,7 +45,6 @@ static const int default_move_weights[TETRALATH_BOARD_SIZE] = {
 
 // Lookup table signaling the default move order when evaluating moves in the
 // minimax algorithm.
-
 static const alignas(64) uint8_t default_move_order[TETRALATH_BOARD_SIZE] = {
     21, 39, 22, 38, 29, 31, 30,
     14, 46, 20, 40, 23, 37,

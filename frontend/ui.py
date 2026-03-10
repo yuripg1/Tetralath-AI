@@ -65,9 +65,10 @@ def refresh_game_ui(
     menus: list[pygame_menu.Menu],
     game_board: list[definitions.TetralathColor],
     last_move_position: int,
+    game_state: definitions.TetralathState,
 ) -> None:
     game_window.fill(TETRALATH_BACKGROUND_COLOR)
-    draw_board(game_window, game_board, last_move_position)
+    draw_board(game_window, game_board, last_move_position, game_state)
     for menu in menus:
         menu.draw(game_window)
     pygame.display.flip()
@@ -88,7 +89,7 @@ def get_events(
         elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             click_x = event.pos[0]
             click_y = event.pos[1]
-            board_position_index = board.click_in_an_hexagon(
+            board_position_index = board.position_in_a_hexagon(
                 click_x,
                 click_y,
                 board.TETRALATH_BOARD_NUMBER_OF_HEXAGONS,
@@ -342,8 +343,15 @@ def update_game_result_label(game: definitions.TetralathGame, game_result_label:
 
 
 def draw_hexagons(
-    game_window: pygame.surface.Surface, hexagon_radius: float, board_center_x: int, board_center_y: int
+    game_window: pygame.surface.Surface,
+    hexagon_radius: float,
+    board_center_x: int,
+    board_center_y: int,
+    game_state: definitions.TetralathState,
 ) -> None:
+    mouse_position = pygame.mouse.get_pos()
+    mouse_position_x = mouse_position[0]
+    mouse_position_y = mouse_position[1]
     hexagon_centers = board.get_all_hexagon_centers(
         board.TETRALATH_BOARD_ROW_LENGTHS,
         board.TETRALATH_BOARD_MIDDLE_ROW_INDEX,
@@ -351,9 +359,15 @@ def draw_hexagons(
         board_center_x,
         board_center_y,
     )
-    for center_x, center_y in hexagon_centers:
-        hexagon_vertices = board.get_hexagon_vertices(center_x, center_y, hexagon_radius)
-        pygame.draw.polygon(game_window, board.TETRALATH_BOARD_POSITION_FILL_COLOR, hexagon_vertices)
+    for hexagon_center_x, hexagon_center_y in hexagon_centers:
+        hexagon_vertices = board.get_hexagon_vertices(hexagon_center_x, hexagon_center_y, hexagon_radius)
+        is_mouse_over_hexagon = board.is_position_in_hexagon(
+            mouse_position_x, mouse_position_y, hexagon_radius, hexagon_center_x, hexagon_center_y
+        )
+        hexagon_fill_color = board.TETRALATH_BOARD_POSITION_FILL_COLOR
+        if is_mouse_over_hexagon and game_state == definitions.TetralathState.RUNNING:
+            hexagon_fill_color = board.TETRALATH_BOARD_POSITION_FILL_COLOR_MOUSE_OVER
+        pygame.draw.polygon(game_window, hexagon_fill_color, hexagon_vertices)
         pygame.draw.polygon(
             game_window,
             board.TETRALATH_BOARD_POSITION_BORDER_COLOR,
@@ -431,13 +445,17 @@ def draw_pieces(
 
 
 def draw_board(
-    game_window: pygame.surface.Surface, game_board: list[definitions.TetralathColor], last_move_position: int
+    game_window: pygame.surface.Surface,
+    game_board: list[definitions.TetralathColor],
+    last_move_position: int,
+    game_state: definitions.TetralathState,
 ) -> None:
     draw_hexagons(
         game_window,
         TETRALATH_BOARD_HEXAGON_RADIUS,
         round(TETRALATH_WINDOW_WIDTH / 2),
         round(TETRALATH_WINDOW_HEIGHT / 2),
+        game_state,
     )
     draw_board_edges(
         game_window,

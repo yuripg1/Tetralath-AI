@@ -5,6 +5,7 @@ TETRALATH_BOARD_NUMBER_OF_HEXAGONS = 61
 TETRALATH_BOARD_ROW_LENGTHS = [5, 6, 7, 8, 9, 8, 7, 6, 5]
 TETRALATH_BOARD_MIDDLE_ROW_INDEX = 4
 TETRALATH_BOARD_POSITION_FILL_COLOR = (255, 255, 0)
+TETRALATH_BOARD_POSITION_FILL_COLOR_MOUSE_OVER = (255, 255, 128)
 TETRALATH_BOARD_POSITION_BORDER_COLOR = (128, 128, 128)
 TETRALATH_BOARD_POSITION_BORDER_WIDTH = 3
 TETRALATH_BOARD_EDGE_BORDER_COLOR = (0, 0, 0)
@@ -108,7 +109,7 @@ def get_all_hexagon_centers(
     return hexagon_centers
 
 
-def is_click_in_hexagon(
+def is_position_in_hexagon(
     click_x: int, click_y: int, hexagon_radius: float, hexagon_center_x: int, hexagon_center_y: int
 ) -> bool:
     hexagon_vertices = get_hexagon_vertices(hexagon_center_x, hexagon_center_y, hexagon_radius)
@@ -124,7 +125,7 @@ def is_click_in_hexagon(
     return True
 
 
-def click_in_an_hexagon(
+def position_in_a_hexagon(
     click_x: int,
     click_y: int,
     number_of_hexagons: int,
@@ -139,6 +140,6 @@ def click_in_an_hexagon(
         hexagon_center_x, hexagon_center_y = get_single_hexagon_center(
             row, column, len(row_lengths), middle_row_index, hexagon_radius, board_center_x, board_center_y
         )
-        if is_click_in_hexagon(click_x, click_y, hexagon_radius, hexagon_center_x, hexagon_center_y):
+        if is_position_in_hexagon(click_x, click_y, hexagon_radius, hexagon_center_x, hexagon_center_y):
             return i
     return None
