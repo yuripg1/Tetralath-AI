@@ -342,6 +342,10 @@ def update_game_result_label(game: definitions.TetralathGame, game_result_label:
     game_result_label.set_title(new_title)
 
 
+def trigger_redraw_board_event(global_ui_events: list[definitions.TetralathUIEvent]) -> None:
+    global_ui_events.append(definitions.TetralathUIEvent(type=definitions.TetralathEventType.REDRAW_BOARD))
+
+
 def get_current_mouse_position() -> tuple[float]:
     mouse_position = pygame.mouse.get_pos()
     return (float(mouse_position[0]), float(mouse_position[1]))
@@ -353,6 +357,8 @@ def update_highlighted_position(
     new_highlighted_position = None
     if game["state"] != definitions.TetralathState.RUNNING:
         return
+    if game["current_color"] != game["player_color"]:
+        return
     mouse_position_x, mouse_position_y = get_current_mouse_position()
     for i in range(board.TETRALATH_BOARD_NUMBER_OF_HEXAGONS):
         if board.is_position_in_hexagon(mouse_position_x, mouse_position_y, board.BOARD_POSITIONS[i]):
@@ -360,11 +366,7 @@ def update_highlighted_position(
             break
     if game["highlighted_board_position"] != new_highlighted_position:
         game["highlighted_board_position"] = new_highlighted_position
-        global_ui_events.append(
-            definitions.TetralathUIEvent(
-                type=definitions.TetralathEventType.UPDATED_BOARD_HIGHLIGHT,
-            )
-        )
+        trigger_redraw_board_event(global_ui_events)
 
 
 def draw_hexagons(

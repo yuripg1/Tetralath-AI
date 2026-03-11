@@ -34,6 +34,13 @@ def handle_game_ending(
     game["state"] = definitions.TetralathState.ENDING
 
 
+def handle_game_quitting(
+    game: definitions.TetralathGame, game_backend: ctypes.c_void_p, libtetralath_instance: libtetralath.LibTetralath
+) -> None:
+    libtetralath_instance.teardown_headless_game(game_backend)
+    game["state"] = definitions.TetralathState.QUITTING
+
+
 def handle_new_turn(
     game: definitions.TetralathGame, game_backend: ctypes.c_void_p, libtetralath_instance: libtetralath.LibTetralath
 ) -> None:
@@ -101,17 +108,11 @@ def handle_ai_move_end(
     game_backend: ctypes.c_void_p,
     libtetralath_instance: libtetralath.LibTetralath,
     ai_move_processing_data: definitions.TetralathAIMoveProcessingData,
-    global_ui_events: list[definitions.TetralathUIEvent],
 ) -> None:
     game["advance_turn"] = True
     ai_move_processing_data["thread"] = None
     set_move(game, game_backend, libtetralath_instance, ai_move_processing_data["move"], game["current_color"])
     update_game_result(game, game_backend, libtetralath_instance)
-    global_ui_events.append(
-        definitions.TetralathUIEvent(
-            type=definitions.TetralathEventType.AI_MOVE_PROCESSED,
-        )
-    )
 
 
 def handle_undo_last_move(
@@ -158,11 +159,13 @@ def graphical_game() -> None:
     }
     running = True
     while running:
-        if game["state"] == definitions.TetralathState.RUNNING:
-            ui.update_highlighted_position(game, global_ui_events)
-            if game["result"] is not definitions.TetralathResult.NONE:
+        if game["result"] is not definitions.TetralathResult.NONE:
+            if game["state"] == definitions.TetralathState.RUNNING:
                 handle_game_ending(game, game_backend, libtetralath_instance)
                 ui.enable_right_panel(right_panel, undo_last_move_button)
+                ui.trigger_redraw_board_event(global_ui_events)
+        if game["state"] == definitions.TetralathState.RUNNING:
+            ui.update_highlighted_position(game, global_ui_events)
             if game["advance_turn"]:
                 handle_new_turn(game, game_backend, libtetralath_instance)
                 if game["current_color"] == game["player_color"]:
@@ -171,23 +174,24 @@ def graphical_game() -> None:
                     ui.disable_right_panel(right_panel, undo_last_move_button)
                 ui.update_current_player_label(game, current_player_label)
                 ui.update_game_result_label(game, game_result_label)
+                ui.trigger_redraw_board_event(global_ui_events)
             if game["current_color"] != game["player_color"]:
                 if ai_move_processing_data["thread"] is None:
                     handle_ai_move_start(game_backend, libtetralath_instance, ai_move_processing_data)
                     ui.update_ai_info_label(ai_move_processing_data, ai_info_label, False)
+                    ui.trigger_redraw_board_event(global_ui_events)
                 if ai_move_processing_data["thread"] is not None and not ai_move_processing_data["thread"].is_alive():
-                    handle_ai_move_end(
-                        game, game_backend, libtetralath_instance, ai_move_processing_data, global_ui_events
-                    )
+                    handle_ai_move_end(game, game_backend, libtetralath_instance, ai_move_processing_data)
                     ui.update_ai_info_label(ai_move_processing_data, ai_info_label, False)
                     ui.update_game_result_label(game, game_result_label)
+                    ui.trigger_redraw_board_event(global_ui_events)
         new_ui_events, pygame_events = ui.get_events(global_ui_events)
         for new_ui_event in new_ui_events:
             game["redraw_board"] = True
             if new_ui_event["type"] == definitions.TetralathEventType.QUIT:
                 if running is True:
-                    libtetralath_instance.teardown_headless_game(game_backend)
                     ui.destroy_game_ui()
+                    handle_game_quitting(game, game_backend, libtetralath_instance)
                     running = False
             elif new_ui_event["type"] == definitions.TetralathEventType.START_GAME:
                 if game["state"] == definitions.TetralathState.NONE:
