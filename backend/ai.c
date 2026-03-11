@@ -31,7 +31,7 @@ Board position indexes:
 
 // Lookup table assigning a weight to each position based on how many nearby
 // positions it can interact with to form sequences of interest.
-static const int default_move_weights[TETRALATH_BOARD_SIZE] = {
+static const alignas(64) uint8_t default_move_weights[TETRALATH_BOARD_SIZE + 3] = {
             15, 16, 16, 16, 15,
           16, 18, 19, 19, 18, 16,
         16, 19, 21, 22, 21, 19, 16,
@@ -40,19 +40,21 @@ static const int default_move_weights[TETRALATH_BOARD_SIZE] = {
       16, 19, 22, 24, 24, 22, 19, 16,
         16, 19, 21, 22, 21, 19, 16,
           16, 18, 19, 19, 18, 16,
-            15, 16, 16, 16, 15
+            15, 16, 16, 16, 15,
+     0,  0,  0
 };
 
 // Lookup table signaling the default move order when evaluating moves in the
 // minimax algorithm.
-static const alignas(64) uint8_t default_move_order[TETRALATH_BOARD_SIZE] = {
+static const alignas(64) uint8_t default_move_order[TETRALATH_BOARD_SIZE + 3] = {
     21, 39, 22, 38, 29, 31, 30,
     14, 46, 20, 40, 23, 37,
     13, 47, 15, 45, 28, 32,
      7, 53,  8, 52, 12, 48, 16, 44, 19, 41, 24, 36,
      6, 54,  9, 51, 27, 33,
      1, 59,  2, 58,  3, 57,  5, 55, 10, 50, 11, 49, 17, 43, 18, 42, 25, 35,
-     0, 60,  4, 56, 26, 34
+     0, 60,  4, 56, 26, 34,
+     0,  0,  0
 };
 
 /*
@@ -64,7 +66,7 @@ Directions:
     1: Diagonal down right
     2: Diagonal down left
 */
-static const alignas(64) uint8_t sequence_start_positions[TETRALATH_NUMBER_OF_DIRECTIONS][TETRALATH_SEQUENCE_START_POSITIONS_PER_DIRECTION_COUNT] = {
+static const alignas(64) uint8_t sequence_start_positions[TETRALATH_NUMBER_OF_DIRECTIONS][TETRALATH_SEQUENCE_START_POSITIONS_PER_DIRECTION_COUNT + 21] = {
     {
         26, 27, 28, 29, 30, 31, 32,
         18, 19, 20, 21, 22, 23,
@@ -74,7 +76,8 @@ static const alignas(64) uint8_t sequence_start_positions[TETRALATH_NUMBER_OF_DI
          5,  6,  7,  8,
         50, 51, 52, 53,
          0,  1,  2,
-        56, 57, 58
+        56, 57, 58,
+         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0
     },
     {
          0,  6, 13, 21, 30, 39, 47,
@@ -85,7 +88,8 @@ static const alignas(64) uint8_t sequence_start_positions[TETRALATH_NUMBER_OF_DI
          3,  9, 16, 24,
         18, 27, 36, 44,
          4, 10, 17,
-        26, 35, 43
+        26, 35, 43,
+         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0
     },
     {
          4,  9, 15, 22, 30, 38, 45,
@@ -96,7 +100,8 @@ static const alignas(64) uint8_t sequence_start_positions[TETRALATH_NUMBER_OF_DI
          1,  6, 12, 19,
         25, 33, 41, 48,
          0,  5, 11,
-        34, 42, 49
+        34, 42, 49,
+         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0
     }
 };
 
@@ -109,7 +114,7 @@ Directions:
     1: Diagonal down right
     2: Diagonal down left
 */
-static const alignas(64) uint8_t sequence_next_positions[TETRALATH_NUMBER_OF_DIRECTIONS][TETRALATH_BOARD_SIZE + 1] = {
+static const alignas(64) uint8_t sequence_next_positions[TETRALATH_NUMBER_OF_DIRECTIONS][TETRALATH_BOARD_SIZE + 3] = {
     {
          1,  2,  3,  4, TETRALATH_NO_NEXT_POSITION,
          6,  7,  8,  9, 10, TETRALATH_NO_NEXT_POSITION,
@@ -120,7 +125,8 @@ static const alignas(64) uint8_t sequence_next_positions[TETRALATH_NUMBER_OF_DIR
         44, 45, 46, 47, 48, 49, TETRALATH_NO_NEXT_POSITION,
         51, 52, 53, 54, 55, TETRALATH_NO_NEXT_POSITION,
         57, 58, 59, 60, TETRALATH_NO_NEXT_POSITION,
-        TETRALATH_NO_NEXT_POSITION
+        TETRALATH_NO_NEXT_POSITION,
+         0,  0
     },
     {
          6,  7,  8,  9, 10,
@@ -132,7 +138,8 @@ static const alignas(64) uint8_t sequence_next_positions[TETRALATH_NUMBER_OF_DIR
         50, 51, 52, 53, 54, 55, TETRALATH_NO_NEXT_POSITION,
         56, 57, 58, 59, 60, TETRALATH_NO_NEXT_POSITION,
         TETRALATH_NO_NEXT_POSITION, TETRALATH_NO_NEXT_POSITION, TETRALATH_NO_NEXT_POSITION, TETRALATH_NO_NEXT_POSITION, TETRALATH_NO_NEXT_POSITION,
-        TETRALATH_NO_NEXT_POSITION
+        TETRALATH_NO_NEXT_POSITION,
+         0,  0
     },
     {
          5,  6,  7,  8,  9,
@@ -144,7 +151,8 @@ static const alignas(64) uint8_t sequence_next_positions[TETRALATH_NUMBER_OF_DIR
         TETRALATH_NO_NEXT_POSITION, 50, 51, 52, 53, 54, 55,
         TETRALATH_NO_NEXT_POSITION, 56, 57, 58, 59, 60,
         TETRALATH_NO_NEXT_POSITION, TETRALATH_NO_NEXT_POSITION, TETRALATH_NO_NEXT_POSITION, TETRALATH_NO_NEXT_POSITION, TETRALATH_NO_NEXT_POSITION,
-        TETRALATH_NO_NEXT_POSITION
+        TETRALATH_NO_NEXT_POSITION,
+         0,  0
     }
 };
 
@@ -575,7 +583,7 @@ void initialize_move_values(TETRALATH_MOVE_VALUE * const move_values) {
         const int position = default_move_order[i];
         move_values[i].position = position;
         move_values[i].minimax_result = TETRALATH_RESULT_ALPHA_MIN;
-        move_values[i].weight = default_move_weights[position];
+        move_values[i].weight = (int)default_move_weights[position];
     }
 }
 
