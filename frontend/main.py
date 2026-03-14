@@ -165,7 +165,6 @@ def graphical_game() -> None:
                 ui.enable_right_panel(right_panel, undo_last_move_button)
                 ui.trigger_redraw_board_event(global_ui_events)
         if game["state"] == definitions.TetralathState.RUNNING:
-            ui.update_highlighted_position(game, global_ui_events)
             if game["advance_turn"]:
                 handle_new_turn(game, game_backend, libtetralath_instance)
                 if game["current_color"] == game["player_color"]:
@@ -185,9 +184,13 @@ def graphical_game() -> None:
                     ui.update_ai_info_label(ai_move_processing_data, ai_info_label, False)
                     ui.update_game_result_label(game, game_result_label)
                     ui.trigger_redraw_board_event(global_ui_events)
+        ui.update_highlighted_position(game, global_ui_events)
+        ui.update_cursor(game)
         new_ui_events, pygame_events = ui.get_events(global_ui_events)
         for new_ui_event in new_ui_events:
             game["redraw_board"] = True
+            if new_ui_event["type"] == definitions.TetralathEventType.REDRAW_BOARD:
+                pass
             if new_ui_event["type"] == definitions.TetralathEventType.QUIT:
                 if running is True:
                     ui.destroy_game_ui()

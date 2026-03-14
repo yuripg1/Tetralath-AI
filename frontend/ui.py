@@ -51,6 +51,10 @@ TETRALATH_BOARD_PIECE_COLORS = {
 }
 TETRALATH_BOARD_CENTER_X = float(TETRALATH_WINDOW_WIDTH) / float(2)
 TETRALATH_BOARD_CENTER_Y = float(TETRALATH_WINDOW_HEIGHT) / float(2)
+TETRALATH_CURSOR_DEFAULT: pygame.cursors.Cursor = pygame.SYSTEM_CURSOR_ARROW
+TETRALATH_CURSOR_INVALID_MOVE: pygame.cursors.Cursor = pygame.SYSTEM_CURSOR_NO
+TETRALATH_CURSOR_VALID_MOVE: pygame.cursors.Cursor = pygame.SYSTEM_CURSOR_HAND
+TETRALATH_CURSOR_WAITING_TURN: pygame.cursors.Cursor = pygame.SYSTEM_CURSOR_WAIT
 
 
 def initialize_game_ui() -> tuple[pygame.surface.Surface, pygame.time.Clock]:
@@ -354,11 +358,9 @@ def get_current_mouse_position() -> tuple[float]:
 def update_highlighted_position(
     game: definitions.TetralathGame, global_ui_events: list[definitions.TetralathUIEvent]
 ) -> None:
-    new_highlighted_position = None
-    if game["state"] != definitions.TetralathState.RUNNING:
+    if game["state"] != definitions.TetralathState.RUNNING or game["current_color"] != game["player_color"]:
         return
-    if game["current_color"] != game["player_color"]:
-        return
+    new_highlighted_position: int | None = None
     mouse_position_x, mouse_position_y = get_current_mouse_position()
     for i in range(board.TETRALATH_BOARD_NUMBER_OF_HEXAGONS):
         if board.is_position_in_hexagon(mouse_position_x, mouse_position_y, board.BOARD_POSITIONS[i]):
@@ -367,6 +369,20 @@ def update_highlighted_position(
     if game["highlighted_board_position"] != new_highlighted_position:
         game["highlighted_board_position"] = new_highlighted_position
         trigger_redraw_board_event(global_ui_events)
+
+
+def update_cursor(game: definitions.TetralathGame) -> None:
+    new_cursor: pygame.cursors.Cursor = TETRALATH_CURSOR_DEFAULT
+    if game["state"] == definitions.TetralathState.RUNNING:
+        if game["current_color"] != game["player_color"]:
+            new_cursor = TETRALATH_CURSOR_WAITING_TURN
+        elif game["highlighted_board_position"] is not None:
+            if game["board"][game["highlighted_board_position"]] == definitions.TetralathColor.NONE:
+                new_cursor = TETRALATH_CURSOR_VALID_MOVE
+            else:
+                new_cursor = TETRALATH_CURSOR_INVALID_MOVE
+    if pygame.mouse.get_cursor() != new_cursor:
+        pygame.mouse.set_cursor(new_cursor)
 
 
 def draw_hexagons(
