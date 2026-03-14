@@ -15,22 +15,31 @@ typedef struct {
 typedef struct {
     TETRALATH_COLOR * const board_copy;
     const TETRALATH_COLOR perspective_color;
-    const TETRALATH_AI_MODE ai_mode;
+    const int winning_distance_mask;
+    const bool stop_at_first_winning_scenario;
     const int64_t target_end_time;
 } TETRALATH_MINIMAX_STATIC_DATA;
 
 #define TETRALATH_NUMBER_OF_DIRECTIONS 3
 #define TETRALATH_NO_NEXT_POSITION 61
+#define TETRALATH_NO_PREVIOUS_POSITION 61
 #define TETRALATH_SEQUENCE_START_POSITIONS_PER_DIRECTION_COUNT 43
 #define TETRALATH_MAXIMUM_NEAR_SEQUENCES 21
 #define TETRALATH_SEQUENCES_LOOKUP_TABLE_LENGTH 192
+#define TETRALATH_CONSIDER_WINNING_DISTANCE_MASK 127
+#define TETRALATH_IGNORE_WINNING_DISTANCE_MASK 0
+#define TETRALATH_WEIGHT_ADDITION_FORCED_MOVE 32
+#define TETRALATH_WEIGHT_ADDITION_NEIGHBORING_MOVE_PERSPECTIVE 16
+#define TETRALATH_WEIGHT_ADDITION_NEIGHBORING_MOVE_OPPONENT 8
 
+void compute_previous_positions();
 void index_sequence_values();
-void initialize_move_values(TETRALATH_MOVE_VALUE * const move_values);
+void initialize_move_values(TETRALATH_MOVE_VALUE * const move_values, const bool shuffle_order);
 void copy_move_values(TETRALATH_MOVE_VALUE * const new_move_values, const TETRALATH_MOVE_VALUE * const move_values);
-bool found_winning_move(const TETRALATH_MOVE_VALUE * const move_values);
 int check_game_result(const TETRALATH_COLOR * const board, const int moves_count, const TETRALATH_COLOR perspective_color, const TETRALATH_COLOR opponent_color);
-int get_forced_next_move(const TETRALATH_COLOR * const original_board, const TETRALATH_COLOR perspective_color, const int moves_count);
+void prioritize_forced_moves(const TETRALATH_COLOR * const original_board, TETRALATH_MOVE_VALUE * const move_values, const TETRALATH_COLOR perspective_color, const int moves_count);
+void prioritize_neighboring_moves(const TETRALATH_COLOR * const board, TETRALATH_MOVE_VALUE * const move_values, const TETRALATH_COLOR perspective_color);
+void sort_move_values(TETRALATH_MOVE_VALUE * const move_values, const bool use_weights);
 int minimax(const TETRALATH_COLOR * const original_board, TETRALATH_MOVE_VALUE * const move_values, const TETRALATH_COLOR perspective_color, const int moves_count, const int minimax_depth, const TETRALATH_AI_MODE ai_mode, const int64_t target_end_time);
 
 #endif
