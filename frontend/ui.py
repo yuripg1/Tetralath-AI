@@ -152,7 +152,7 @@ def draw_left_panel(
 
     ai_mode_options = [
         ("Ruthless", definitions.TetralathAIMode.RUTHLESS),
-        ("Friendly", definitions.TetralathAIMode.FRIENDLY),
+        ("Merciful", definitions.TetralathAIMode.MERCIFUL),
     ]
     ai_mode_default_index = 0
     game["ai_mode"] = ai_mode_options[ai_mode_default_index][1]

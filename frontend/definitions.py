@@ -20,7 +20,7 @@ class TetralathColor(enum.Enum):
 class TetralathAIMode(enum.Enum):
     NONE = 0
     RUTHLESS = 1
-    FRIENDLY = 2
+    MERCIFUL = 2
 
 
 class TetralathResult(enum.Enum):

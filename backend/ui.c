@@ -183,7 +183,7 @@ TETRALATH_AI_MODE choose_ai_mode() {
 
     TETRALATH_AI_MODE mode_options[2] = {
         TETRALATH_AI_MODE_RUTHLESS,
-        TETRALATH_AI_MODE_FRIENDLY
+        TETRALATH_AI_MODE_MERCIFUL
     };
 
     while (chosen_mode == TETRALATH_AI_MODE_NONE) {
@@ -197,7 +197,7 @@ TETRALATH_AI_MODE choose_ai_mode() {
             if (i == 0) {
                 mvprintw(option_y, x, "- Ruthless");
             } else {
-                mvprintw(option_y, x, "- Friendly");
+                mvprintw(option_y, x, "- Merciful");
             }
             attroff(A_REVERSE);
         }

@@ -1,6 +1,6 @@
 # Tetralath AI
 
-Tetralath is a two-player turn-based board game played on a hexagonal board of 61 positions. This project lets you play against an AI that uses minimax search with alpha-beta pruning and iterative deepening. You can run it as a graphical (GUI) application - the recommended way - or as a terminal (TUI) application.
+Tetralath is a two-player turn-based board game played on a hexagonal board of 61 positions. This project lets you play against an AI that uses minimax search with alpha-beta pruning and iterative deepening. You can run it as a graphical (GUI) application or as a terminal (TUI) application.
 
 ---
 
@@ -59,8 +59,8 @@ This builds the standalone application and runs the TUI.
 
 ## AI behaviour
 
-- **Friendly mode:** The AI tries to win as soon as it can and to delay losing as much as possible. It's generally easier for a human to beat.
-- **Ruthless mode:** The AI looks for the first winning scenario it can find, without optimizing for the earliest win. This makes it perform better and therefore also harder for a human to beat.
+- **Merciful mode:** The AI tries to delay losing as much as possible and tries to win as soon as it can. It can perform a little worse because of that and be a tad easier for a human or another AI to beat.
+- **Ruthless mode:** The AI tries to delay losing as much as possible but looks for the any winning scenario it can find, without optimizing for the earliest win. This makes it perform a little better and therefore also a bit harder for a human or another AI to beat.
 
 The AI uses minimax with alpha-beta pruning and iterative deepening. It also optimizes the search by looking for forced moves/traps and by improving the order of the evaluated moves at each depth. It has a 5-second limit per move. It searches at depth 1, then 2, then 3, and so on until time runs out. Only fully completed search depths are considered. Any run still in progress when the time limit is hit is discarded, so no result from beyond the time window is ever used. With multi-threading enabled by default, two threads share the work (e.g. one does odd depths, one even depths) to use the 5 seconds more effectively.
 
@@ -75,5 +75,5 @@ Both versions (GUI and TUI) let you undo moves: one undo typically removes your 
 ## Project layout
 
 - **`backend/`** - C game engine and AI. Can build the standalone application or the shared library `libtetralath.so` used by the GUI.
-- **`frontend/`** - Python GUI. Uses `libtetralath.so`.
+- **`frontend/`** - Python GUI. Uses `libtetralath.so` as the game engine.
 - **`archive/v1/`** - Original C implementation from 2012. Not needed to run the current GUI or TUI.
