@@ -17,6 +17,16 @@ class LibTetralath:
         self.lib.teardown_headless_game.restype = None
         self.lib.set_ai_mode.argtypes = [ctypes.c_void_p, ctypes.c_int]
         self.lib.set_ai_mode.restype = None
+        self.lib.get_ai_mode.argtypes = [ctypes.c_void_p]
+        self.lib.get_ai_mode.restype = ctypes.c_int
+        self.lib.set_ai_strategy.argtypes = [ctypes.c_void_p, ctypes.c_int]
+        self.lib.set_ai_strategy.restype = None
+        self.lib.get_ai_strategy.argtypes = [ctypes.c_void_p]
+        self.lib.get_ai_strategy.restype = ctypes.c_int
+        self.lib.set_number_of_threads.argtypes = [ctypes.c_void_p, ctypes.c_int]
+        self.lib.set_number_of_threads.restype = None
+        self.lib.get_number_of_threads.argtypes = [ctypes.c_void_p]
+        self.lib.get_number_of_threads.restype = ctypes.c_int
         self.lib.set_player_color.argtypes = [ctypes.c_void_p, ctypes.c_int]
         self.lib.set_player_color.restype = None
         self.lib.get_player_color.argtypes = [ctypes.c_void_p]
@@ -65,6 +75,21 @@ class LibTetralath:
     def set_ai_mode(self, game_backend: ctypes.c_void_p, ai_mode: definitions.TetralathAIMode) -> None:
         self.lib.set_ai_mode(game_backend, ai_mode.value)
 
+    def get_ai_mode(self, game_backend: ctypes.c_void_p) -> definitions.TetralathAIMode:
+        return definitions.TetralathAIMode(self.lib.get_ai_mode(game_backend))
+
+    def set_ai_strategy(self, game_backend: ctypes.c_void_p, ai_strategy: definitions.TetralathAIStrategy) -> None:
+        self.lib.set_ai_strategy(game_backend, ai_strategy.value)
+
+    def get_ai_strategy(self, game_backend: ctypes.c_void_p) -> definitions.TetralathAIStrategy:
+        return definitions.TetralathAIStrategy(self.lib.get_ai_strategy(game_backend))
+
+    def set_number_of_threads(self, game_backend: ctypes.c_void_p, number_of_threads: int) -> None:
+        self.lib.set_number_of_threads(game_backend, number_of_threads)
+
+    def get_number_of_threads(self, game_backend: ctypes.c_void_p) -> int:
+        return int(self.lib.get_number_of_threads(game_backend))
+
     def set_player_color(self, game_backend: ctypes.c_void_p, player_color: definitions.TetralathColor) -> None:
         self.lib.set_player_color(game_backend, player_color.value)
 
@@ -96,28 +121,28 @@ class LibTetralath:
         self.lib.set_move(game_backend, position, color.value)
 
     def set_move_undoing(self, game_backend: ctypes.c_void_p) -> int:
-        return self.lib.set_move_undoing(game_backend)
+        return int(self.lib.set_move_undoing(game_backend))
 
     def get_moves_count(self, game_backend: ctypes.c_void_p) -> int:
-        return self.lib.get_moves_count(game_backend)
+        return int(self.lib.get_moves_count(game_backend))
 
     def get_number_of_moves_to_undo(self, game_backend: ctypes.c_void_p) -> int:
-        return self.lib.get_number_of_moves_to_undo(game_backend)
+        return int(self.lib.get_number_of_moves_to_undo(game_backend))
 
     def get_latest_move_position(self, game_backend: ctypes.c_void_p) -> int:
-        return self.lib.get_latest_move_position(game_backend)
+        return int(self.lib.get_latest_move_position(game_backend))
 
     def get_latest_move_color(self, game_backend: ctypes.c_void_p) -> definitions.TetralathColor:
         return definitions.TetralathColor(self.lib.get_latest_move_color(game_backend))
 
     def compute_ai_move(self, game_backend: ctypes.c_void_p) -> int:
-        return self.lib.compute_ai_move(game_backend)
+        return int(self.lib.compute_ai_move(game_backend))
 
     def get_next_empty_position(self, game_backend: ctypes.c_void_p, position: int, increment: int) -> int:
-        return self.lib.get_next_empty_position(game_backend, position, increment)
+        return int(self.lib.get_next_empty_position(game_backend, position, increment))
 
     def get_latest_minimax_depth(self, game_backend: ctypes.c_void_p) -> int:
-        return self.lib.get_latest_minimax_depth(game_backend)
+        return int(self.lib.get_latest_minimax_depth(game_backend))
 
     def get_latest_minimax_time_taken(self, game_backend: ctypes.c_void_p) -> float:
-        return self.lib.get_latest_minimax_time_taken(game_backend)
+        return float(self.lib.get_latest_minimax_time_taken(game_backend))

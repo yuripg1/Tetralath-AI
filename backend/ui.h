@@ -15,7 +15,10 @@ typedef enum {
     TETRALATH_PLAYER_ACTION_KEY_RIGHT = 2,
     TETRALATH_PLAYER_ACTION_KEY_ENTER = 3,
     TETRALATH_PLAYER_ACTION_KEY_U = 4,
-    TETRALATH_PLAYER_ACTION_KEY_Q = 5,
+    TETRALATH_PLAYER_ACTION_KEY_M = 5,
+    TETRALATH_PLAYER_ACTION_KEY_S = 6,
+    TETRALATH_PLAYER_ACTION_KEY_T = 7,
+    TETRALATH_PLAYER_ACTION_KEY_Q = 8,
 } TETRALATH_PLAYER_ACTION;
 
 typedef struct {
@@ -29,11 +32,11 @@ typedef struct {
 #define TETRALATH_YELLOW_BLACK 4
 #define TETRALATH_WHITE_BLUE 5
 #define TETRALATH_BLACK_BLUE 6
-#define TETRALATH_BOARD_X 29
+#define TETRALATH_BOARD_X 19
 #define TETRALATH_BOARD_Y 2
 #define TETRALATH_LEFT_PANEL_X 3
 #define TETRALATH_LEFT_PANEL_Y 2
-#define TETRALATH_RIGHT_PANEL_X 69
+#define TETRALATH_RIGHT_PANEL_X 59
 #define TETRALATH_RIGHT_PANEL_Y 2
 #define TETRALATH_POSITION_OFFSET 4
 #define TETRALATH_ROW_OFFSET 2
@@ -43,8 +46,10 @@ typedef struct {
 #define TETRALATH_QUIT_GAME 62
 #define TETRALATH_END_GAME 63
 
-TETRALATH_AI_MODE choose_ai_mode();
-TETRALATH_COLOR choose_player_color();
+TETRALATH_COLOR choose_player_color(const TETRALATH_COLOR default_player_color);
+TETRALATH_AI_MODE choose_ai_mode(const TETRALATH_AI_MODE default_ai_mode);
+TETRALATH_AI_STRATEGY choose_ai_strategy(const TETRALATH_AI_STRATEGY default_ai_strategy);
+int choose_number_of_threads(const int default_number_of_threads);
 TETRALATH_PLAYER_ACTION choose_player_action();
 void update_position_highlights(const int current_position, const int previous_position, const TETRALATH_COLOR player_color);
 void draw_move(const int position, const TETRALATH_COLOR color, const bool is_latest_move);

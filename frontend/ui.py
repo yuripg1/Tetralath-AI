@@ -25,6 +25,7 @@ TETRALATH_LEFT_PANEL_WIDGET_BORDER_COLOR = (192, 192, 192)
 TETRALATH_LEFT_PANEL_WIDGET_BORDER_WIDTH = 2
 TETRALATH_LEFT_PANEL_WIDGET_FONT_COLOR = (0, 0, 0)
 TETRALATH_LEFT_PANEL_WIDGET_FONT_SIZE = 30
+TETRALATH_LEFT_PANEL_SPACING_LABELS_SIZE = 15
 TETRALATH_LEFT_PANEL_POSITION = (0, 0, False)
 TETRALATH_RIGHT_PANEL_BASE_THEME = "THEME_DEFAULT"
 TETRALATH_RIGHT_PANEL_WIDTH = 266
@@ -37,6 +38,7 @@ TETRALATH_RIGHT_PANEL_WIDGET_BORDER_COLOR = (192, 192, 192)
 TETRALATH_RIGHT_PANEL_WIDGET_BORDER_WIDTH = 2
 TETRALATH_RIGHT_PANEL_WIDGET_FONT_COLOR = (0, 0, 0)
 TETRALATH_RIGHT_PANEL_WIDGET_FONT_SIZE = 30
+TETRALATH_RIGHT_PANEL_SPACING_LABELS_SIZE = 15
 TETRALATH_RIGHT_PANEL_POSITION = (958, 0, False)
 TETRALATH_BOARD_NUMBER_OF_HEXAGONS = board.TETRALATH_BOARD_NUMBER_OF_HEXAGONS
 TETRALATH_BOARD_HEXAGON_RADIUS = float(43)
@@ -116,7 +118,12 @@ def get_events(
 
 def draw_left_panel(
     game: definitions.TetralathGame, pending_tetralath_ui_events: list[definitions.TetralathUIEvent]
-) -> tuple[pygame_menu.Menu, pygame_menu.widgets.Selector, pygame_menu.widgets.Selector, pygame_menu.widgets.Button]:
+) -> tuple[
+    pygame_menu.Menu,
+    list[pygame_menu.widgets.Selector],
+    list[pygame_menu.widgets.Selector],
+    list[pygame_menu.widgets.Button],
+]:
     theme = getattr(pygame_menu.themes, TETRALATH_LEFT_PANEL_BASE_THEME).copy()
     theme.border_width = 0
     theme.widget_border_width = 0
@@ -147,29 +154,6 @@ def draw_left_panel(
     def on_mouse_leave_widget(widget: pygame_menu.widgets.Button, menu: pygame_menu.Menu) -> None:
         widget.set_background_color(TETRALATH_LEFT_PANEL_WIDGET_BACKGROUND_COLOR)
 
-    def on_ai_mode_change(selected: tuple, index: int) -> None:
-        game["ai_mode"] = selected[0][1]
-
-    ai_mode_options = [
-        ("Ruthless", definitions.TetralathAIMode.RUTHLESS),
-        ("Merciful", definitions.TetralathAIMode.MERCIFUL),
-    ]
-    ai_mode_default_index = 0
-    game["ai_mode"] = ai_mode_options[ai_mode_default_index][1]
-    menu.add.label("AI mode")
-    ai_mode_selector = menu.add.selector(
-        "",
-        ai_mode_options,
-        default=ai_mode_default_index,
-        onchange=on_ai_mode_change,
-        background_color=TETRALATH_LEFT_PANEL_WIDGET_BACKGROUND_COLOR,
-        border_width=TETRALATH_LEFT_PANEL_WIDGET_BORDER_WIDTH,
-    )
-    ai_mode_selector.set_onmouseover(on_mouse_over_widget)
-    ai_mode_selector.set_onmouseleave(on_mouse_leave_widget)
-
-    menu.add.label("")
-
     def on_player_color_change(selected: tuple, index: int) -> None:
         game["player_color"] = selected[0][1]
 
@@ -179,7 +163,7 @@ def draw_left_panel(
     ]
     player_color_default_index = 0
     game["player_color"] = player_color_options[player_color_default_index][1]
-    menu.add.label("Player color")
+    menu.add.label("Player color:")
     player_color_selector = menu.add.selector(
         "",
         player_color_options,
@@ -191,7 +175,81 @@ def draw_left_panel(
     player_color_selector.set_onmouseover(on_mouse_over_widget)
     player_color_selector.set_onmouseleave(on_mouse_leave_widget)
 
-    menu.add.label("")
+    menu.add.label("", font_size=TETRALATH_LEFT_PANEL_SPACING_LABELS_SIZE)
+
+    def on_ai_mode_change(selected: tuple, index: int) -> None:
+        game["ai_mode"] = selected[0][1]
+        trigger_changed_game_setting_event(pending_tetralath_ui_events)
+
+    ai_mode_options = [
+        ("Merciful", definitions.TetralathAIMode.MERCIFUL),
+        ("Ruthless", definitions.TetralathAIMode.RUTHLESS),
+    ]
+    ai_mode_default_index = 0
+    game["ai_mode"] = ai_mode_options[ai_mode_default_index][1]
+    menu.add.label("AI mode:")
+    ai_mode_selector = menu.add.selector(
+        "",
+        ai_mode_options,
+        default=ai_mode_default_index,
+        onchange=on_ai_mode_change,
+        background_color=TETRALATH_LEFT_PANEL_WIDGET_BACKGROUND_COLOR,
+        border_width=TETRALATH_LEFT_PANEL_WIDGET_BORDER_WIDTH,
+    )
+    ai_mode_selector.set_onmouseover(on_mouse_over_widget)
+    ai_mode_selector.set_onmouseleave(on_mouse_leave_widget)
+
+    menu.add.label("", font_size=TETRALATH_LEFT_PANEL_SPACING_LABELS_SIZE)
+
+    def on_ai_strategy_change(selected: tuple, index: int) -> None:
+        game["ai_strategy"] = selected[0][1]
+        trigger_changed_game_setting_event(pending_tetralath_ui_events)
+
+    ai_strategy_options = [
+        ("Offensive", definitions.TetralathAIStrategy.OFFENSIVE),
+        ("Defensive", definitions.TetralathAIStrategy.DEFENSIVE),
+    ]
+    ai_strategy_default_index = 0
+    game["ai_strategy"] = ai_strategy_options[ai_strategy_default_index][1]
+    menu.add.label("AI strategy:")
+    ai_strategy_selector = menu.add.selector(
+        "",
+        ai_strategy_options,
+        default=ai_strategy_default_index,
+        onchange=on_ai_strategy_change,
+        background_color=TETRALATH_LEFT_PANEL_WIDGET_BACKGROUND_COLOR,
+        border_width=TETRALATH_LEFT_PANEL_WIDGET_BORDER_WIDTH,
+    )
+    ai_strategy_selector.set_onmouseover(on_mouse_over_widget)
+    ai_strategy_selector.set_onmouseleave(on_mouse_leave_widget)
+
+    menu.add.label("", font_size=TETRALATH_LEFT_PANEL_SPACING_LABELS_SIZE)
+
+    def on_number_of_threads_change(selected: tuple, index: int) -> None:
+        game["number_of_threads"] = selected[0][1]
+        trigger_changed_game_setting_event(pending_tetralath_ui_events)
+
+    number_of_threads_options = [
+        ("1", 1),
+        ("2", 2),
+        ("3", 3),
+        ("4", 4),
+    ]
+    number_of_threads_default_index = 0
+    game["number_of_threads"] = number_of_threads_options[number_of_threads_default_index][1]
+    menu.add.label("# of threads:")
+    number_of_threads_selector = menu.add.selector(
+        "",
+        number_of_threads_options,
+        default=number_of_threads_default_index,
+        onchange=on_number_of_threads_change,
+        background_color=TETRALATH_LEFT_PANEL_WIDGET_BACKGROUND_COLOR,
+        border_width=TETRALATH_LEFT_PANEL_WIDGET_BORDER_WIDTH,
+    )
+    number_of_threads_selector.set_onmouseover(on_mouse_over_widget)
+    number_of_threads_selector.set_onmouseleave(on_mouse_leave_widget)
+
+    menu.add.label("", font_size=TETRALATH_LEFT_PANEL_SPACING_LABELS_SIZE)
 
     def on_start_game() -> None:
         ui_event: definitions.TetralathUIEvent = {
@@ -208,24 +266,26 @@ def draw_left_panel(
     start_game_button.set_onmouseover(on_mouse_over_widget)
     start_game_button.set_onmouseleave(on_mouse_leave_widget)
 
-    return menu, ai_mode_selector, player_color_selector, start_game_button
+    static_selectors: list[pygame_menu.widgets.Selector] = [player_color_selector]
+    dynamic_selectors: list[pygame_menu.widgets.Selector] = [
+        ai_mode_selector,
+        ai_strategy_selector,
+        number_of_threads_selector,
+    ]
+    static_buttons: list[pygame_menu.widgets.Button] = [start_game_button]
 
-
-def disable_left_panel(
-    menu: pygame_menu.Menu,
-    ai_mode_selector: pygame_menu.widgets.Selector,
-    player_color_selector: pygame_menu.widgets.Selector,
-    start_game_button: pygame_menu.widgets.Button,
-) -> None:
-    ai_mode_selector.readonly = True
-    player_color_selector.readonly = True
-    start_game_button.readonly = True
-    menu.render()
+    return menu, static_selectors, dynamic_selectors, static_buttons
 
 
 def draw_right_panel(
     pending_tetralath_ui_events: list[definitions.TetralathUIEvent],
-) -> tuple[pygame_menu.Menu, pygame_menu.widgets.Button, pygame_menu.widgets.Label]:
+) -> tuple[
+    pygame_menu.Menu,
+    list[pygame_menu.widgets.Button],
+    pygame_menu.widgets.Label,
+    pygame_menu.widgets.Label,
+    pygame_menu.widgets.Label,
+]:
     theme = getattr(pygame_menu.themes, TETRALATH_RIGHT_PANEL_BASE_THEME).copy()
     theme.title = False
     theme.border_width = 0
@@ -268,30 +328,35 @@ def draw_right_panel(
     undo_last_move_button.set_onmouseover(on_mouse_over_widget)
     undo_last_move_button.set_onmouseleave(on_mouse_leave_widget)
 
-    menu.add.label("")
+    menu.add.label("", font_size=TETRALATH_RIGHT_PANEL_SPACING_LABELS_SIZE)
 
     menu.add.label("Current player:")
     current_player_label = menu.add.label("-")
 
-    menu.add.label("")
+    menu.add.label("", font_size=TETRALATH_RIGHT_PANEL_SPACING_LABELS_SIZE)
 
     ai_info_label = menu.add.label("", wordwrap=True, max_nlines=2)
     ai_info_label.set_title(" \n ")
 
-    menu.add.label("")
+    menu.add.label("", font_size=TETRALATH_RIGHT_PANEL_SPACING_LABELS_SIZE)
 
     game_result_label = menu.add.label("")
 
-    return menu, undo_last_move_button, current_player_label, ai_info_label, game_result_label
+    dynamic_buttons: list[pygame_menu.widgets.Button] = [undo_last_move_button]
+
+    return menu, dynamic_buttons, current_player_label, ai_info_label, game_result_label
 
 
-def enable_right_panel(menu: pygame_menu.Menu, undo_last_move_button: pygame_menu.widgets.Button) -> None:
-    undo_last_move_button.readonly = False
-    menu.render()
-
-
-def disable_right_panel(menu: pygame_menu.Menu, undo_last_move_button: pygame_menu.widgets.Button) -> None:
-    undo_last_move_button.readonly = True
+def set_readonly_in_menu_components(
+    readonly_value: bool,
+    menu: pygame_menu.Menu,
+    selectors: list[pygame_menu.widgets.Selector],
+    buttons: list[pygame_menu.widgets.Button],
+) -> None:
+    for selector in selectors:
+        selector.readonly = readonly_value
+    for button in buttons:
+        button.readonly = readonly_value
     menu.render()
 
 
@@ -344,6 +409,10 @@ def update_game_result_label(game: definitions.TetralathGame, game_result_label:
     elif game["result"] == definitions.TetralathResult.DRAW:
         new_title = "It's a tie"
     game_result_label.set_title(new_title)
+
+
+def trigger_changed_game_setting_event(global_ui_events: list[definitions.TetralathUIEvent]) -> None:
+    global_ui_events.append(definitions.TetralathUIEvent(type=definitions.TetralathEventType.CHANGED_GAME_SETTING))
 
 
 def trigger_redraw_board_event(global_ui_events: list[definitions.TetralathUIEvent]) -> None:

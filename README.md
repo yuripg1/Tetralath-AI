@@ -1,6 +1,6 @@
 # Tetralath AI
 
-Tetralath is a two-player turn-based board game played on a hexagonal board of 61 positions. This project lets you play against an AI that uses minimax search with alpha-beta pruning and iterative deepening. You can run it as a graphical (GUI) application or as a terminal (TUI) application.
+Tetralath is a two-player turn-based board game played on a hexagonal board of 61 positions. This project lets you play against an AI that uses minimax search with alpha-beta pruning, iterative deepening and multi-threading. You can run it as a graphical (GUI) application or as a terminal (TUI) application.
 
 ---
 
@@ -10,8 +10,9 @@ Tetralath is a two-player turn-based board game played on a hexagonal board of 6
 - **Turns:** Players alternate every turn. On your turn, you place one piece of your color on any empty cell.
 - **Start:** White always make the first move to start the game.
 - **Winning:** You win by forming a line of 4 pieces of your color (horizontal or along a diagonal).
-- **Losing:** If you form a line of 3 pieces of your color without also having a line of 4, you lose (your opponent wins).
+- **Losing:** If you form a line of 3 pieces of your color, you lose (your opponent wins).
 - **Summary:** 4-in-a-row wins. 3-in-a-row alone loses.
+- **Clarification:** A line of 3 pieces that is part of a line of 4 pieces does not count as a losing scenario.
 - **Draw:** If all 61 positions are filled and neither player has won or lost, the game is a tie.
 
 ---
@@ -31,7 +32,7 @@ $ ./run_frontend.sh
 
 This builds the shared library in `backend/` (`libtetralath.so`), sets up a Python virtual environment in `frontend/.venv`, installs dependencies from `frontend/requirements.txt`, and runs the GUI. The game engine and AI run in the shared library.
 
-![Graphical UI (GUI)](img/tetralath_gui.png)
+![Graphical UI (GUI)](img/tetralath_gui.gif)
 
 ### Terminal version (TUI)
 
@@ -46,7 +47,7 @@ $ ./run_backend.sh
 
 This builds the standalone application and runs the TUI.
 
-![Terminal UI (TUI)](img/tetralath_tui.png)
+![Terminal UI (TUI)](img/tetralath_tui.gif)
 
 ---
 
@@ -57,12 +58,23 @@ This builds the standalone application and runs the TUI.
 
 ---
 
-## AI behaviour
+## AI
 
-- **Merciful mode:** The AI tries to delay losing as much as possible and tries to win as soon as it can. It can perform a little worse because of that and be a tad easier for a human or another AI to beat.
-- **Ruthless mode:** The AI tries to delay losing as much as possible but looks for the any winning scenario it can find, without optimizing for the earliest win. This makes it perform a little better and therefore also a bit harder for a human or another AI to beat.
+At the core of the AI is a minimax algorithm with alpha-beta pruning, iterative deepening and multi-threading. It runs the minimax search with depth 1, then 2, then 3 and so on until it reaches the processing time limit. Between those searches with increasing depth, it sorts the possible moves from best to worst (based on the previous run), which greatly improves the amount of pruning done and, thus, makes the next search perform much better. It also implements multi-threading so that we can evaluate multiple possible moves at the same time while also doing the best effort to make the threads efficiently divide up their work among them and to keep an updated alpha value during the search.
 
-The AI uses minimax with alpha-beta pruning and iterative deepening. It also optimizes the search by looking for forced moves/traps and by improving the order of the evaluated moves at each depth. It has a 5-second limit per move. It searches at depth 1, then 2, then 3, and so on until time runs out. Only fully completed search depths are considered. Any run still in progress when the time limit is hit is discarded, so no result from beyond the time window is ever used. With multi-threading enabled by default, two threads share the work (e.g. one does odd depths, one even depths) to use the 5 seconds more effectively.
+It also implements two sets of settings "AI mode" and "AI strategy" which are described below.
+
+### AI modes
+
+- **Merciful:** This mode searches for the fastest winning scenario (the one that requires the least amount of moves) in its horizon. That means that, when it has victory in sight, it proceeds to do the moves to win the game at the earliest opportunity. It's considered "merciful" because it doesn't fool around and it finishes the opponent as soon as possible. This search for the best winning scenario has a cost, though, and it makes the AI perform worse than the alternative (the "ruthless" mode).
+
+- **Ruthless:** This mode searches for any winning scenario (not necessarily the one that requires the least amount of moves) in its horizon. That means that, when it has victory in sight, it proceeds to do any move that keeps it on track to winning but may not go straight for the quickest win. It's considered "ruthless" because, instead of finishing the opponent as soon as possible, it may sometimes end up doing some dummy moves and leave the opponent lingering but already sure of its coming defeat. This search for any winning scenario makes the AI perform better than the alternative (the "merciful" mode) because it ends up being able to prune more branches in the minimax algorithm.
+
+### AI strategies
+
+- **Offensive:** This strategy prioritizes moves that increase the likelihood of forming lines of 4 pieces, but that can leave the AI vulnerable to an offensive strategy from the opponent.
+
+- **Defensive:** This strategy prioritizes blocking the opponent from forming lines of 4 pieces as much as possible as well as to force moves from the opponent to fill the board before it has any chance of executing an offensive strategy at the beginning. But that means that the AI is unlikely to get close to forming a line of 4 pieces for itself and can end up dragging the game for longer.
 
 ---
 

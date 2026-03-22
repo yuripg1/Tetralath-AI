@@ -56,6 +56,15 @@ int get_player_action(TETRALATH_GAME *game) {
                 }
                 chosen_action = TETRALATH_UNDO_LAST_MOVE;
                 break;
+            case TETRALATH_PLAYER_ACTION_KEY_M:
+                set_ai_mode(game, choose_ai_mode(get_ai_mode(game)));
+                break;
+            case TETRALATH_PLAYER_ACTION_KEY_S:
+                set_ai_strategy(game, choose_ai_strategy(get_ai_strategy(game)));
+                break;
+            case TETRALATH_PLAYER_ACTION_KEY_T:
+                set_number_of_threads(game, choose_number_of_threads(get_number_of_threads(game)));
+                break;
             case TETRALATH_PLAYER_ACTION_KEY_Q:
                 chosen_action = TETRALATH_QUIT_GAME;
                 break;
@@ -126,8 +135,10 @@ static void process_ai_move(TETRALATH_GAME *game) {
 static void graphical_game() {
     TETRALATH_GAME *game = init_headless_game();
     initialize_game_ui();
-    set_ai_mode(game, choose_ai_mode());
-    TETRALATH_COLOR player_color = choose_player_color();
+    TETRALATH_COLOR player_color = choose_player_color(TETRALATH_COLOR_WHITE);
+    set_ai_mode(game, choose_ai_mode(TETRALATH_AI_MODE_MERCIFUL));
+    set_ai_strategy(game, choose_ai_strategy(TETRALATH_AI_STRATEGY_OFFENSIVE));
+    set_number_of_threads(game, choose_number_of_threads(1));
     set_player_color(game, player_color);
     draw_right_panel();
     TETRALATH_RESULT game_result;

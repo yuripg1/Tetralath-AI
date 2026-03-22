@@ -1,4 +1,3 @@
-#include <pthread.h>
 #include <stdbool.h>
 #include <stdlib.h>
 
@@ -6,7 +5,7 @@
 #include "time.h"
 
 static TETRALATH_COLOR *initialize_board() {
-    TETRALATH_COLOR *board = (TETRALATH_COLOR*)malloc((TETRALATH_BOARD_SIZE + 1) * sizeof(TETRALATH_COLOR));
+    TETRALATH_COLOR *board = (TETRALATH_COLOR*)malloc((TETRALATH_ALLOCATED_BOARD_SIZE) * sizeof(TETRALATH_COLOR));
     for (int i = 0; i < TETRALATH_BOARD_SIZE; i += 1) {
         board[i] = TETRALATH_COLOR_NONE;
     }
@@ -29,6 +28,7 @@ static TETRALATH_GAME *initialize_game_data() {
     game->next_color = TETRALATH_COLOR_NONE;
     game->player_color = TETRALATH_COLOR_NONE;
     game->ai_mode = TETRALATH_AI_MODE_NONE;
+    game->number_of_threads = 0;
     game->state = TETRALATH_STATE_NONE;
     game->result = TETRALATH_RESULT_NONE_MAX;
     compute_previous_positions();
@@ -52,61 +52,6 @@ static void initialize_minimax_outputs(TETRALATH_MINIMAX_OUTPUT * const minimax_
     }
 }
 
-static void *process_ai_move_thread(void *arg) {
-    TETRALATH_THREAD_INPUT *thread_input = (TETRALATH_THREAD_INPUT *)arg;
-
-    TETRALATH_MOVE_VALUE move_values[TETRALATH_BOARD_SIZE];
-    copy_move_values(move_values, thread_input->initial_move_values);
-
-    int minimax_depth = thread_input->minimax_depth_remainder + thread_input->minimum_minimax_depth;
-    int64_t current_time = get_current_time_nsec();
-    while (minimax_depth <= thread_input->maximum_minimax_depth && current_time < thread_input->target_end_time) {
-        const int current_ai_move = minimax(thread_input->game->board, move_values, thread_input->game->current_color, thread_input->game->moves->moves_count, minimax_depth, thread_input->game->ai_mode, thread_input->target_end_time);
-        current_time = get_current_time_nsec();
-        if (current_time < thread_input->target_end_time) {
-            thread_input->minimax_outputs[minimax_depth - 1].minimax_depth = minimax_depth;
-            thread_input->minimax_outputs[minimax_depth - 1].ai_move = current_ai_move;
-            thread_input->minimax_outputs[minimax_depth - 1].time_taken_nsec = current_time - thread_input->computing_start_time;
-            minimax_depth += thread_input->minimax_depth_divisor;
-        }
-    }
-
-    return NULL;
-}
-
-static TETRALATH_MINIMAX_OUTPUT *get_best_ai_move(TETRALATH_MINIMAX_OUTPUT * const minimax_outputs) {
-    TETRALATH_MINIMAX_OUTPUT *best_minimax_output = NULL;
-    int best_minimax_depth = 0;
-    for (int i = 0; i < TETRALATH_BOARD_SIZE; i += 1) {
-        if (minimax_outputs[i].ai_move != TETRALATH_POSITION_NONE && minimax_outputs[i].minimax_depth > best_minimax_depth) {
-            best_minimax_output = &minimax_outputs[i];
-            best_minimax_depth = minimax_outputs[i].minimax_depth;
-        }
-    }
-    return best_minimax_output;
-}
-
-static TETRALATH_RESULT get_simplified_game_result(const TETRALATH_GAME * const game) {
-    TETRALATH_RESULT simplified_game_result = TETRALATH_RESULT_NONE_MAX;
-
-    const int game_result = check_game_result(game->board, game->moves->moves_count, game->player_color, flip_color(game->player_color));
-    switch (game_result) {
-        case TETRALATH_RESULT_WIN:
-            simplified_game_result = TETRALATH_RESULT_WIN;
-            break;
-        case TETRALATH_RESULT_LOSS:
-            simplified_game_result = TETRALATH_RESULT_LOSS;
-            break;
-        case TETRALATH_RESULT_DRAW_MAX:
-            simplified_game_result = TETRALATH_RESULT_DRAW_MAX;
-            break;
-        default:
-            break;
-    }
-
-    return simplified_game_result;
-}
-
 TETRALATH_GAME *init_headless_game() {
     TETRALATH_GAME *game = initialize_game_data();
     return game;
@@ -118,6 +63,26 @@ void teardown_headless_game(TETRALATH_GAME * const game) {
 
 void set_ai_mode(TETRALATH_GAME * const game, const TETRALATH_AI_MODE ai_mode) {
     game->ai_mode = ai_mode;
+}
+
+TETRALATH_AI_MODE get_ai_mode(TETRALATH_GAME * const game) {
+    return game->ai_mode;
+}
+
+void set_ai_strategy(TETRALATH_GAME * const game, const TETRALATH_AI_STRATEGY ai_strategy) {
+    game->ai_strategy = ai_strategy;
+}
+
+TETRALATH_AI_STRATEGY get_ai_strategy(TETRALATH_GAME * const game) {
+    return game->ai_strategy;
+}
+
+void set_number_of_threads(TETRALATH_GAME * const game, const int number_of_threads) {
+    game->number_of_threads = number_of_threads;
+}
+
+int get_number_of_threads(TETRALATH_GAME * const game) {
+    return game->number_of_threads;
 }
 
 void set_player_color(TETRALATH_GAME * const game, const TETRALATH_COLOR player_color) {
@@ -137,7 +102,7 @@ TETRALATH_STATE get_game_state(const TETRALATH_GAME * const game) {
 }
 
 void update_game_result(TETRALATH_GAME * const game) {
-    game->result = get_simplified_game_result(game);
+    game->result = get_player_game_result(game->board, game->moves->moves_count, game->player_color);
 }
 
 TETRALATH_RESULT get_game_result(const TETRALATH_GAME * const game) {
@@ -146,7 +111,7 @@ TETRALATH_RESULT get_game_result(const TETRALATH_GAME * const game) {
 
 void start_new_turn_data(TETRALATH_GAME * const game) {
     if (game->next_color == TETRALATH_COLOR_NONE) {
-        game->next_color = TETRALATH_COLOR_WHITE;
+        game->next_color = TETRALATH_FIRST_MOVE_COLOR;
     }
     game->current_color = game->next_color;
     game->next_color = flip_color(game->current_color);
@@ -213,11 +178,15 @@ int compute_ai_move(TETRALATH_GAME * const game) {
     TETRALATH_MINIMAX_OUTPUT minimax_outputs[TETRALATH_BOARD_SIZE];
     initialize_minimax_outputs(minimax_outputs);
 
-    TETRALATH_MOVE_VALUE initial_move_values[TETRALATH_BOARD_SIZE];
-    initialize_move_values(initial_move_values, true);
-    prioritize_forced_moves(game->board, initial_move_values, game->current_color, game->moves->moves_count);
-    prioritize_neighboring_moves(game->board, initial_move_values, game->current_color);
-    sort_move_values(initial_move_values, true);
+    TETRALATH_MOVE_VALUE move_values[TETRALATH_BOARD_SIZE];
+    initialize_move_values(move_values, true);
+
+    const int forced_next_move = get_forced_next_move(game->board, game->current_color, game->moves->moves_count);
+
+    if (forced_next_move == TETRALATH_POSITION_NONE) {
+        prioritize_neighboring_moves(game->board, move_values, game->current_color, game->ai_strategy);
+        prioritize_forced_moves(game->board, move_values, game->current_color, game->moves->moves_count, game->ai_strategy);
+    }
 
     int minimum_minimax_depth = TETRALATH_DEFAULT_MINIMAX_MINIMUM_DEPTH;
     int maximum_minimax_depth = TETRALATH_DEFAULT_MINIMAX_MAXIMUM_DEPTH;
@@ -225,35 +194,34 @@ int compute_ai_move(TETRALATH_GAME * const game) {
         maximum_minimax_depth = TETRALATH_BOARD_SIZE - get_moves_count(game);
     }
 
-    const int number_of_threads = TETRALATH_DEFAULT_NUMBER_OF_THREADS;
-    TETRALATH_THREAD_INPUT thread_inputs[number_of_threads];
-    for (int i = 0; i < number_of_threads; i += 1) {
-        thread_inputs[i].game = game;
-        thread_inputs[i].minimax_depth_divisor = number_of_threads;
-        thread_inputs[i].minimax_depth_remainder = i;
-        thread_inputs[i].minimum_minimax_depth = minimum_minimax_depth;
-        thread_inputs[i].maximum_minimax_depth = maximum_minimax_depth;
-        thread_inputs[i].computing_start_time = computing_start_time;
-        thread_inputs[i].target_end_time = target_end_time;
-        thread_inputs[i].initial_move_values = initial_move_values;
-        thread_inputs[i].minimax_outputs = minimax_outputs;
+    int minimax_depth = minimum_minimax_depth;
+    bool use_weights_on_sort = true;
+    TETRALATH_MINIMAX_OUTPUT best_minimax_output = {
+        .ai_move = TETRALATH_POSITION_NONE,
+        .minimax_result = TETRALATH_RESULT_ALPHA_MIN,
+    };
+    int64_t current_time = get_current_time_nsec();
+    while (minimax_depth <= maximum_minimax_depth && current_time < target_end_time) {
+        minimax(game->board, move_values, game->current_color, game->moves->moves_count, minimax_depth, forced_next_move, game->ai_mode, game->number_of_threads, target_end_time, use_weights_on_sort);
+        current_time = get_current_time_nsec();
+
+        TETRALATH_MOVE_VALUE *best_move = get_new_best_move(move_values, best_minimax_output.ai_move, best_minimax_output.minimax_result);
+        if (best_move != NULL) {
+            best_minimax_output.minimax_depth = minimax_depth;
+            best_minimax_output.time_taken_nsec = (current_time - computing_start_time);
+            best_minimax_output.ai_move = best_move->position;
+            best_minimax_output.minimax_result = best_move->minimax_result;
+        }
+
+        use_weights_on_sort = false;
+        minimax_depth += 1;
     }
 
-    pthread_t threads[number_of_threads];
-    for (int i = 0; i < number_of_threads; i++) {
-        pthread_create(&threads[i], NULL, process_ai_move_thread, &thread_inputs[i]);
-    }
-    for (int i = 0; i < number_of_threads; i++) {
-        pthread_join(threads[i], NULL);
-    }
+    game->latest_minimax_output.minimax_depth = best_minimax_output.minimax_depth;
+    game->latest_minimax_output.ai_move = best_minimax_output.ai_move;
+    game->latest_minimax_output.time_taken_nsec = best_minimax_output.time_taken_nsec;
 
-    TETRALATH_MINIMAX_OUTPUT *best_minimax_output = get_best_ai_move(minimax_outputs);
-
-    game->latest_minimax_output.minimax_depth = best_minimax_output->minimax_depth;
-    game->latest_minimax_output.ai_move = best_minimax_output->ai_move;
-    game->latest_minimax_output.time_taken_nsec = best_minimax_output->time_taken_nsec;
-
-    return best_minimax_output->ai_move;
+    return best_minimax_output.ai_move;
 }
 
 int get_next_empty_position(const TETRALATH_GAME * const game, const int position, const int increment) {

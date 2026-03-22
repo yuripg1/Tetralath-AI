@@ -18,6 +18,7 @@ typedef struct {
 
 typedef struct {
     int minimax_depth;
+    int minimax_result;
     int ai_move;
     int64_t time_taken_nsec;
 } TETRALATH_MINIMAX_OUTPUT;
@@ -29,22 +30,12 @@ typedef struct {
     TETRALATH_COLOR next_color;
     TETRALATH_COLOR player_color;
     TETRALATH_AI_MODE ai_mode;
+    TETRALATH_AI_STRATEGY ai_strategy;
+    int number_of_threads;
     TETRALATH_STATE state;
     TETRALATH_RESULT result;
     TETRALATH_MINIMAX_OUTPUT latest_minimax_output;
 } TETRALATH_GAME;
-
-typedef struct {
-    TETRALATH_GAME *game;
-    int minimax_depth_divisor;
-    int minimax_depth_remainder;
-    int minimum_minimax_depth;
-    int maximum_minimax_depth;
-    int64_t computing_start_time;
-    int64_t target_end_time;
-    TETRALATH_MOVE_VALUE *initial_move_values;
-    TETRALATH_MINIMAX_OUTPUT *minimax_outputs;
-} TETRALATH_THREAD_INPUT;
 
 #define TETRALATH_FIRST_POSITION 0
 #define TETRALATH_LAST_POSITION 60
@@ -52,6 +43,11 @@ typedef struct {
 TETRALATH_GAME *init_headless_game();
 void teardown_headless_game(TETRALATH_GAME * const game);
 void set_ai_mode(TETRALATH_GAME * const game, const TETRALATH_AI_MODE ai_mode);
+TETRALATH_AI_MODE get_ai_mode(TETRALATH_GAME * const game);
+void set_ai_strategy(TETRALATH_GAME * const game, const TETRALATH_AI_STRATEGY ai_strategy);
+TETRALATH_AI_STRATEGY get_ai_strategy(TETRALATH_GAME * const game);
+void set_number_of_threads(TETRALATH_GAME * const game, const int number_of_threads);
+int get_number_of_threads(TETRALATH_GAME * const game);
 void set_player_color(TETRALATH_GAME * const game, const TETRALATH_COLOR player_color);
 TETRALATH_COLOR get_player_color(const TETRALATH_GAME * const game);
 void set_game_state(TETRALATH_GAME * const game, const TETRALATH_STATE state);

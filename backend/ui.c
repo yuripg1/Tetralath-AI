@@ -122,19 +122,22 @@ static void draw_controls_manual() {
 
     mvprintw(y, x, "Controls:");
     mvprintw(y + 1, x, "[U] : Undo last move");
-    mvprintw(y + 2, x, "[Q] : Quit");
+    mvprintw(y + 2, x, "[M] : Change AI mode");
+    mvprintw(y + 3, x, "[S] : Change AI strategy");
+    mvprintw(y + 4, x, "[T] : Change # of threads");
+    mvprintw(y + 5, x, "[Q] : Quit");
 }
 
 static void draw_current_player_title() {
     const int x = TETRALATH_RIGHT_PANEL_X;
-    const int y = TETRALATH_RIGHT_PANEL_Y + 5;
+    const int y = TETRALATH_RIGHT_PANEL_Y + 7;
 
     mvprintw(y, x, "Current player:");
 }
 
 static void update_current_player(const TETRALATH_COLOR current_color, const TETRALATH_COLOR player_color) {
     const int x = TETRALATH_RIGHT_PANEL_X;
-    const int y = TETRALATH_RIGHT_PANEL_Y + 6;
+    const int y = TETRALATH_RIGHT_PANEL_Y + 8;
 
     char *color_name = NULL;
     if (current_color == TETRALATH_COLOR_WHITE) {
@@ -172,107 +175,218 @@ static void update_game_result(const TETRALATH_RESULT result) {
     attroff(A_REVERSE);
 }
 
-TETRALATH_AI_MODE choose_ai_mode() {
-    const int x = TETRALATH_LEFT_PANEL_X;
-    const int y = TETRALATH_LEFT_PANEL_Y;
+static void draw_menu_border(const bool is_active, const int x, const int y, const int width, const int height) {
+    char delimiter_line[width + 1];
+    char content_line[width + 1];
 
-    TETRALATH_AI_MODE chosen_mode = TETRALATH_AI_MODE_NONE;
-
-    int character;
-    int highlighted_option = 0;
-
-    TETRALATH_AI_MODE mode_options[2] = {
-        TETRALATH_AI_MODE_RUTHLESS,
-        TETRALATH_AI_MODE_MERCIFUL
-    };
-
-    while (chosen_mode == TETRALATH_AI_MODE_NONE) {
-        mvprintw(y, x, "Choose AI mode:");
-
-        for (int i = 0; i < 2; i += 1) {
-            int option_y = y + 1 + i;
-            if (i == highlighted_option) {
-                attron(A_REVERSE);
-            }
-            if (i == 0) {
-                mvprintw(option_y, x, "- Ruthless");
-            } else {
-                mvprintw(option_y, x, "- Merciful");
-            }
-            attroff(A_REVERSE);
-        }
-
-        refresh();
-
-        character = getch();
-        switch(character) {
-            case KEY_UP:
-                highlighted_option = 0;
-                break;
-            case KEY_DOWN:
-                highlighted_option = 1;
-                break;
-            case '\n':
-            case '\r':
-            case KEY_ENTER:
-                chosen_mode = mode_options[highlighted_option];
-                break;
+    for (int i = 0; i < width; i += 1) {
+        if (is_active) {
+            delimiter_line[i] = '-';
+            content_line[i] = ' ';
+        } else {
+            delimiter_line[i] = ' ';
+            content_line[i] = ' ';
         }
     }
 
-    return chosen_mode;
+    if (is_active) {
+        content_line[0] = '|';
+        content_line[width - 1] = '|';
+    }
+
+    delimiter_line[width] = '\0';
+    content_line[width] = '\0';
+
+    mvprintw(y, x, "%s", delimiter_line);
+    for (int i = 0; i < (height - 2); i += 1) {
+        mvprintw(y + i + 1, x, "%s", content_line);
+    }
+    mvprintw(y + height - 1, x, "%s", delimiter_line);
+
+    return;
 }
 
-TETRALATH_COLOR choose_player_color() {
+static int selector_component(char *prompt_text, char **option_texts, int *option_values, const int number_of_options, const int default_value, const int y_offset, const int width, const int height) {
     const int x = TETRALATH_LEFT_PANEL_X;
-    const int y = TETRALATH_LEFT_PANEL_Y + 5;
+    const int y = TETRALATH_LEFT_PANEL_Y + y_offset;
 
-    TETRALATH_COLOR chosen_color = TETRALATH_COLOR_NONE;
+    int chosen_option_value;
+    int input_character;
 
-    int character;
+    bool is_menu_active = true;
+
     int highlighted_option = 0;
 
-    TETRALATH_COLOR color_options[TETRALATH_NUMBER_OF_COLORS] = {
-        TETRALATH_COLOR_WHITE,
-        TETRALATH_COLOR_BLACK
-    };
+    for (int i = 0; i < number_of_options; i += 1) {
+        if (option_values[i] == default_value) {
+            highlighted_option = i;
+            break;
+        }
+    }
 
-    while (chosen_color == TETRALATH_COLOR_NONE) {
-        mvprintw(y, x, "Choose your color:");
-        mvprintw(y + 1, x, "(White starts the game)");
+    while (true) {
+        draw_menu_border(is_menu_active, x - 2, y - 1, width + 4, height + 2);
 
-        for (int i = 0; i < TETRALATH_NUMBER_OF_COLORS; i += 1) {
-            int option_y = y + 2 + i;
+        mvprintw(y, x, "%s", prompt_text);
+
+        for (int i = 0; i < number_of_options; i += 1) {
+            int option_y_offset = y + 1 + i;
             if (i == highlighted_option) {
                 attron(A_REVERSE);
             }
-            if (i == 0) {
-                mvprintw(option_y, x, "- White");
-            } else {
-                mvprintw(option_y, x, "- Black");
+            mvprintw(option_y_offset, x, "%s", option_texts[i]);
+            if (i == highlighted_option) {
+                attroff(A_REVERSE);
             }
-            attroff(A_REVERSE);
         }
 
         refresh();
 
-        character = getch();
-        switch(character) {
+        if (!is_menu_active) {
+            break;
+        }
+
+        input_character = getch();
+        switch(input_character) {
             case KEY_UP:
-                highlighted_option = 0;
+                if (highlighted_option == 0) {
+                    highlighted_option = (number_of_options - 1);
+                } else {
+                    highlighted_option -= 1;
+                }
                 break;
             case KEY_DOWN:
-                highlighted_option = 1;
+                if (highlighted_option == (number_of_options - 1)) {
+                    highlighted_option = 0;
+                } else {
+                    highlighted_option += 1;
+                }
                 break;
             case '\n':
             case '\r':
             case KEY_ENTER:
-                chosen_color = color_options[highlighted_option];
+                chosen_option_value = option_values[highlighted_option];
+                is_menu_active = false;
                 break;
         }
     }
 
-    return chosen_color;
+    return chosen_option_value;
+}
+
+TETRALATH_COLOR choose_player_color(const TETRALATH_COLOR default_player_color) {
+    char prompt_text[] = "Player color:";
+    char *option_texts[2] = {
+        "- White",
+        "- Black",
+    };
+    int option_values[2] = {
+        (int)TETRALATH_COLOR_WHITE,
+        (int)TETRALATH_COLOR_BLACK,
+    };
+    const int number_of_options = 2;
+    const int default_value = (int)default_player_color;
+    const int y_offset = 0;
+    const int width = 13;
+    const int height = 3;
+
+    const int chosen_value = selector_component(prompt_text, option_texts, option_values, number_of_options, default_value, y_offset, width, height);
+
+    switch (chosen_value) {
+        case (int)TETRALATH_COLOR_WHITE:
+            return TETRALATH_COLOR_WHITE;
+        case (int)TETRALATH_COLOR_BLACK:
+            return TETRALATH_COLOR_BLACK;
+        default:
+            break;
+    }
+
+    return TETRALATH_COLOR_NONE;
+}
+
+TETRALATH_AI_MODE choose_ai_mode(const TETRALATH_AI_MODE default_ai_mode) {
+    char prompt_text[] = "AI mode:";
+    char *option_texts[2] = {
+        "- Merciful",
+        "- Ruthless",
+    };
+    int option_values[2] = {
+        (int)TETRALATH_AI_MODE_MERCIFUL,
+        (int)TETRALATH_AI_MODE_RUTHLESS,
+    };
+    const int number_of_options = 2;
+    const int default_value = (int)default_ai_mode;
+    const int y_offset = 4;
+    const int width = 10;
+    const int height = 3;
+
+    const int chosen_value = selector_component(prompt_text, option_texts, option_values, number_of_options, default_value, y_offset, width, height);
+
+    switch (chosen_value) {
+        case (int)TETRALATH_AI_MODE_MERCIFUL:
+            return TETRALATH_AI_MODE_MERCIFUL;
+        case (int)TETRALATH_AI_MODE_RUTHLESS:
+            return TETRALATH_AI_MODE_RUTHLESS;
+        default:
+            break;
+    }
+
+    return TETRALATH_AI_MODE_NONE;
+}
+
+TETRALATH_AI_STRATEGY choose_ai_strategy(const TETRALATH_AI_STRATEGY default_ai_strategy) {
+    char prompt_text[] = "AI strategy:";
+    char *option_texts[2] = {
+        "- Offensive",
+        "- Defensive",
+    };
+    int option_values[2] = {
+        (int)TETRALATH_AI_STRATEGY_OFFENSIVE,
+        (int)TETRALATH_AI_STRATEGY_DEFENSIVE,
+    };
+    const int number_of_options = 2;
+    const int default_value = (int)default_ai_strategy;
+    const int y_offset = 8;
+    const int width = 12;
+    const int height = 3;
+
+    const int chosen_value = selector_component(prompt_text, option_texts, option_values, number_of_options, default_value, y_offset, width, height);
+
+    switch (chosen_value) {
+        case (int)TETRALATH_AI_STRATEGY_OFFENSIVE:
+            return TETRALATH_AI_STRATEGY_OFFENSIVE;
+        case (int)TETRALATH_AI_STRATEGY_DEFENSIVE:
+            return TETRALATH_AI_STRATEGY_DEFENSIVE;
+        default:
+            break;
+    }
+
+    return TETRALATH_AI_STRATEGY_NONE;
+}
+
+int choose_number_of_threads(const int default_number_of_threads) {
+    char prompt_text[] = "# of threads:";
+    char *option_texts[4] = {
+        "- 1",
+        "- 2",
+        "- 3",
+        "- 4",
+    };
+    int option_values[4] = {
+        1,
+        2,
+        3,
+        4,
+    };
+    const int number_of_options = 4;
+    const int default_value = default_number_of_threads;
+    const int y_offset = 12;
+    const int width = 13;
+    const int height = 5;
+
+    const int chosen_value = selector_component(prompt_text, option_texts, option_values, number_of_options, default_value, y_offset, width, height);
+
+    return chosen_value;
 }
 
 TETRALATH_PLAYER_ACTION choose_player_action() {
@@ -294,6 +408,18 @@ TETRALATH_PLAYER_ACTION choose_player_action() {
         case 'u':
         case 'U':
             chosen_action = TETRALATH_PLAYER_ACTION_KEY_U;
+            break;
+        case 'm':
+        case 'M':
+            chosen_action = TETRALATH_PLAYER_ACTION_KEY_M;
+            break;
+        case 's':
+        case 'S':
+            chosen_action = TETRALATH_PLAYER_ACTION_KEY_S;
+            break;
+        case 't':
+        case 'T':
+            chosen_action = TETRALATH_PLAYER_ACTION_KEY_T;
             break;
         case 'q':
         case 'Q':
@@ -343,10 +469,10 @@ void draw_move(const int position, const TETRALATH_COLOR color, const bool is_la
 
 void draw_ai_info(const TETRALATH_AI_INFO_STATE ai_info_state, const int64_t processing_start_time, const int64_t processing_end_time, const int minimax_depth, const double minimax_time_taken) {
     const int x = TETRALATH_RIGHT_PANEL_X;
-    const int y = TETRALATH_RIGHT_PANEL_Y + 9;
+    const int y = TETRALATH_RIGHT_PANEL_Y + 10;
 
-    mvprintw(y, x, "                            ");
-    mvprintw(y + 1, x, "                         ");
+    mvprintw(y, x, "                              ");
+    mvprintw(y + 1, x, "                           ");
 
     if (ai_info_state == TETRALATH_AI_INFO_STATE_THINKING) {
         mvprintw(y, x, "AI thinking...");

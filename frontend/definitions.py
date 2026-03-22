@@ -3,34 +3,41 @@ import threading
 import typing
 
 
-class TetralathEventType(enum.Enum):
+class TetralathEventType(enum.IntEnum):
     QUIT = 1
     START_GAME = 2
     BOARD_POSITION_CLICKED = 3
     UNDO_LAST_MOVE = 4
-    REDRAW_BOARD = 5
+    CHANGED_GAME_SETTING = 5
+    REDRAW_BOARD = 6
 
 
-class TetralathColor(enum.Enum):
+class TetralathColor(enum.IntEnum):
     NONE = 0
     WHITE = 1
     BLACK = 2
 
 
-class TetralathAIMode(enum.Enum):
+class TetralathAIMode(enum.IntEnum):
     NONE = 0
-    RUTHLESS = 1
-    MERCIFUL = 2
+    MERCIFUL = 1
+    RUTHLESS = 2
 
 
-class TetralathResult(enum.Enum):
+class TetralathAIStrategy(enum.IntEnum):
+    NONE = 0
+    OFFENSIVE = 1
+    DEFENSIVE = 2
+
+
+class TetralathResult(enum.IntEnum):
     LOSS = 65
     DRAW = 256
     NONE = 257
     WIN = 446
 
 
-class TetralathState(enum.Enum):
+class TetralathState(enum.IntEnum):
     NONE = 0
     RUNNING = 1
     ENDING = 2
@@ -47,6 +54,8 @@ class TetralathGame(typing.TypedDict):
     current_color: TetralathColor
     player_color: TetralathColor
     ai_mode: TetralathAIMode
+    ai_strategy: TetralathAIStrategy
+    number_of_threads: int
     result: TetralathResult
     state: TetralathState
 

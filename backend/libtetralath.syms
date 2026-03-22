@@ -3,6 +3,11 @@ LIBTETRALATH {
     init_headless_game;
     teardown_headless_game;
     set_ai_mode;
+    get_ai_mode;
+    set_ai_strategy;
+    get_ai_strategy;
+    set_number_of_threads;
+    get_number_of_threads;
     set_player_color;
     get_player_color;
     set_game_state;

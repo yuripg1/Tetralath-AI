@@ -7,6 +7,14 @@ import libtetralath
 import ui
 
 
+def update_game_settings(
+    game: definitions.TetralathGame, game_backend: ctypes.c_void_p, libtetralath_instance: libtetralath.LibTetralath
+) -> None:
+    libtetralath_instance.set_ai_mode(game_backend, game["ai_mode"])
+    libtetralath_instance.set_ai_strategy(game_backend, game["ai_strategy"])
+    libtetralath_instance.set_number_of_threads(game_backend, game["number_of_threads"])
+
+
 def update_game_result(
     game: definitions.TetralathGame, game_backend: ctypes.c_void_p, libtetralath_instance: libtetralath.LibTetralath
 ) -> None:
@@ -21,8 +29,10 @@ def handle_game_starting(
 ) -> None:
     game["advance_turn"] = True
     game["state"] = definitions.TetralathState.RUNNING
-    libtetralath_instance.set_ai_mode(game_backend, game["ai_mode"])
     libtetralath_instance.set_player_color(game_backend, game["player_color"])
+    libtetralath_instance.set_ai_mode(game_backend, game["ai_mode"])
+    libtetralath_instance.set_ai_strategy(game_backend, game["ai_strategy"])
+    libtetralath_instance.set_number_of_threads(game_backend, game["number_of_threads"])
     libtetralath_instance.set_game_state(game_backend, definitions.TetralathState.RUNNING)
     update_game_result(game, game_backend, libtetralath_instance)
 
@@ -141,16 +151,19 @@ def graphical_game() -> None:
         "current_color": definitions.TetralathColor.NONE,
         "player_color": definitions.TetralathColor.NONE,
         "ai_mode": definitions.TetralathAIMode.NONE,
+        "ai_strategy": definitions.TetralathAIStrategy.NONE,
         "state": definitions.TetralathState.NONE,
         "result": definitions.TetralathResult.NONE,
     }
     game_window, clock = ui.initialize_game_ui()
     global_ui_events: list[definitions.TetralathUIEvent] = []
-    left_panel, ai_mode_selector, player_color_selector, start_game_button = ui.draw_left_panel(game, global_ui_events)
-    right_panel, undo_last_move_button, current_player_label, ai_info_label, game_result_label = ui.draw_right_panel(
-        global_ui_events
+    left_panel_menu, left_panel_static_selectors, left_panel_dynamic_selectors, left_panel_static_buttons = (
+        ui.draw_left_panel(game, global_ui_events)
     )
-    ui.disable_right_panel(right_panel, undo_last_move_button)
+    right_panel_menu, right_panel_dynamic_buttons, current_player_label, ai_info_label, game_result_label = (
+        ui.draw_right_panel(global_ui_events)
+    )
+    ui.set_readonly_in_menu_components(True, right_panel_menu, [], right_panel_dynamic_buttons)
     game["state"] = libtetralath_instance.get_game_state(game_backend)
     ai_move_processing_data: definitions.TetralathAIMoveProcessingData = {
         "thread": None,
@@ -159,18 +172,20 @@ def graphical_game() -> None:
     }
     running = True
     while running:
-        if game["result"] is not definitions.TetralathResult.NONE:
+        if game["result"] != definitions.TetralathResult.NONE:
             if game["state"] == definitions.TetralathState.RUNNING:
                 handle_game_ending(game, game_backend, libtetralath_instance)
-                ui.enable_right_panel(right_panel, undo_last_move_button)
+                ui.set_readonly_in_menu_components(False, right_panel_menu, [], right_panel_dynamic_buttons)
                 ui.trigger_redraw_board_event(global_ui_events)
         if game["state"] == definitions.TetralathState.RUNNING:
             if game["advance_turn"]:
                 handle_new_turn(game, game_backend, libtetralath_instance)
                 if game["current_color"] == game["player_color"]:
-                    ui.enable_right_panel(right_panel, undo_last_move_button)
+                    ui.set_readonly_in_menu_components(False, left_panel_menu, left_panel_dynamic_selectors, [])
+                    ui.set_readonly_in_menu_components(False, right_panel_menu, [], right_panel_dynamic_buttons)
                 else:
-                    ui.disable_right_panel(right_panel, undo_last_move_button)
+                    ui.set_readonly_in_menu_components(True, left_panel_menu, left_panel_dynamic_selectors, [])
+                    ui.set_readonly_in_menu_components(True, right_panel_menu, [], right_panel_dynamic_buttons)
                 ui.update_current_player_label(game, current_player_label)
                 ui.update_game_result_label(game, game_result_label)
                 ui.trigger_redraw_board_event(global_ui_events)
@@ -191,6 +206,9 @@ def graphical_game() -> None:
             game["redraw_board"] = True
             if new_ui_event["type"] == definitions.TetralathEventType.REDRAW_BOARD:
                 pass
+            if new_ui_event["type"] == definitions.TetralathEventType.CHANGED_GAME_SETTING:
+                if game["state"] != definitions.TetralathState.NONE:
+                    update_game_settings(game, game_backend, libtetralath_instance)
             if new_ui_event["type"] == definitions.TetralathEventType.QUIT:
                 if running is True:
                     ui.destroy_game_ui()
@@ -198,7 +216,9 @@ def graphical_game() -> None:
                     running = False
             elif new_ui_event["type"] == definitions.TetralathEventType.START_GAME:
                 if game["state"] == definitions.TetralathState.NONE:
-                    ui.disable_left_panel(left_panel, ai_mode_selector, player_color_selector, start_game_button)
+                    ui.set_readonly_in_menu_components(
+                        True, left_panel_menu, left_panel_static_selectors, left_panel_static_buttons
+                    )
                     handle_game_starting(game, game_backend, libtetralath_instance)
             elif new_ui_event["type"] == definitions.TetralathEventType.BOARD_POSITION_CLICKED:
                 if (
@@ -218,8 +238,8 @@ def graphical_game() -> None:
                     handle_undo_last_move(game, game_backend, libtetralath_instance)
                     ui.update_ai_info_label(ai_move_processing_data, ai_info_label, True)
         if running is True:
-            ui.update_panels([left_panel, right_panel], pygame_events)
-            ui.refresh_game_ui(game_window, clock, [left_panel, right_panel], game)
+            ui.update_panels([left_panel_menu, right_panel_menu], pygame_events)
+            ui.refresh_game_ui(game_window, clock, [left_panel_menu, right_panel_menu], game)
 
 
 def main() -> None:
