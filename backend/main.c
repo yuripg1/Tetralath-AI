@@ -6,7 +6,7 @@
 #include "time.h"
 #include "ui.h"
 
-int get_player_action(TETRALATH_GAME *game) {
+static int get_player_action(TETRALATH_GAME *game) {
     int chosen_action = TETRALATH_POSITION_NONE;
     int previous_position = TETRALATH_POSITION_NONE;
     int highlighted_position = TETRALATH_POSITION_NONE;
@@ -20,7 +20,7 @@ int get_player_action(TETRALATH_GAME *game) {
 
     while (chosen_action == TETRALATH_POSITION_NONE) {
         update_position_highlights(highlighted_position, previous_position, player_color);
-        TETRALATH_PLAYER_ACTION player_action = choose_player_action(game);
+        const TETRALATH_PLAYER_ACTION player_action = choose_player_action();
         int next_position = TETRALATH_POSITION_NONE;
         switch (player_action) {
             case TETRALATH_PLAYER_ACTION_KEY_LEFT:
@@ -132,7 +132,7 @@ static void process_ai_move(TETRALATH_GAME *game) {
     draw_ai_info(TETRALATH_AI_INFO_STATE_FINISHED, processing_start_time, processing_end_time, get_latest_minimax_depth(game), get_latest_minimax_time_taken(game));
 }
 
-static void graphical_game() {
+static void graphical_game(void) {
     TETRALATH_GAME *game = init_headless_game();
     initialize_game_ui();
     TETRALATH_COLOR player_color = choose_player_color(TETRALATH_COLOR_WHITE);
@@ -148,7 +148,7 @@ static void graphical_game() {
     while (game_state != TETRALATH_STATE_ENDING && game_state != TETRALATH_STATE_QUITTING) {
         update_game_result(game);
         game_result = get_game_result(game);
-        while (game_result == TETRALATH_RESULT_NONE_MAX && game_state != TETRALATH_STATE_QUITTING) {
+        while (game_result == TETRALATH_RESULT_NONE && game_state != TETRALATH_STATE_QUITTING) {
             start_new_turn_data(game);
             current_color = get_current_color(game);
             start_turn_ui(current_color, player_color, game_result);
@@ -174,8 +174,8 @@ static void graphical_game() {
 }
 
 
-int main() {
-    srand(time(NULL));
+int main(void) {
+    srand((unsigned int)time(NULL));
     graphical_game();
     return 0;
 }

@@ -87,7 +87,7 @@ static void highlight_position(const int position, const TETRALATH_COLOR player_
     attroff(COLOR_PAIR(highlight_color));
 }
 
-static void draw_board() {
+static void draw_board(void) {
     const int x = TETRALATH_BOARD_X;
     const int y = TETRALATH_BOARD_Y;
 
@@ -116,7 +116,7 @@ static void draw_board() {
     attroff(COLOR_PAIR(TETRALATH_BLACK_YELLOW));
 }
 
-static void draw_controls_manual() {
+static void draw_controls_manual(void) {
     const int x = TETRALATH_RIGHT_PANEL_X;
     const int y = TETRALATH_RIGHT_PANEL_Y;
 
@@ -128,7 +128,7 @@ static void draw_controls_manual() {
     mvprintw(y + 5, x, "[Q] : Quit");
 }
 
-static void draw_current_player_title() {
+static void draw_current_player_title(void) {
     const int x = TETRALATH_RIGHT_PANEL_X;
     const int y = TETRALATH_RIGHT_PANEL_Y + 7;
 
@@ -169,7 +169,7 @@ static void update_game_result(const TETRALATH_RESULT result) {
         mvprintw(y, x, "You won");
     } else if (result == TETRALATH_RESULT_LOSS) {
         mvprintw(y, x, "You lost");
-    } else if (result == TETRALATH_RESULT_DRAW_MAX) {
+    } else if (result == TETRALATH_RESULT_DRAW) {
         mvprintw(y, x, "It's a tie");
     }
     attroff(A_REVERSE);
@@ -389,7 +389,7 @@ int choose_number_of_threads(const int default_number_of_threads) {
     return chosen_value;
 }
 
-TETRALATH_PLAYER_ACTION choose_player_action() {
+TETRALATH_PLAYER_ACTION choose_player_action(void) {
     TETRALATH_PLAYER_ACTION chosen_action = TETRALATH_PLAYER_ACTION_NONE;
 
     int input = getch();
@@ -488,7 +488,7 @@ void draw_ai_info(const TETRALATH_AI_INFO_STATE ai_info_state, const int64_t pro
     refresh();
 }
 
-void initialize_game_ui() {
+void initialize_game_ui(void) {
     initscr();
     cbreak();
     noecho();
@@ -507,7 +507,7 @@ void initialize_game_ui() {
     refresh();
 }
 
-void draw_right_panel() {
+void draw_right_panel(void) {
     draw_controls_manual();
     draw_current_player_title();
     refresh();
@@ -524,6 +524,6 @@ void finish_game_ui(TETRALATH_RESULT result) {
     refresh();
 }
 
-void destroy_game_ui() {
+void destroy_game_ui(void) {
     endwin();
 }

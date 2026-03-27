@@ -12,9 +12,9 @@
 #endif
 
 #if __has_attribute(aligned) || defined(__GNUC__)
-  #define ALIGN_TO(N) __attribute__((aligned(N)))
+  #define ALIGN_TO(n) __attribute__((aligned(n)))
 #else
-  #define ALIGN_TO(N)
+  #define ALIGN_TO(n)
 #endif
 
 #ifndef __has_builtin
@@ -22,8 +22,8 @@
 #endif
 
 #if __has_builtin(__builtin_expect) || defined(__GNUC__)
-  #define EXPECT(x) __builtin_expect(!!(x), 1)
-  #define DO_NOT_EXPECT(x) __builtin_expect(!!(x), 0)
+  #define EXPECT(x) __builtin_expect((x), 1L)
+  #define DO_NOT_EXPECT(x) __builtin_expect((x), 0L)
 #else
   #define EXPECT(x) (x)
   #define DO_NOT_EXPECT(x) (x)

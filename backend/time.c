@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include <time.h>
 
-int64_t get_current_time_nsec() {
+int64_t get_current_time_nsec(void) {
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
     return (int64_t)ts.tv_sec * 1000000000LL + (int64_t)ts.tv_nsec;
