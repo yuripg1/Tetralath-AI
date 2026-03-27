@@ -1,71 +1,69 @@
 #ifndef GAME_H
 #define GAME_H
 
-#include <stdint.h>
-
 #include "ai.h"
 #include "definitions.h"
 
 typedef struct {
     int position;
     int color;
-} TETRALATH_MOVE;
+} TetralathMove;
 
 typedef struct {
-    TETRALATH_MOVE moves_list[TETRALATH_BOARD_SIZE];
+    TetralathMove moves_list[TETRALATH_BOARD_SIZE];
     int moves_count;
-} TETRALATH_MOVES;
+} TetralathMoves;
 
 typedef struct {
     int64_t time_taken_nsec;
     int minimax_depth;
     int minimax_result;
     int ai_move;
-} TETRALATH_MINIMAX_OUTPUT;
+} TetralathMinimaxOutput;
 
 typedef struct {
-    TETRALATH_MOVES moves;
-    TETRALATH_COLOR board[TETRALATH_ALLOCATED_BOARD_LENGTH];
-    TETRALATH_MINIMAX_OUTPUT latest_minimax_output;
-    TETRALATH_COLOR current_color;
-    TETRALATH_COLOR next_color;
-    TETRALATH_COLOR player_color;
-    TETRALATH_AI_MODE ai_mode;
-    TETRALATH_AI_STRATEGY ai_strategy;
-    TETRALATH_STATE state;
-    TETRALATH_RESULT result;
+    TetralathMoves moves;
+    TetralathColor board[TETRALATH_ALLOCATED_BOARD_LENGTH];
+    TetralathMinimaxOutput latest_minimax_output;
+    TetralathColor current_color;
+    TetralathColor next_color;
+    TetralathColor player_color;
+    TetralathAiMode ai_mode;
+    TetralathAiStrategy ai_strategy;
+    TetralathState state;
+    TetralathResult result;
     int number_of_threads;
-} TETRALATH_GAME;
+} TetralathGame;
 
 #define TETRALATH_FIRST_POSITION 0
 #define TETRALATH_LAST_POSITION 60
 
-TETRALATH_GAME *init_headless_game(void);
-void teardown_headless_game(TETRALATH_GAME * restrict const game);
-void set_ai_mode(TETRALATH_GAME * restrict const game, const TETRALATH_AI_MODE ai_mode);
-TETRALATH_AI_MODE get_ai_mode(const TETRALATH_GAME * restrict const game);
-void set_ai_strategy(TETRALATH_GAME * restrict const game, const TETRALATH_AI_STRATEGY ai_strategy);
-TETRALATH_AI_STRATEGY get_ai_strategy(const TETRALATH_GAME * restrict const game);
-void set_number_of_threads(TETRALATH_GAME * restrict const game, const int number_of_threads);
-int get_number_of_threads(const TETRALATH_GAME * restrict const game);
-void set_player_color(TETRALATH_GAME * restrict const game, const TETRALATH_COLOR player_color);
-TETRALATH_COLOR get_player_color(const TETRALATH_GAME * restrict const game);
-void set_game_state(TETRALATH_GAME * restrict const game, const TETRALATH_STATE state);
-TETRALATH_STATE get_game_state(const TETRALATH_GAME * restrict const game);
-void update_game_result(TETRALATH_GAME * restrict const game);
-TETRALATH_RESULT get_game_result(const TETRALATH_GAME * restrict const game);
-void start_new_turn_data(TETRALATH_GAME * restrict const game);
-TETRALATH_COLOR get_current_color(const TETRALATH_GAME * restrict const game);
-void set_next_color(TETRALATH_GAME * restrict const game, const TETRALATH_COLOR next_color);
-void set_move(TETRALATH_GAME * restrict const game, const int position, const TETRALATH_COLOR color);
-int set_move_undoing(TETRALATH_GAME * restrict const game);
-int get_moves_count(const TETRALATH_GAME * restrict const game);
-int get_number_of_moves_to_undo(const TETRALATH_GAME * restrict const game);
-int get_latest_move_position(const TETRALATH_GAME * restrict const game);
-TETRALATH_COLOR get_latest_move_color(const TETRALATH_GAME * restrict const game);
-int compute_ai_move(TETRALATH_GAME * restrict const game);
-int get_next_empty_position(const TETRALATH_GAME * restrict const game, const int position, const int increment);
-int get_latest_minimax_depth(const TETRALATH_GAME * restrict const game);
-double get_latest_minimax_time_taken(const TETRALATH_GAME * restrict const game);
+TetralathGame *init_headless_game(void);
+void teardown_headless_game(TetralathGame * restrict const game);
+void set_ai_mode(TetralathGame * restrict const game, const TetralathAiMode ai_mode);
+TetralathAiMode get_ai_mode(const TetralathGame * restrict const game);
+void set_ai_strategy(TetralathGame * restrict const game, const TetralathAiStrategy ai_strategy);
+TetralathAiStrategy get_ai_strategy(const TetralathGame * restrict const game);
+void set_number_of_threads(TetralathGame * restrict const game, const int number_of_threads);
+int get_number_of_threads(const TetralathGame * restrict const game);
+void set_player_color(TetralathGame * restrict const game, const TetralathColor player_color);
+TetralathColor get_player_color(const TetralathGame * restrict const game);
+void set_game_state(TetralathGame * restrict const game, const TetralathState state);
+TetralathState get_game_state(const TetralathGame * restrict const game);
+void update_game_result(TetralathGame * restrict const game);
+TetralathResult get_game_result(const TetralathGame * restrict const game);
+void start_new_turn_data(TetralathGame * restrict const game);
+TetralathColor get_current_color(const TetralathGame * restrict const game);
+void set_next_color(TetralathGame * restrict const game, const TetralathColor next_color);
+void set_move(TetralathGame * restrict const game, const int position, const TetralathColor color);
+int set_move_undoing(TetralathGame * restrict const game);
+int get_moves_count(const TetralathGame * restrict const game);
+int get_number_of_moves_to_undo(const TetralathGame * restrict const game);
+int get_latest_move_position(const TetralathGame * restrict const game);
+TetralathColor get_latest_move_color(const TetralathGame * restrict const game);
+int compute_ai_move(TetralathGame * restrict const game);
+int get_next_empty_position(const TetralathGame * restrict const game, const int position, const int increment);
+int get_latest_minimax_depth(const TetralathGame * restrict const game);
+double get_latest_minimax_time_taken(const TetralathGame * restrict const game);
 
 #endif

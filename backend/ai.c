@@ -261,9 +261,9 @@ static const alignas(TETRALATH_CPU_CACHE_LINE_BYTES) uint8_t indexed_sequence_va
 static bool sequence_previous_positions_initialized = false;
 static uint8_t sequence_previous_positions[TETRALATH_NUMBER_OF_DIRECTIONS][TETRALATH_BOARD_SIZE + (TETRALATH_CPU_CACHE_LINE_BYTES - TETRALATH_BOARD_SIZE)];
 
-static TETRALATH_SEQUENCE HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) check_sequence_from_position(const TETRALATH_COLOR sequence_color_1, const TETRALATH_COLOR sequence_color_2, const TETRALATH_COLOR sequence_color_3, const TETRALATH_COLOR sequence_color_4) {
+static TetralathSequence HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) check_sequence_from_position(const TetralathColor sequence_color_1, const TetralathColor sequence_color_2, const TetralathColor sequence_color_3, const TetralathColor sequence_color_4) {
     const int sequence_value = (sequence_color_1 << 6) | (sequence_color_2 << 4) | (sequence_color_3 << 2) | sequence_color_4;
-    return (TETRALATH_SEQUENCE)(indexed_sequence_values[sequence_value]);
+    return (TetralathSequence)(indexed_sequence_values[sequence_value]);
 }
 
 static void HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) add_to_near_sequences(int * restrict const near_sequences_count_pointer, uint8_t * restrict const near_sequences_empty_positions, const uint8_t empty_position, const int max_elements) {
@@ -288,7 +288,7 @@ static void HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) add_to_near_sequences(i
 }
 
 /*
-This function returns either a TETRALATH_RESULT signaling the result of the game
+This function returns either a TetralathResult signaling the result of the game
 for the perspective color or a number less than 64 representing a forced move
 for the opponent in the next turn.
 
@@ -302,8 +302,8 @@ If you do not intend on using these predictive results, then you are free to use
 any color as the perspective color (and the opposite color as the opponent
 color).
 */
-static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) check_game_result(const TETRALATH_COLOR * restrict const board, const int moves_count, const TETRALATH_COLOR perspective_color, const TETRALATH_COLOR opponent_color) {
-    alignas(TETRALATH_CPU_CACHE_LINE_BYTES) TETRALATH_SEQUENCES_INFO sequences_info = {
+static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) check_game_result(const TetralathColor * restrict const board, const int moves_count, const TetralathColor perspective_color, const TetralathColor opponent_color) {
+    alignas(TETRALATH_CPU_CACHE_LINE_BYTES) TetralathSequencesInfo sequences_info = {
 
         /*
         Stores the counts as well as the empty positions of the near quadruplets
@@ -331,16 +331,19 @@ static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) check_game_result(const 
     for (int i = 0; i < TETRALATH_NUMBER_OF_DIRECTIONS; i += 1) {
         for (int j = 0; j < TETRALATH_SEQUENCE_START_POSITIONS_PER_DIRECTION_COUNT; j += 1) {
             const int sequence_position_1 = ((int)(sequence_start_positions[i][j]));
-            const TETRALATH_COLOR sequence_color_1 = board[sequence_position_1];
-            if (sequence_color_1 == TETRALATH_COLOR_NONE) {
+            const TetralathColor sequence_color_1 = board[sequence_position_1];
+
+            // Hints the compiler to prioritize the costlier path.
+            if (DO_NOT_EXPECT(sequence_color_1 == TETRALATH_COLOR_NONE)) {
                 continue;
             }
+
             const int sequence_position_2 = ((int)(sequence_next_positions[i][sequence_position_1]));
             const int sequence_position_3 = ((int)(sequence_next_positions[i][sequence_position_2]));
             const int sequence_position_4 = ((int)(sequence_next_positions[i][sequence_position_3]));
-            const TETRALATH_SEQUENCE sequence_value = check_sequence_from_position(sequence_color_1, board[sequence_position_2], board[sequence_position_3], board[sequence_position_4]);
+            const TetralathSequence sequence_value = check_sequence_from_position(sequence_color_1, board[sequence_position_2], board[sequence_position_3], board[sequence_position_4]);
             const int current_color_index = (sequence_color_1 - 1);
-            const TETRALATH_COLOR flipped_color_index = (flip_color(sequence_color_1) - 1);
+            const TetralathColor flipped_color_index = (flip_color(sequence_color_1) - 1);
             switch (sequence_value) {
                 case TETRALATH_SEQUENCE_QUADRUPLET:
 
@@ -443,7 +446,8 @@ static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) check_game_result(const 
 
     }
 
-    if (perspective_near_quadruplets_count == 1) {
+    // Hints the compiler to prioritize the path more likely to happen
+    if (DO_NOT_EXPECT(perspective_near_quadruplets_count == 1)) {
         const int candidate_for_winning_move = (int)(sequences_info.near_quadruplets_empty_positions[perspective_color_index][0]);
         const int opponent_near_triplets_count = sequences_info.near_triplets_count[opponent_color_index];
         if (opponent_near_triplets_count >= 1) {
@@ -475,17 +479,17 @@ static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) check_game_result(const 
     return (int)TETRALATH_RESULT_NONE;
 }
 
-static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) min_level(const TETRALATH_MINIMAX_STATIC_DATA * restrict const minimax_static_data, const int alpha, const int beta, const int moves_count, const int previous_remaining_depth);
+static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) min_level(const TetralathMinimaxStaticData * restrict const minimax_static_data, const int alpha, const int beta, const int moves_count, const int previous_remaining_depth);
 
-static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) max_level(const TETRALATH_MINIMAX_STATIC_DATA * restrict const minimax_static_data, const int alpha, const int beta, const int moves_count, const int previous_remaining_depth) {
-    const TETRALATH_COLOR perspective_color = minimax_static_data->perspective_color;
-    const TETRALATH_COLOR opponent_color = flip_color(perspective_color);
+static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) max_level(const TetralathMinimaxStaticData * restrict const minimax_static_data, const int alpha, const int beta, const int moves_count, const int previous_remaining_depth) {
+    const TetralathColor perspective_color = minimax_static_data->perspective_color;
+    const TetralathColor opponent_color = flip_color(perspective_color);
 
-    TETRALATH_COLOR * restrict const board_copy = minimax_static_data->board_copy;
+    TetralathColor * restrict const board_copy = minimax_static_data->board_copy;
 
     const int result = check_game_result(board_copy, moves_count, opponent_color, perspective_color);
 
-    switch ((TETRALATH_RESULT)result) {
+    switch ((TetralathResult)result) {
 
         // Returns the winning result with the distance so that we are able to
         // win as fast as possible
@@ -567,15 +571,15 @@ static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) max_level(const TETRALAT
     return best_result;
 }
 
-static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) min_level(const TETRALATH_MINIMAX_STATIC_DATA * restrict const minimax_static_data, const int alpha, const int beta, const int moves_count, const int previous_remaining_depth) {
-    const TETRALATH_COLOR perspective_color = minimax_static_data->perspective_color;
-    const TETRALATH_COLOR opponent_color = flip_color(perspective_color);
+static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) min_level(const TetralathMinimaxStaticData * restrict const minimax_static_data, const int alpha, const int beta, const int moves_count, const int previous_remaining_depth) {
+    const TetralathColor perspective_color = minimax_static_data->perspective_color;
+    const TetralathColor opponent_color = flip_color(perspective_color);
 
-    TETRALATH_COLOR * restrict const board_copy = minimax_static_data->board_copy;
+    TetralathColor * restrict const board_copy = minimax_static_data->board_copy;
 
     const int result = check_game_result(board_copy, moves_count, perspective_color, opponent_color);
 
-    switch ((TETRALATH_RESULT)result) {
+    switch ((TetralathResult)result) {
 
         // Returns the winning result with the distance so that we are able to
         // win as fast as possible
@@ -657,9 +661,9 @@ static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) min_level(const TETRALAT
     return worst_result;
 }
 
-static void sort_move_values(TETRALATH_MOVE_VALUE * restrict const move_values, const bool use_weights) {
+static void sort_move_values(TetralathMoveValue * restrict const move_values, const bool use_weights) {
     for (int i = 1; i < TETRALATH_BOARD_SIZE; i += 1) {
-        TETRALATH_MOVE_VALUE current_move_value = move_values[i];
+        TetralathMoveValue current_move_value = move_values[i];
         int j = i - 1;
         bool current_move_value_sorted = false;
         bool move_ahead;
@@ -683,7 +687,7 @@ static void sort_move_values(TETRALATH_MOVE_VALUE * restrict const move_values, 
     }
 }
 
-static void reset_move_values(TETRALATH_MOVE_VALUE * restrict const move_values) {
+static void reset_move_values(TetralathMoveValue * restrict const move_values) {
     for (int i = 0; i < TETRALATH_BOARD_SIZE; i += 1) {
         move_values[i].minimax_result = TETRALATH_RESULT_INFINITY_MIN;
         move_values[i].is_valid = false;
@@ -691,8 +695,8 @@ static void reset_move_values(TETRALATH_MOVE_VALUE * restrict const move_values)
     }
 }
 
-static void copy_board(TETRALATH_COLOR * restrict const new_board, const TETRALATH_COLOR * restrict const original_board) {
-    memcpy(new_board, original_board, (TETRALATH_ALLOCATED_BOARD_LENGTH) * sizeof(TETRALATH_COLOR));
+static void copy_board(TetralathColor * restrict const new_board, const TetralathColor * restrict const original_board) {
+    memcpy(new_board, original_board, (TETRALATH_ALLOCATED_BOARD_LENGTH) * sizeof(TetralathColor));
 }
 
 static void shuffle_move_order(int *move_order) {
@@ -705,11 +709,11 @@ static void shuffle_move_order(int *move_order) {
     }
 }
 
-static void get_neighbors_info(TETRALATH_NEIGHBORS_INFO * restrict const neighbors_info, const TETRALATH_COLOR * restrict const board, const int backward_or_forward) {
+static void get_neighbors_info(TetralathNeighborsInfo * restrict const neighbors_info, const TetralathColor * restrict const board, const int backward_or_forward) {
     const int reference_position = neighbors_info->reference_position;
     const int direction = neighbors_info->direction;
-    const TETRALATH_COLOR perspective_color = neighbors_info->perspective_color;
-    const TETRALATH_COLOR opponent_color = neighbors_info->opponent_color;
+    const TetralathColor perspective_color = neighbors_info->perspective_color;
+    const TetralathColor opponent_color = neighbors_info->opponent_color;
 
     const uint8_t *sequence_lookup_table;
     int *neighbor_positions;
@@ -742,7 +746,7 @@ static void get_neighbors_info(TETRALATH_NEIGHBORS_INFO * restrict const neighbo
 
     bool is_unobstructed = true;
     for (int i = 0; i < TETRALATH_NEIGHBORS_LENGTH_TO_SEARCH; i += 1) {
-        const TETRALATH_COLOR current_color = board[neighbor_positions[i]];
+        const TetralathColor current_color = board[neighbor_positions[i]];
         if ((current_color == opponent_color) || (current_color == TETRALATH_COLOR_INVALID)) {
             break;
         }
@@ -767,7 +771,7 @@ When "prefer_more_distant_neighbors" is false, gives more relevance to closer
 neighbors. This is mainly relevant for defensive behaviors trying to block the
 opponent from forming lines.
 */
-static void set_neighboring_relevance_per_position(int neighboring_positions_relevance[TETRALATH_BOARD_SIZE], TETRALATH_NEIGHBORS_INFO * restrict const neighbors_info, const TETRALATH_COLOR * restrict const board, const int backward_or_forward, const bool prefer_more_distant_neighbors) {
+static void set_neighboring_relevance_per_position(int neighboring_positions_relevance[TETRALATH_BOARD_SIZE], TetralathNeighborsInfo * restrict const neighbors_info, const TetralathColor * restrict const board, const int backward_or_forward, const bool prefer_more_distant_neighbors) {
     int unobstructed_length;
     int unobstructed_or_friendly_length;
 
@@ -807,11 +811,11 @@ static void set_neighboring_relevance_per_position(int neighboring_positions_rel
     }
 }
 
-static void set_neighboring_relevance(int neighboring_positions_relevance[TETRALATH_BOARD_SIZE], const TETRALATH_COLOR * restrict const board, const TETRALATH_COLOR perspective_color, const TETRALATH_COLOR opponent_color, const bool prefer_more_distant_neighbors) {
+static void set_neighboring_relevance(int neighboring_positions_relevance[TETRALATH_BOARD_SIZE], const TetralathColor * restrict const board, const TetralathColor perspective_color, const TetralathColor opponent_color, const bool prefer_more_distant_neighbors) {
     for (int i = 0; i < TETRALATH_NUMBER_OF_DIRECTIONS; i += 1) {
         for (int j = 0; j < TETRALATH_BOARD_SIZE; j += 1) {
             if (board[j] == perspective_color) {
-                TETRALATH_NEIGHBORS_INFO neighbors_info = {
+                TetralathNeighborsInfo neighbors_info = {
                     .perspective_color = perspective_color,
                     .opponent_color = opponent_color,
                     .reference_position = j,
@@ -835,7 +839,7 @@ static void initialize_neighboring_positions(int neighboring_positions_relevance
     }
 }
 
-static void apply_weight_addition_for_neighboring_positions(TETRALATH_MOVE_VALUE * restrict const move_values, const int neighboring_positions_relevance[TETRALATH_BOARD_SIZE], const int weight_addition) {
+static void apply_weight_addition_for_neighboring_positions(TetralathMoveValue * restrict const move_values, const int neighboring_positions_relevance[TETRALATH_BOARD_SIZE], const int weight_addition) {
     for (int i = 0; i < TETRALATH_BOARD_SIZE; i += 1) {
         const int evaluated_position = move_values[i].position;
         if (neighboring_positions_relevance[evaluated_position] > 0) {
@@ -850,7 +854,7 @@ Winning scores: 6, 7
 Strategy-based scores: 3, 4, 5
 Losing scores: 1, 2
 */
-static int get_move_score(const int move_result, const TETRALATH_AI_STRATEGY ai_strategy, const bool is_forced_move_for_opponent, const bool is_forced_move_for_perspective) {
+static int get_move_score(const int move_result, const TetralathAiStrategy ai_strategy, const bool is_forced_move_for_opponent, const bool is_forced_move_for_perspective) {
     if (move_result == ((int)TETRALATH_RESULT_WIN)) {
         return 7;
     }
@@ -889,11 +893,11 @@ static int get_move_score(const int move_result, const TETRALATH_AI_STRATEGY ai_
 }
 
 static void *minimax_thread(void *arg) {
-    TETRALATH_MINIMAX_THREAD_DATA * restrict const thread_data = (TETRALATH_MINIMAX_THREAD_DATA*)arg;
+    TetralathMinimaxThreadData * restrict const thread_data = (TetralathMinimaxThreadData*)arg;
 
-    TETRALATH_MOVE_VALUE * restrict const move_values = thread_data->move_values;
+    TetralathMoveValue * restrict const move_values = thread_data->move_values;
 
-    const TETRALATH_COLOR perspective_color = thread_data->perspective_color;
+    const TetralathColor perspective_color = thread_data->perspective_color;
 
     const int64_t target_end_time = thread_data->target_end_time;
 
@@ -901,10 +905,10 @@ static void *minimax_thread(void *arg) {
     const int next_moves_count = thread_data->next_moves_count;
     const int minimax_depth = thread_data->minimax_depth;
 
-    alignas(TETRALATH_CPU_CACHE_LINE_BYTES) TETRALATH_COLOR board_copy[TETRALATH_ALLOCATED_BOARD_LENGTH];
+    alignas(TETRALATH_CPU_CACHE_LINE_BYTES) TetralathColor board_copy[TETRALATH_ALLOCATED_BOARD_LENGTH];
     copy_board(board_copy, thread_data->original_board);
 
-    const alignas(TETRALATH_CPU_CACHE_LINE_BYTES) TETRALATH_MINIMAX_STATIC_DATA static_data = {
+    const alignas(TETRALATH_CPU_CACHE_LINE_BYTES) TetralathMinimaxStaticData static_data = {
         .board_copy = board_copy,
         .target_end_time = target_end_time,
         .perspective_color = perspective_color,
@@ -995,7 +999,7 @@ void compute_previous_positions(void) {
     }
 }
 
-void initialize_move_values(TETRALATH_MOVE_VALUE * restrict const move_values, const bool shuffle_order) {
+void initialize_move_values(TetralathMoveValue * restrict const move_values, const bool shuffle_order) {
     int moves_order[TETRALATH_BOARD_SIZE];
 
     for (int i = 0; i < TETRALATH_BOARD_SIZE; i += 1) {
@@ -1016,7 +1020,7 @@ void initialize_move_values(TETRALATH_MOVE_VALUE * restrict const move_values, c
     }
 }
 
-void copy_move_values(TETRALATH_MOVE_VALUE * restrict const new_move_values, const TETRALATH_MOVE_VALUE * restrict const move_values) {
+void copy_move_values(TetralathMoveValue * restrict const new_move_values, const TetralathMoveValue * restrict const move_values) {
     for (int i = 0; i < TETRALATH_BOARD_SIZE; i += 1) {
         new_move_values[i].position = move_values[i].position;
         new_move_values[i].minimax_result = move_values[i].minimax_result;
@@ -1026,8 +1030,8 @@ void copy_move_values(TETRALATH_MOVE_VALUE * restrict const new_move_values, con
     }
 }
 
-TETRALATH_RESULT get_player_game_result(const TETRALATH_COLOR * restrict const board, const int moves_count, const TETRALATH_COLOR perspective_color) {
-    TETRALATH_RESULT player_game_result = TETRALATH_RESULT_NONE;
+TetralathResult get_player_game_result(const TetralathColor * restrict const board, const int moves_count, const TetralathColor perspective_color) {
+    TetralathResult player_game_result = TETRALATH_RESULT_NONE;
 
     const int raw_game_result = check_game_result(board, moves_count, perspective_color, flip_color(perspective_color));
     switch (raw_game_result) {
@@ -1047,13 +1051,13 @@ TETRALATH_RESULT get_player_game_result(const TETRALATH_COLOR * restrict const b
     return player_game_result;
 }
 
-void prioritize_neighboring_moves(const TETRALATH_COLOR * restrict const board, TETRALATH_MOVE_VALUE * restrict const move_values, const TETRALATH_COLOR perspective_color, const TETRALATH_AI_STRATEGY ai_strategy) {
+void prioritize_neighboring_moves(const TetralathColor * restrict const board, TetralathMoveValue * restrict const move_values, const TetralathColor perspective_color, const TetralathAiStrategy ai_strategy) {
     int neighboring_positions_relevance[TETRALATH_BOARD_SIZE];
 
     const int perspective_base_weight = (ai_strategy == TETRALATH_AI_STRATEGY_OFFENSIVE) ? TETRALATH_WEIGHT_ADDITION_NEIGHBORING_MOVE_MORE_IMPORTANT : TETRALATH_WEIGHT_ADDITION_NEIGHBORING_MOVE_LESS_IMPORTANT;
     const int opponent_base_weight = (perspective_base_weight == TETRALATH_WEIGHT_ADDITION_NEIGHBORING_MOVE_MORE_IMPORTANT) ? TETRALATH_WEIGHT_ADDITION_NEIGHBORING_MOVE_LESS_IMPORTANT : TETRALATH_WEIGHT_ADDITION_NEIGHBORING_MOVE_MORE_IMPORTANT;
 
-    const TETRALATH_COLOR opponent_color = flip_color(perspective_color);
+    const TetralathColor opponent_color = flip_color(perspective_color);
 
     initialize_neighboring_positions(neighboring_positions_relevance);
     set_neighboring_relevance(neighboring_positions_relevance, board, perspective_color, opponent_color, true);
@@ -1064,11 +1068,11 @@ void prioritize_neighboring_moves(const TETRALATH_COLOR * restrict const board, 
     apply_weight_addition_for_neighboring_positions(move_values, neighboring_positions_relevance, opponent_base_weight);
 }
 
-void prioritize_moves_by_outcome(const TETRALATH_COLOR * restrict const original_board, TETRALATH_MOVE_VALUE * restrict const move_values, const TETRALATH_COLOR perspective_color, const int moves_count, const TETRALATH_AI_STRATEGY ai_strategy) {
-    TETRALATH_COLOR board_copy[TETRALATH_ALLOCATED_BOARD_LENGTH];
+void prioritize_moves_by_outcome(const TetralathColor * restrict const original_board, TetralathMoveValue * restrict const move_values, const TetralathColor perspective_color, const int moves_count, const TetralathAiStrategy ai_strategy) {
+    TetralathColor board_copy[TETRALATH_ALLOCATED_BOARD_LENGTH];
     copy_board(board_copy, original_board);
 
-    const TETRALATH_COLOR opponent_color = flip_color(perspective_color);
+    const TetralathColor opponent_color = flip_color(perspective_color);
 
     const int moves_count_1 = moves_count + 1;
     const int moves_count_2 = moves_count + 2;
@@ -1117,11 +1121,11 @@ void prioritize_moves_by_outcome(const TETRALATH_COLOR * restrict const original
     }
 }
 
-int get_forced_next_move(const TETRALATH_COLOR * restrict const original_board, const TETRALATH_COLOR perspective_color, const int moves_count) {
-    TETRALATH_COLOR board_copy[TETRALATH_ALLOCATED_BOARD_LENGTH];
+int get_forced_next_move(const TetralathColor * restrict const original_board, const TetralathColor perspective_color, const int moves_count) {
+    TetralathColor board_copy[TETRALATH_ALLOCATED_BOARD_LENGTH];
     copy_board(board_copy, original_board);
 
-    const TETRALATH_COLOR opponent_color = flip_color(perspective_color);
+    const TetralathColor opponent_color = flip_color(perspective_color);
 
     const int current_result = check_game_result(board_copy, moves_count, opponent_color, perspective_color);
 
@@ -1139,8 +1143,8 @@ int get_forced_next_move(const TETRALATH_COLOR * restrict const original_board, 
     return TETRALATH_POSITION_NONE;
 }
 
-TETRALATH_MOVE_VALUE *get_new_best_move(TETRALATH_MOVE_VALUE * const move_values, int previous_best_move, int previous_best_result) {
-    TETRALATH_MOVE_VALUE * new_best_move = NULL;
+TetralathMoveValue *get_new_best_move(TetralathMoveValue * const move_values, int previous_best_move, int previous_best_result) {
+    TetralathMoveValue * new_best_move = NULL;
 
     int updated_previous_best_result = previous_best_result;
 
@@ -1180,8 +1184,8 @@ TETRALATH_MOVE_VALUE *get_new_best_move(TETRALATH_MOVE_VALUE * const move_values
     return new_best_move;
 }
 
-void minimax(const TETRALATH_COLOR * restrict const original_board, TETRALATH_MOVE_VALUE * restrict const move_values, const TETRALATH_COLOR perspective_color, const int moves_count, const int minimax_depth, const int forced_next_move, const TETRALATH_AI_MODE ai_mode, const int number_of_threads, const int64_t target_end_time, const bool use_weights_on_sort) {
-    TETRALATH_MOVE_VALUE new_move_values[TETRALATH_BOARD_SIZE];
+void minimax(const TetralathColor * restrict const original_board, TetralathMoveValue * restrict const move_values, const TetralathColor perspective_color, const int moves_count, const int minimax_depth, const int forced_next_move, const TetralathAiMode ai_mode, const int number_of_threads, const int64_t target_end_time, const bool use_weights_on_sort) {
+    TetralathMoveValue new_move_values[TETRALATH_BOARD_SIZE];
     copy_move_values(new_move_values, move_values);
 
     // We sort the move candidates taking advantage of the information known up
@@ -1195,13 +1199,13 @@ void minimax(const TETRALATH_COLOR * restrict const original_board, TETRALATH_MO
     const int initial_alpha = (TETRALATH_RESULT_LOSS_MIN + next_moves_count);
     const int initial_beta = (ai_mode == TETRALATH_AI_MODE_RUTHLESS) ? TETRALATH_RESULT_WIN_MIN : (TETRALATH_RESULT_WIN_MAX - next_moves_count);
 
-    alignas(TETRALATH_CPU_CACHE_LINE_BYTES) TETRALATH_SHARED_INT shared_move_index = { .value = 0 };
-    alignas(TETRALATH_CPU_CACHE_LINE_BYTES) TETRALATH_SHARED_INT shared_alpha = { .value = initial_alpha };
+    alignas(TETRALATH_CPU_CACHE_LINE_BYTES) TetralathSharedInt shared_move_index = { .value = 0 };
+    alignas(TETRALATH_CPU_CACHE_LINE_BYTES) TetralathSharedInt shared_alpha = { .value = initial_alpha };
 
     pthread_mutex_init(&(shared_move_index.mutex), NULL);
     pthread_mutex_init(&(shared_alpha.mutex), NULL);
 
-    TETRALATH_MINIMAX_THREAD_DATA thread_data[number_of_threads];
+    TetralathMinimaxThreadData thread_data[number_of_threads];
     for (int i = 0; i < number_of_threads; i += 1) {
         thread_data[i].original_board = original_board;
         thread_data[i].move_values = new_move_values;

@@ -3,7 +3,7 @@
 #include "time.h"
 #include "ui.h"
 
-static const TETRALATH_UI_POSITION board_ui_positions[TETRALATH_BOARD_SIZE] = {
+static const TetralathUiPosition board_ui_positions[TETRALATH_BOARD_SIZE] = {
     {TETRALATH_BOARD_X + (TETRALATH_POSITION_OFFSET * 0) + (TETRALATH_ROW_OFFSET * 4) + 1, TETRALATH_BOARD_Y + 1},
     {TETRALATH_BOARD_X + (TETRALATH_POSITION_OFFSET * 1) + (TETRALATH_ROW_OFFSET * 4) + 1, TETRALATH_BOARD_Y + 1},
     {TETRALATH_BOARD_X + (TETRALATH_POSITION_OFFSET * 2) + (TETRALATH_ROW_OFFSET * 4) + 1, TETRALATH_BOARD_Y + 1},
@@ -75,7 +75,7 @@ static void unhighlight_position(const int position) {
     attroff(COLOR_PAIR(TETRALATH_BLACK_YELLOW));
 }
 
-static void highlight_position(const int position, const TETRALATH_COLOR player_color) {
+static void highlight_position(const int position, const TetralathColor player_color) {
     int position_x = board_ui_positions[position].x;
     int position_y = board_ui_positions[position].y;
     int highlight_color = TETRALATH_WHITE_BLUE;
@@ -135,7 +135,7 @@ static void draw_current_player_title(void) {
     mvprintw(y, x, "Current player:");
 }
 
-static void update_current_player(const TETRALATH_COLOR current_color, const TETRALATH_COLOR player_color) {
+static void update_current_player(const TetralathColor current_color, const TetralathColor player_color) {
     const int x = TETRALATH_RIGHT_PANEL_X;
     const int y = TETRALATH_RIGHT_PANEL_Y + 8;
 
@@ -158,7 +158,7 @@ static void update_current_player(const TETRALATH_COLOR current_color, const TET
     mvprintw(y, x, "%s %s", color_name, role);
 }
 
-static void update_game_result(const TETRALATH_RESULT result) {
+static void update_game_result(const TetralathResult result) {
     const int x = TETRALATH_RIGHT_PANEL_X;
     const int y = TETRALATH_RIGHT_PANEL_Y + 12;
 
@@ -274,7 +274,7 @@ static int selector_component(char *prompt_text, char **option_texts, int *optio
     return chosen_option_value;
 }
 
-TETRALATH_COLOR choose_player_color(const TETRALATH_COLOR default_player_color) {
+TetralathColor choose_player_color(const TetralathColor default_player_color) {
     char prompt_text[] = "Player color:";
     char *option_texts[2] = {
         "- White",
@@ -304,7 +304,7 @@ TETRALATH_COLOR choose_player_color(const TETRALATH_COLOR default_player_color) 
     return TETRALATH_COLOR_NONE;
 }
 
-TETRALATH_AI_MODE choose_ai_mode(const TETRALATH_AI_MODE default_ai_mode) {
+TetralathAiMode choose_ai_mode(const TetralathAiMode default_ai_mode) {
     char prompt_text[] = "AI mode:";
     char *option_texts[2] = {
         "- Merciful",
@@ -334,7 +334,7 @@ TETRALATH_AI_MODE choose_ai_mode(const TETRALATH_AI_MODE default_ai_mode) {
     return TETRALATH_AI_MODE_NONE;
 }
 
-TETRALATH_AI_STRATEGY choose_ai_strategy(const TETRALATH_AI_STRATEGY default_ai_strategy) {
+TetralathAiStrategy choose_ai_strategy(const TetralathAiStrategy default_ai_strategy) {
     char prompt_text[] = "AI strategy:";
     char *option_texts[2] = {
         "- Offensive",
@@ -389,8 +389,8 @@ int choose_number_of_threads(const int default_number_of_threads) {
     return chosen_value;
 }
 
-TETRALATH_PLAYER_ACTION choose_player_action(void) {
-    TETRALATH_PLAYER_ACTION chosen_action = TETRALATH_PLAYER_ACTION_NONE;
+TetralathPlayerAction choose_player_action(void) {
+    TetralathPlayerAction chosen_action = TETRALATH_PLAYER_ACTION_NONE;
 
     int input = getch();
     switch (input) {
@@ -432,7 +432,7 @@ TETRALATH_PLAYER_ACTION choose_player_action(void) {
     return chosen_action;
 }
 
-void update_position_highlights(const int current_position, const int previous_position, const TETRALATH_COLOR player_color) {
+void update_position_highlights(const int current_position, const int previous_position, const TetralathColor player_color) {
     if (previous_position != TETRALATH_POSITION_NONE) {
         unhighlight_position(previous_position);
     }
@@ -442,7 +442,7 @@ void update_position_highlights(const int current_position, const int previous_p
     refresh();
 }
 
-void draw_move(const int position, const TETRALATH_COLOR color, const bool is_latest_move) {
+void draw_move(const int position, const TetralathColor color, const bool is_latest_move) {
     const int position_x = board_ui_positions[position].x;
     const int position_y = board_ui_positions[position].y;
     if (color == TETRALATH_COLOR_WHITE) {
@@ -467,7 +467,7 @@ void draw_move(const int position, const TETRALATH_COLOR color, const bool is_la
     refresh();
 }
 
-void draw_ai_info(const TETRALATH_AI_INFO_STATE ai_info_state, const int64_t processing_start_time, const int64_t processing_end_time, const int minimax_depth, const double minimax_time_taken) {
+void draw_ai_info(const TetralathAiInfoState ai_info_state, const int64_t processing_start_time, const int64_t processing_end_time, const int minimax_depth, const double minimax_time_taken) {
     const int x = TETRALATH_RIGHT_PANEL_X;
     const int y = TETRALATH_RIGHT_PANEL_Y + 10;
 
@@ -513,13 +513,13 @@ void draw_right_panel(void) {
     refresh();
 }
 
-void start_turn_ui(const TETRALATH_COLOR current_color, const TETRALATH_COLOR player_color, const TETRALATH_RESULT result) {
+void start_turn_ui(const TetralathColor current_color, const TetralathColor player_color, const TetralathResult result) {
     update_current_player(current_color, player_color);
     update_game_result(result);
     refresh();
 }
 
-void finish_game_ui(TETRALATH_RESULT result) {
+void finish_game_ui(TetralathResult result) {
     update_game_result(result);
     refresh();
 }

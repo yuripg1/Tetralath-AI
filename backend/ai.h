@@ -13,13 +13,12 @@ typedef struct {
     int weight;
     bool is_valid;
     bool has_finished_in_time;
-} TETRALATH_MOVE_VALUE;
+} TetralathMoveValue;
 
 #define TETRALATH_NEIGHBORS_LENGTH_TO_SEARCH 3
-
 typedef struct {
-    const TETRALATH_COLOR perspective_color;
-    const TETRALATH_COLOR opponent_color;
+    const TetralathColor perspective_color;
+    const TetralathColor opponent_color;
     const int reference_position;
     const int direction;
     int unobstructed_length_forward;
@@ -28,40 +27,38 @@ typedef struct {
     int unobstructed_or_friendly_length_backward;
     int neighbor_positions_forward[TETRALATH_NEIGHBORS_LENGTH_TO_SEARCH];
     int neighbor_positions_backward[TETRALATH_NEIGHBORS_LENGTH_TO_SEARCH];
-} TETRALATH_NEIGHBORS_INFO;
+} TetralathNeighborsInfo;
 
 #define TETRALATH_SHARED_INT_BASE_SIZE (sizeof(pthread_mutex_t) + sizeof(int))
-
 typedef struct {
     pthread_mutex_t mutex;
     int value;
     const uint8_t padding[TETRALATH_CPU_CACHE_LINE_BYTES - TETRALATH_SHARED_INT_BASE_SIZE];
-} TETRALATH_SHARED_INT;
-_Static_assert((sizeof(TETRALATH_SHARED_INT) % TETRALATH_CPU_CACHE_LINE_BYTES) == 0, "sizeof(TETRALATH_SHARED_INT) must be a multiple of TETRALATH_CPU_CACHE_LINE_BYTES");
+} TetralathSharedInt;
+_Static_assert((sizeof(TetralathSharedInt) % TETRALATH_CPU_CACHE_LINE_BYTES) == 0, "sizeof(TetralathSharedInt) must be a multiple of TETRALATH_CPU_CACHE_LINE_BYTES");
 
 typedef struct {
-    const TETRALATH_COLOR * restrict original_board;
-    TETRALATH_MOVE_VALUE * restrict move_values;
-    TETRALATH_SHARED_INT * restrict shared_move_index;
-    TETRALATH_SHARED_INT * restrict shared_alpha;
+    const TetralathColor * restrict original_board;
+    TetralathMoveValue * restrict move_values;
+    TetralathSharedInt * restrict shared_move_index;
+    TetralathSharedInt * restrict shared_alpha;
     int64_t target_end_time;
-    TETRALATH_COLOR perspective_color;
+    TetralathColor perspective_color;
     int next_moves_count;
     int minimax_depth;
     int forced_next_move;
     int initial_alpha;
     int initial_beta;
-} TETRALATH_MINIMAX_THREAD_DATA;
+} TetralathMinimaxThreadData;
 
-#define TETRALATH_MINIMAX_STATIC_DATA_BASE_SIZE (sizeof(void*) + sizeof(int64_t) + sizeof(TETRALATH_COLOR))
-
+#define TETRALATH_MINIMAX_STATIC_DATA_BASE_SIZE (sizeof(void*) + sizeof(int64_t) + sizeof(TetralathColor))
 typedef struct {
-    TETRALATH_COLOR * restrict const board_copy;
+    TetralathColor * restrict const board_copy;
     const int64_t target_end_time;
-    const TETRALATH_COLOR perspective_color;
+    const TetralathColor perspective_color;
     const uint8_t padding[TETRALATH_CPU_CACHE_LINE_BYTES - TETRALATH_MINIMAX_STATIC_DATA_BASE_SIZE];
-} TETRALATH_MINIMAX_STATIC_DATA;
-_Static_assert((sizeof(TETRALATH_MINIMAX_STATIC_DATA) % TETRALATH_CPU_CACHE_LINE_BYTES) == 0, "sizeof(TETRALATH_MINIMAX_STATIC_DATA) must be a multiple of TETRALATH_CPU_CACHE_LINE_BYTES");
+} TetralathMinimaxStaticData;
+_Static_assert((sizeof(TetralathMinimaxStaticData) % TETRALATH_CPU_CACHE_LINE_BYTES) == 0, "sizeof(TetralathMinimaxStaticData) must be a multiple of TETRALATH_CPU_CACHE_LINE_BYTES");
 
 #define TETRALATH_MAX_NEAR_QUADRUPLETS 2
 
@@ -77,8 +74,8 @@ typedef struct {
     bool has_triplets[TETRALATH_NUMBER_OF_COLORS];
     uint8_t near_quadruplets_empty_positions[TETRALATH_NUMBER_OF_COLORS][TETRALATH_MAX_NEAR_QUADRUPLETS];
     uint8_t near_triplets_empty_positions[TETRALATH_NUMBER_OF_COLORS][TETRALATH_MAX_NEAR_TRIPLETS];
-} TETRALATH_SEQUENCES_INFO;
-_Static_assert((sizeof(TETRALATH_SEQUENCES_INFO) % TETRALATH_CPU_CACHE_LINE_BYTES) == 0, "sizeof(TETRALATH_SEQUENCES_INFO) must be a multiple of TETRALATH_CPU_CACHE_LINE_BYTES");
+} TetralathSequencesInfo;
+_Static_assert((sizeof(TetralathSequencesInfo) % TETRALATH_CPU_CACHE_LINE_BYTES) == 0, "sizeof(TetralathSequencesInfo) must be a multiple of TETRALATH_CPU_CACHE_LINE_BYTES");
 
 #define TETRALATH_BACKWARD_SEARCH 1
 #define TETRALATH_FORWARD_SEARCH 2
@@ -93,13 +90,13 @@ _Static_assert((sizeof(TETRALATH_SEQUENCES_INFO) % TETRALATH_CPU_CACHE_LINE_BYTE
 #define TETRALATH_WEIGHT_ADDITION_BY_MOVE_OUTCOME 134217728
 
 void compute_previous_positions(void);
-void initialize_move_values(TETRALATH_MOVE_VALUE * restrict const move_values, const bool shuffle_order);
-void copy_move_values(TETRALATH_MOVE_VALUE * restrict const new_move_values, const TETRALATH_MOVE_VALUE * restrict const move_values);
-TETRALATH_RESULT get_player_game_result(const TETRALATH_COLOR * restrict const board, const int moves_count, const TETRALATH_COLOR perspective_color);
-void prioritize_neighboring_moves(const TETRALATH_COLOR * restrict const board, TETRALATH_MOVE_VALUE * restrict const move_values, const TETRALATH_COLOR perspective_color, const TETRALATH_AI_STRATEGY ai_strategy);
-void prioritize_moves_by_outcome(const TETRALATH_COLOR * const original_board, TETRALATH_MOVE_VALUE * restrict const move_values, const TETRALATH_COLOR perspective_color, const int moves_count, const TETRALATH_AI_STRATEGY ai_strategy);
-int get_forced_next_move(const TETRALATH_COLOR * restrict const original_board, const TETRALATH_COLOR perspective_color, const int moves_count);
-TETRALATH_MOVE_VALUE *get_new_best_move(TETRALATH_MOVE_VALUE * const move_values, int previous_best_move, int previous_best_result);
-void minimax(const TETRALATH_COLOR * restrict const original_board, TETRALATH_MOVE_VALUE * restrict const move_values, const TETRALATH_COLOR perspective_color, const int moves_count, const int minimax_depth, const int forced_next_move, const TETRALATH_AI_MODE ai_mode, const int number_of_threads, const int64_t target_end_time, const bool use_weights_on_sort);
+void initialize_move_values(TetralathMoveValue * restrict const move_values, const bool shuffle_order);
+void copy_move_values(TetralathMoveValue * restrict const new_move_values, const TetralathMoveValue * restrict const move_values);
+TetralathResult get_player_game_result(const TetralathColor * restrict const board, const int moves_count, const TetralathColor perspective_color);
+void prioritize_neighboring_moves(const TetralathColor * restrict const board, TetralathMoveValue * restrict const move_values, const TetralathColor perspective_color, const TetralathAiStrategy ai_strategy);
+void prioritize_moves_by_outcome(const TetralathColor * const original_board, TetralathMoveValue * restrict const move_values, const TetralathColor perspective_color, const int moves_count, const TetralathAiStrategy ai_strategy);
+int get_forced_next_move(const TetralathColor * restrict const original_board, const TetralathColor perspective_color, const int moves_count);
+TetralathMoveValue *get_new_best_move(TetralathMoveValue * const move_values, int previous_best_move, int previous_best_result);
+void minimax(const TetralathColor * restrict const original_board, TetralathMoveValue * restrict const move_values, const TetralathColor perspective_color, const int moves_count, const int minimax_depth, const int forced_next_move, const TetralathAiMode ai_mode, const int number_of_threads, const int64_t target_end_time, const bool use_weights_on_sort);
 
 #endif

@@ -17,7 +17,7 @@ typedef enum {
     // Can represent a position outside the board.
     // 11 binary
     TETRALATH_COLOR_INVALID = 3,
-} TETRALATH_COLOR;
+} TetralathColor;
 
 #define TETRALATH_NUMBER_OF_COLORS 2
 #define TETRALATH_FIRST_MOVE_COLOR TETRALATH_COLOR_WHITE
@@ -31,8 +31,8 @@ _Static_assert((((int)TETRALATH_COLOR_BLACK) ^ TETRALATH_COLOR_MASK) == ((int)TE
 
 // Flips between white and black colors with a simple XOR operation, without the
 // need for if/else conditionals.
-static inline TETRALATH_COLOR flip_color(const TETRALATH_COLOR color) {
-    return (TETRALATH_COLOR)(color ^ TETRALATH_COLOR_MASK);
+static inline TetralathColor flip_color(const TetralathColor color) {
+    return (TetralathColor)(color ^ TETRALATH_COLOR_MASK);
 }
 
 typedef enum {
@@ -81,7 +81,7 @@ typedef enum {
 
     // 110111111 binary
     TETRALATH_RESULT_INFINITY_MAX = 447,
-} TETRALATH_RESULT;
+} TetralathResult;
 
 #define TETRALATH_MINIMUM_RESULT_VALUE TETRALATH_RESULT_INFINITY_MIN
 
@@ -94,32 +94,32 @@ typedef enum {
     TETRALATH_SEQUENCE_NEAR_TRIPLET_3 = 5,
     TETRALATH_SEQUENCE_NEAR_QUADRUPLET_1 = 6,
     TETRALATH_SEQUENCE_NEAR_QUADRUPLET_2 = 7,
-} TETRALATH_SEQUENCE;
+} TetralathSequence;
 
 typedef enum {
     TETRALATH_STATE_NONE = 0,
     TETRALATH_STATE_RUNNING = 1,
     TETRALATH_STATE_ENDING = 2,
     TETRALATH_STATE_QUITTING = 3,
-} TETRALATH_STATE;
+} TetralathState;
 
 typedef enum {
     TETRALATH_AI_MODE_NONE = 0,
     TETRALATH_AI_MODE_MERCIFUL = 1,
     TETRALATH_AI_MODE_RUTHLESS = 2,
-} TETRALATH_AI_MODE;
+} TetralathAiMode;
 
 typedef enum {
     TETRALATH_AI_STRATEGY_NONE = 0,
     TETRALATH_AI_STRATEGY_OFFENSIVE = 1,
     TETRALATH_AI_STRATEGY_DEFENSIVE = 2,
-} TETRALATH_AI_STRATEGY;
+} TetralathAiStrategy;
 
 #define TETRALATH_CPU_CACHE_LINE_BYTES 64
 
 #define TETRALATH_ALLOCATED_BOARD_LENGTH 64
 
-#define TETRALATH_ALLOCATED_BOARD_BYTES (TETRALATH_ALLOCATED_BOARD_LENGTH * sizeof(TETRALATH_COLOR))
+#define TETRALATH_ALLOCATED_BOARD_BYTES (TETRALATH_ALLOCATED_BOARD_LENGTH * sizeof(TetralathColor))
 _Static_assert((TETRALATH_ALLOCATED_BOARD_BYTES % TETRALATH_CPU_CACHE_LINE_BYTES) == 0, "TETRALATH_ALLOCATED_BOARD_BYTES must be a multiple of TETRALATH_CPU_CACHE_LINE_BYTES");
 
 #define TETRALATH_BOARD_SIZE 61

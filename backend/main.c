@@ -1,26 +1,25 @@
 #include <stdlib.h>
-#include <time.h>
 
 #include "definitions.h"
 #include "game.h"
 #include "time.h"
 #include "ui.h"
 
-static int get_player_action(TETRALATH_GAME *game) {
+static int get_player_action(TetralathGame *game) {
     int chosen_action = TETRALATH_POSITION_NONE;
     int previous_position = TETRALATH_POSITION_NONE;
     int highlighted_position = TETRALATH_POSITION_NONE;
 
-    TETRALATH_COLOR player_color = get_player_color(game);
+    TetralathColor player_color = get_player_color(game);
 
-    TETRALATH_STATE game_state = get_game_state(game);
+    TetralathState game_state = get_game_state(game);
     if (game_state != TETRALATH_STATE_ENDING) {
         highlighted_position = get_next_empty_position(game, (-1), TETRALATH_BOARD_FORWARD_INCREMENT);
     }
 
     while (chosen_action == TETRALATH_POSITION_NONE) {
         update_position_highlights(highlighted_position, previous_position, player_color);
-        const TETRALATH_PLAYER_ACTION player_action = choose_player_action();
+        const TetralathPlayerAction player_action = choose_player_action();
         int next_position = TETRALATH_POSITION_NONE;
         switch (player_action) {
             case TETRALATH_PLAYER_ACTION_KEY_LEFT:
@@ -76,14 +75,14 @@ static int get_player_action(TETRALATH_GAME *game) {
     return chosen_action;
 }
 
-static void process_player_action(TETRALATH_GAME *game) {
-    TETRALATH_COLOR player_color = get_player_color(game);
+static void process_player_action(TetralathGame *game) {
+    TetralathColor player_color = get_player_color(game);
     int player_move = TETRALATH_POSITION_NONE;
     const int player_action = get_player_action(game);
     if (player_action >= TETRALATH_FIRST_POSITION && player_action <= TETRALATH_LAST_POSITION) {
         if (get_moves_count(game) >= 1) {
             const int previous_move_position = get_latest_move_position(game);
-            const TETRALATH_COLOR previous_move_color = get_latest_move_color(game);
+            const TetralathColor previous_move_color = get_latest_move_color(game);
             draw_move(previous_move_position, previous_move_color, false);
         }
         player_move = player_action;
@@ -101,7 +100,7 @@ static void process_player_action(TETRALATH_GAME *game) {
         draw_ai_info(TETRALATH_AI_INFO_STATE_NONE, 0, 0, 0, 0);
         if (get_moves_count(game) >= 1) {
             const int latest_move_position = get_latest_move_position(game);
-            const TETRALATH_COLOR latest_move_color = get_latest_move_color(game);
+            const TetralathColor latest_move_color = get_latest_move_color(game);
             draw_move(latest_move_position, latest_move_color, true);
         }
         set_next_color(game, player_color);
@@ -110,7 +109,7 @@ static void process_player_action(TETRALATH_GAME *game) {
     }
 }
 
-static void process_ai_move(TETRALATH_GAME *game) {
+static void process_ai_move(TetralathGame *game) {
     const int64_t processing_start_time = get_current_time_nsec();
 
     draw_ai_info(TETRALATH_AI_INFO_STATE_THINKING, 0, 0, 0, 0);
@@ -119,11 +118,11 @@ static void process_ai_move(TETRALATH_GAME *game) {
 
     if (get_moves_count(game) >= 1) {
         const int previous_move_position = get_latest_move_position(game);
-        const TETRALATH_COLOR previous_move_color = get_latest_move_color(game);
+        const TetralathColor previous_move_color = get_latest_move_color(game);
         draw_move(previous_move_position, previous_move_color, false);
     }
 
-    TETRALATH_COLOR current_color = get_current_color(game);
+    TetralathColor current_color = get_current_color(game);
     set_move(game, ai_move, current_color);
     draw_move(ai_move, current_color, true);
 
@@ -133,18 +132,18 @@ static void process_ai_move(TETRALATH_GAME *game) {
 }
 
 static void graphical_game(void) {
-    TETRALATH_GAME *game = init_headless_game();
+    TetralathGame *game = init_headless_game();
     initialize_game_ui();
-    TETRALATH_COLOR player_color = choose_player_color(TETRALATH_COLOR_WHITE);
+    TetralathColor player_color = choose_player_color(TETRALATH_COLOR_WHITE);
     set_ai_mode(game, choose_ai_mode(TETRALATH_AI_MODE_MERCIFUL));
     set_ai_strategy(game, choose_ai_strategy(TETRALATH_AI_STRATEGY_OFFENSIVE));
     set_number_of_threads(game, choose_number_of_threads(1));
     set_player_color(game, player_color);
     draw_right_panel();
-    TETRALATH_RESULT game_result;
-    TETRALATH_COLOR current_color;
+    TetralathResult game_result;
+    TetralathColor current_color;
     set_game_state(game, TETRALATH_STATE_RUNNING);
-    TETRALATH_STATE game_state = get_game_state(game);
+    TetralathState game_state = get_game_state(game);
     while (game_state != TETRALATH_STATE_ENDING && game_state != TETRALATH_STATE_QUITTING) {
         update_game_result(game);
         game_result = get_game_result(game);
