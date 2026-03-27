@@ -332,12 +332,9 @@ static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) check_game_result(const 
         for (int j = 0; j < TETRALATH_SEQUENCE_START_POSITIONS_PER_DIRECTION_COUNT; j += 1) {
             const int sequence_position_1 = ((int)(sequence_start_positions[i][j]));
             const TetralathColor sequence_color_1 = board[sequence_position_1];
-
-            // Hints the compiler to prioritize the costlier path.
-            if (DO_NOT_EXPECT(sequence_color_1 == TETRALATH_COLOR_NONE)) {
+            if (sequence_color_1 == TETRALATH_COLOR_NONE) {
                 continue;
             }
-
             const int sequence_position_2 = ((int)(sequence_next_positions[i][sequence_position_1]));
             const int sequence_position_3 = ((int)(sequence_next_positions[i][sequence_position_2]));
             const int sequence_position_4 = ((int)(sequence_next_positions[i][sequence_position_3]));
@@ -446,8 +443,7 @@ static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) check_game_result(const 
 
     }
 
-    // Hints the compiler to prioritize the path more likely to happen
-    if (DO_NOT_EXPECT(perspective_near_quadruplets_count == 1)) {
+    if (perspective_near_quadruplets_count == 1) {
         const int candidate_for_winning_move = (int)(sequences_info.near_quadruplets_empty_positions[perspective_color_index][0]);
         const int opponent_near_triplets_count = sequences_info.near_triplets_count[opponent_color_index];
         if (opponent_near_triplets_count >= 1) {
@@ -892,6 +888,10 @@ static int get_move_score(const int move_result, const TetralathAiStrategy ai_st
     return 4;
 }
 
+static bool should_save_terminal_upper_bound(const int evaluated_result) {
+    return (evaluated_result >= TETRALATH_RESULT_LOSS_MIN) && (evaluated_result <= TETRALATH_RESULT_LOSS_MAX);
+}
+
 static void *minimax_thread(void *arg) {
     TetralathMinimaxThreadData * restrict const thread_data = (TetralathMinimaxThreadData*)arg;
 
@@ -936,9 +936,11 @@ static void *minimax_thread(void *arg) {
             break;
         }
 
+        const int terminal_upper_bound = move_values[local_index].terminal_upper_bound;
+
         const int evaluated_position = move_values[local_index].position;
 
-        if (((forced_next_move == TETRALATH_POSITION_NONE) || (forced_next_move == evaluated_position)) && (board_copy[evaluated_position] == TETRALATH_COLOR_NONE) && (!prune)) {
+        if (((forced_next_move == TETRALATH_POSITION_NONE) || (forced_next_move == evaluated_position)) && (board_copy[evaluated_position] == TETRALATH_COLOR_NONE) && ((terminal_upper_bound > local_alpha) || (local_alpha == initial_alpha)) && (!prune)) {
             board_copy[evaluated_position] = perspective_color;
 
             const int evaluated_result = min_level(&static_data, local_alpha, local_beta, next_moves_count, minimax_depth);
@@ -963,6 +965,10 @@ static void *minimax_thread(void *arg) {
             board_copy[evaluated_position] = TETRALATH_COLOR_NONE;
 
             move_values[local_index].minimax_result = evaluated_result;
+
+            if (should_save_terminal_upper_bound(evaluated_result)) {
+                move_values[local_index].terminal_upper_bound = evaluated_result;
+            }
 
             if (local_beta <= local_alpha) {
                 prune = true;
@@ -1014,6 +1020,7 @@ void initialize_move_values(TetralathMoveValue * restrict const move_values, con
         const int position = moves_order[i];
         move_values[i].position = position;
         move_values[i].minimax_result = TETRALATH_RESULT_INFINITY_MIN;
+        move_values[i].terminal_upper_bound = TETRALATH_RESULT_INFINITY_MAX;
         move_values[i].weight = (int)default_move_weights[position];
         move_values[i].is_valid = false;
         move_values[i].has_finished_in_time = false;
@@ -1024,6 +1031,7 @@ void copy_move_values(TetralathMoveValue * restrict const new_move_values, const
     for (int i = 0; i < TETRALATH_BOARD_SIZE; i += 1) {
         new_move_values[i].position = move_values[i].position;
         new_move_values[i].minimax_result = move_values[i].minimax_result;
+        new_move_values[i].terminal_upper_bound = move_values[i].terminal_upper_bound;
         new_move_values[i].weight = move_values[i].weight;
         new_move_values[i].is_valid = move_values[i].is_valid;
         new_move_values[i].has_finished_in_time = move_values[i].has_finished_in_time;

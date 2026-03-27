@@ -10,6 +10,7 @@
 typedef struct {
     int position;
     int minimax_result;
+    int terminal_upper_bound;
     int weight;
     bool is_valid;
     bool has_finished_in_time;
