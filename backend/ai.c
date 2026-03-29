@@ -116,16 +116,16 @@ Directions:
 */
 static const alignas(TETRALATH_CPU_CACHE_LINE_BYTES) uint8_t sequence_next_positions[TETRALATH_NUMBER_OF_DIRECTIONS][TETRALATH_BOARD_SIZE + (TETRALATH_CPU_CACHE_LINE_BYTES - TETRALATH_BOARD_SIZE)] = {
     {
-         1,  2,  3,  4, ((uint8_t)TETRALATH_NO_NEXT_POSITION),
-         6,  7,  8,  9, 10, ((uint8_t)TETRALATH_NO_NEXT_POSITION),
-        12, 13, 14, 15, 16, 17, ((uint8_t)TETRALATH_NO_NEXT_POSITION),
-        19, 20, 21, 22, 23, 24, 25, ((uint8_t)TETRALATH_NO_NEXT_POSITION),
-        27, 28, 29, 30, 31, 32, 33, 34, ((uint8_t)TETRALATH_NO_NEXT_POSITION),
-        36, 37, 38, 39, 40, 41, 42, ((uint8_t)TETRALATH_NO_NEXT_POSITION),
-        44, 45, 46, 47, 48, 49, ((uint8_t)TETRALATH_NO_NEXT_POSITION),
-        51, 52, 53, 54, 55, ((uint8_t)TETRALATH_NO_NEXT_POSITION),
-        57, 58, 59, 60, ((uint8_t)TETRALATH_NO_NEXT_POSITION),
-        ((uint8_t)TETRALATH_NO_NEXT_POSITION),
+         1,  2,  3,  4, TETRALATH_NO_NEXT_POSITION,
+         6,  7,  8,  9, 10, TETRALATH_NO_NEXT_POSITION,
+        12, 13, 14, 15, 16, 17, TETRALATH_NO_NEXT_POSITION,
+        19, 20, 21, 22, 23, 24, 25, TETRALATH_NO_NEXT_POSITION,
+        27, 28, 29, 30, 31, 32, 33, 34, TETRALATH_NO_NEXT_POSITION,
+        36, 37, 38, 39, 40, 41, 42, TETRALATH_NO_NEXT_POSITION,
+        44, 45, 46, 47, 48, 49, TETRALATH_NO_NEXT_POSITION,
+        51, 52, 53, 54, 55, TETRALATH_NO_NEXT_POSITION,
+        57, 58, 59, 60, TETRALATH_NO_NEXT_POSITION,
+        TETRALATH_NO_NEXT_POSITION,
         0, 0,
     },
     {
@@ -133,12 +133,12 @@ static const alignas(TETRALATH_CPU_CACHE_LINE_BYTES) uint8_t sequence_next_posit
         12, 13, 14, 15, 16, 17,
         19, 20, 21, 22, 23, 24, 25,
         27, 28, 29, 30, 31, 32, 33, 34,
-        35, 36, 37, 38, 39, 40, 41, 42, ((uint8_t)TETRALATH_NO_NEXT_POSITION),
-        43, 44, 45, 46, 47, 48, 49, ((uint8_t)TETRALATH_NO_NEXT_POSITION),
-        50, 51, 52, 53, 54, 55, ((uint8_t)TETRALATH_NO_NEXT_POSITION),
-        56, 57, 58, 59, 60, ((uint8_t)TETRALATH_NO_NEXT_POSITION),
-        ((uint8_t)TETRALATH_NO_NEXT_POSITION), ((uint8_t)TETRALATH_NO_NEXT_POSITION), ((uint8_t)TETRALATH_NO_NEXT_POSITION), ((uint8_t)TETRALATH_NO_NEXT_POSITION), ((uint8_t)TETRALATH_NO_NEXT_POSITION),
-        ((uint8_t)TETRALATH_NO_NEXT_POSITION),
+        35, 36, 37, 38, 39, 40, 41, 42, TETRALATH_NO_NEXT_POSITION,
+        43, 44, 45, 46, 47, 48, 49, TETRALATH_NO_NEXT_POSITION,
+        50, 51, 52, 53, 54, 55, TETRALATH_NO_NEXT_POSITION,
+        56, 57, 58, 59, 60, TETRALATH_NO_NEXT_POSITION,
+        TETRALATH_NO_NEXT_POSITION, TETRALATH_NO_NEXT_POSITION, TETRALATH_NO_NEXT_POSITION, TETRALATH_NO_NEXT_POSITION, TETRALATH_NO_NEXT_POSITION,
+        TETRALATH_NO_NEXT_POSITION,
         0, 0,
     },
     {
@@ -146,12 +146,12 @@ static const alignas(TETRALATH_CPU_CACHE_LINE_BYTES) uint8_t sequence_next_posit
         11, 12, 13, 14, 15, 16,
         18, 19, 20, 21, 22, 23, 24,
         26, 27, 28, 29, 30, 31, 32, 33,
-        ((uint8_t)TETRALATH_NO_NEXT_POSITION), 35, 36, 37, 38, 39, 40, 41, 42,
-        ((uint8_t)TETRALATH_NO_NEXT_POSITION), 43, 44, 45, 46, 47, 48, 49,
-        ((uint8_t)TETRALATH_NO_NEXT_POSITION), 50, 51, 52, 53, 54, 55,
-        ((uint8_t)TETRALATH_NO_NEXT_POSITION), 56, 57, 58, 59, 60,
-        ((uint8_t)TETRALATH_NO_NEXT_POSITION), ((uint8_t)TETRALATH_NO_NEXT_POSITION), ((uint8_t)TETRALATH_NO_NEXT_POSITION), ((uint8_t)TETRALATH_NO_NEXT_POSITION), ((uint8_t)TETRALATH_NO_NEXT_POSITION),
-        ((uint8_t)TETRALATH_NO_NEXT_POSITION),
+        TETRALATH_NO_NEXT_POSITION, 35, 36, 37, 38, 39, 40, 41, 42,
+        TETRALATH_NO_NEXT_POSITION, 43, 44, 45, 46, 47, 48, 49,
+        TETRALATH_NO_NEXT_POSITION, 50, 51, 52, 53, 54, 55,
+        TETRALATH_NO_NEXT_POSITION, 56, 57, 58, 59, 60,
+        TETRALATH_NO_NEXT_POSITION, TETRALATH_NO_NEXT_POSITION, TETRALATH_NO_NEXT_POSITION, TETRALATH_NO_NEXT_POSITION, TETRALATH_NO_NEXT_POSITION,
+        TETRALATH_NO_NEXT_POSITION,
         0, 0,
     },
 };
@@ -266,7 +266,7 @@ static TetralathSequence HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) check_sequ
     return (TetralathSequence)(indexed_sequence_values[sequence_value]);
 }
 
-static void HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) add_to_near_sequences(int * restrict const near_sequences_count_pointer, uint8_t * restrict const near_sequences_empty_positions, const uint8_t empty_position, const int max_elements) {
+static void HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) add_to_near_sequences(int * restrict const near_sequences_count_pointer, uint8_t * restrict const near_sequences_empty_positions, const int empty_position, const int max_elements) {
     const int near_sequences_count = (*near_sequences_count_pointer);
 
     // Hints the compiler to prioritize the costlier path.
@@ -274,16 +274,18 @@ static void HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) add_to_near_sequences(i
         return;
     }
 
+    const uint8_t casted_empty_position = ((uint8_t)(empty_position));
+
     for (int i = 0; i < near_sequences_count; i += 1) {
 
         // Hints the compiler to prioritize the costlier path.
-        if (DO_NOT_EXPECT(near_sequences_empty_positions[i] == empty_position)) {
+        if (DO_NOT_EXPECT(near_sequences_empty_positions[i] == casted_empty_position)) {
             return;
         }
 
     }
 
-    near_sequences_empty_positions[near_sequences_count] = empty_position;
+    near_sequences_empty_positions[near_sequences_count] = casted_empty_position;
     (*near_sequences_count_pointer) += 1;
 }
 
@@ -346,25 +348,25 @@ static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) check_game_result(const 
 
                     // If we find any quadruplet, we can immediately return the
                     // result because the game is over.
-                    return (int)((sequence_color_1 == perspective_color) ? TETRALATH_RESULT_WIN : TETRALATH_RESULT_LOSS);
+                    return (sequence_color_1 == perspective_color) ? TETRALATH_RESULT_WIN : TETRALATH_RESULT_LOSS;
 
                 case TETRALATH_SEQUENCE_TRIPLET:
                     sequences_info.has_triplets[current_color_index] += true;
                     break;
                 case TETRALATH_SEQUENCE_NEAR_TRIPLET_1:
-                    add_to_near_sequences(&(sequences_info.near_triplets_count[current_color_index]), sequences_info.near_triplets_empty_positions[current_color_index], (uint8_t)sequence_position_3, TETRALATH_MAX_NEAR_TRIPLETS);
+                    add_to_near_sequences(&(sequences_info.near_triplets_count[current_color_index]), sequences_info.near_triplets_empty_positions[current_color_index], sequence_position_3, TETRALATH_MAX_NEAR_TRIPLETS);
                     break;
                 case TETRALATH_SEQUENCE_NEAR_TRIPLET_2:
-                    add_to_near_sequences(&(sequences_info.near_triplets_count[current_color_index]), sequences_info.near_triplets_empty_positions[current_color_index], (uint8_t)sequence_position_2, TETRALATH_MAX_NEAR_TRIPLETS);
+                    add_to_near_sequences(&(sequences_info.near_triplets_count[current_color_index]), sequences_info.near_triplets_empty_positions[current_color_index], sequence_position_2, TETRALATH_MAX_NEAR_TRIPLETS);
                     break;
                 case TETRALATH_SEQUENCE_NEAR_TRIPLET_3:
-                    add_to_near_sequences(&(sequences_info.near_triplets_count[flipped_color_index]), sequences_info.near_triplets_empty_positions[flipped_color_index], (uint8_t)sequence_position_2, TETRALATH_MAX_NEAR_TRIPLETS);
+                    add_to_near_sequences(&(sequences_info.near_triplets_count[flipped_color_index]), sequences_info.near_triplets_empty_positions[flipped_color_index], sequence_position_2, TETRALATH_MAX_NEAR_TRIPLETS);
                     break;
                 case TETRALATH_SEQUENCE_NEAR_QUADRUPLET_1:
-                    add_to_near_sequences(&(sequences_info.near_quadruplets_count[current_color_index]), sequences_info.near_quadruplets_empty_positions[current_color_index], (uint8_t)sequence_position_3, TETRALATH_MAX_NEAR_QUADRUPLETS);
+                    add_to_near_sequences(&(sequences_info.near_quadruplets_count[current_color_index]), sequences_info.near_quadruplets_empty_positions[current_color_index], sequence_position_3, TETRALATH_MAX_NEAR_QUADRUPLETS);
                     break;
                 case TETRALATH_SEQUENCE_NEAR_QUADRUPLET_2:
-                    add_to_near_sequences(&(sequences_info.near_quadruplets_count[current_color_index]), sequences_info.near_quadruplets_empty_positions[current_color_index], (uint8_t)sequence_position_2, TETRALATH_MAX_NEAR_QUADRUPLETS);
+                    add_to_near_sequences(&(sequences_info.near_quadruplets_count[current_color_index]), sequences_info.near_quadruplets_empty_positions[current_color_index], sequence_position_2, TETRALATH_MAX_NEAR_QUADRUPLETS);
                     break;
                 default:
                     break;
@@ -378,7 +380,7 @@ static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) check_game_result(const 
     if (DO_NOT_EXPECT(sequences_info.has_triplets[perspective_color_index])) {
 
         // If the perspective color has a triplet, it has lost the game.
-        return (int)TETRALATH_RESULT_LOSS;
+        return TETRALATH_RESULT_LOSS;
 
     }
 
@@ -397,7 +399,7 @@ static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) check_game_result(const 
         If the opponent color has a triplet, the perspective color has won the
         game.
         */
-        return (int)TETRALATH_RESULT_WIN;
+        return TETRALATH_RESULT_WIN;
 
     }
 
@@ -411,7 +413,7 @@ static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) check_game_result(const 
 
         // If the board is full and no one won the game, the game has ended in a
         // draw.
-        return (int)TETRALATH_RESULT_DRAW;
+        return TETRALATH_RESULT_DRAW;
 
     }
 
@@ -425,7 +427,7 @@ static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) check_game_result(const 
         near quadruplet, the perspective color is going to lose the game in the
         next turn regardless of its next move.
         */
-        return (int)TETRALATH_RESULT_ABOUT_TO_LOSE;
+        return TETRALATH_RESULT_ABOUT_TO_LOSE;
 
     }
 
@@ -439,7 +441,7 @@ static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) check_game_result(const 
         near quadruplets, it's going to win the game two moves from now
         regardless of the opponent's next move.
         */
-        return (int)TETRALATH_RESULT_ABOUT_TO_WIN;
+        return TETRALATH_RESULT_ABOUT_TO_WIN;
 
     }
 
@@ -465,14 +467,14 @@ static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) check_game_result(const 
                     assured that the opponent has no near quadruplets, so no
                     extra checking ends up being required.
                     */
-                    return (int)TETRALATH_RESULT_ABOUT_TO_WIN;
+                    return TETRALATH_RESULT_ABOUT_TO_WIN;
                 }
             }
         }
         return candidate_for_winning_move;
     }
 
-    return (int)TETRALATH_RESULT_NONE;
+    return TETRALATH_RESULT_NONE;
 }
 
 static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) min_level(const TetralathMinimaxStaticData * restrict const minimax_static_data, const int alpha, const int beta, const int moves_count, const int previous_remaining_depth);
@@ -485,7 +487,7 @@ static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) max_level(const Tetralat
 
     const int result = check_game_result(board_copy, moves_count, opponent_color, perspective_color);
 
-    switch ((TetralathResult)result) {
+    switch (result) {
 
         // Returns the winning result with the distance so that we are able to
         // win as fast as possible
@@ -575,7 +577,7 @@ static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) min_level(const Tetralat
 
     const int result = check_game_result(board_copy, moves_count, perspective_color, opponent_color);
 
-    switch ((TetralathResult)result) {
+    switch (result) {
 
         // Returns the winning result with the distance so that we are able to
         // win as fast as possible
@@ -705,25 +707,25 @@ static void shuffle_move_order(int *move_order) {
     }
 }
 
-static void get_neighbors_info(TetralathNeighborsInfo * restrict const neighbors_info, const TetralathColor * restrict const board, const int backward_or_forward) {
+static void get_neighbors_info(TetralathNeighborsInfo * restrict const neighbors_info, const TetralathColor * restrict const board, const TetralathBoardWalkDirection board_walk_direction) {
     const int reference_position = neighbors_info->reference_position;
     const int direction = neighbors_info->direction;
     const TetralathColor perspective_color = neighbors_info->perspective_color;
     const TetralathColor opponent_color = neighbors_info->opponent_color;
 
-    const uint8_t *sequence_lookup_table;
-    int *neighbor_positions;
-    int *unobstructed_length;
-    int *unobstructed_or_friendly_length;
+    const uint8_t * restrict sequence_lookup_table;
+    int * restrict neighbor_positions;
+    int * restrict unobstructed_length;
+    int * restrict unobstructed_or_friendly_length;
 
-    switch (backward_or_forward) {
-        case (int)TETRALATH_BACKWARD_SEARCH:
+    switch (board_walk_direction) {
+        case TETRALATH_BOARD_WALK_DIRECTION_BACKWARD:
             sequence_lookup_table = sequence_previous_positions[direction];
             neighbor_positions = neighbors_info->neighbor_positions_backward;
             unobstructed_length = &(neighbors_info->unobstructed_length_backward);
             unobstructed_or_friendly_length = &(neighbors_info->unobstructed_or_friendly_length_backward);
             break;
-        case (int)TETRALATH_FORWARD_SEARCH:
+        case TETRALATH_BOARD_WALK_DIRECTION_FORWARD:
             sequence_lookup_table = sequence_next_positions[direction];
             neighbor_positions = neighbors_info->neighbor_positions_forward;
             unobstructed_length = &(neighbors_info->unobstructed_length_forward);
@@ -767,19 +769,19 @@ When "prefer_more_distant_neighbors" is false, gives more relevance to closer
 neighbors. This is mainly relevant for defensive behaviors trying to block the
 opponent from forming lines.
 */
-static void set_neighboring_relevance_per_position(int neighboring_positions_relevance[TETRALATH_BOARD_SIZE], TetralathNeighborsInfo * restrict const neighbors_info, const TetralathColor * restrict const board, const int backward_or_forward, const bool prefer_more_distant_neighbors) {
+static void set_neighboring_relevance_per_position(int neighboring_positions_relevance[TETRALATH_BOARD_SIZE], TetralathNeighborsInfo * restrict const neighbors_info, const TetralathColor * restrict const board, const TetralathBoardWalkDirection board_walk_direction, const bool prefer_more_distant_neighbors) {
     int unobstructed_length;
     int unobstructed_or_friendly_length;
 
-    int *neighbor_positions;
+    int * restrict neighbor_positions;
 
-    switch (backward_or_forward) {
-        case (int)TETRALATH_BACKWARD_SEARCH:
+    switch (board_walk_direction) {
+        case TETRALATH_BOARD_WALK_DIRECTION_BACKWARD:
             unobstructed_length = neighbors_info->unobstructed_length_backward;
             unobstructed_or_friendly_length = neighbors_info->unobstructed_or_friendly_length_backward;
             neighbor_positions = neighbors_info->neighbor_positions_backward;
             break;
-        case (int)TETRALATH_FORWARD_SEARCH:
+        case TETRALATH_BOARD_WALK_DIRECTION_FORWARD:
             unobstructed_length = neighbors_info->unobstructed_length_forward;
             unobstructed_or_friendly_length = neighbors_info->unobstructed_or_friendly_length_forward;
             neighbor_positions = neighbors_info->neighbor_positions_forward;
@@ -817,13 +819,13 @@ static void set_neighboring_relevance(int neighboring_positions_relevance[TETRAL
                     .reference_position = j,
                     .direction = i,
                 };
-                get_neighbors_info(&neighbors_info, board, TETRALATH_BACKWARD_SEARCH);
-                get_neighbors_info(&neighbors_info, board, TETRALATH_FORWARD_SEARCH);
+                get_neighbors_info(&neighbors_info, board, TETRALATH_BOARD_WALK_DIRECTION_BACKWARD);
+                get_neighbors_info(&neighbors_info, board, TETRALATH_BOARD_WALK_DIRECTION_FORWARD);
                 if ((neighbors_info.unobstructed_or_friendly_length_backward + neighbors_info.unobstructed_or_friendly_length_forward) < 3) {
                     continue;
                 }
-                set_neighboring_relevance_per_position(neighboring_positions_relevance, &neighbors_info, board, TETRALATH_BACKWARD_SEARCH, prefer_more_distant_neighbors);
-                set_neighboring_relevance_per_position(neighboring_positions_relevance, &neighbors_info, board, TETRALATH_FORWARD_SEARCH, prefer_more_distant_neighbors);
+                set_neighboring_relevance_per_position(neighboring_positions_relevance, &neighbors_info, board, TETRALATH_BOARD_WALK_DIRECTION_BACKWARD, prefer_more_distant_neighbors);
+                set_neighboring_relevance_per_position(neighboring_positions_relevance, &neighbors_info, board, TETRALATH_BOARD_WALK_DIRECTION_FORWARD, prefer_more_distant_neighbors);
             }
         }
     }
@@ -851,19 +853,19 @@ Strategy-based scores: 3, 4, 5
 Losing scores: 1, 2
 */
 static int get_move_score(const int move_result, const TetralathAiStrategy ai_strategy, const bool is_forced_move_for_opponent, const bool is_forced_move_for_perspective) {
-    if (move_result == ((int)TETRALATH_RESULT_WIN)) {
+    if (move_result == TETRALATH_RESULT_WIN) {
         return 7;
     }
 
-    if (move_result == ((int)TETRALATH_RESULT_ABOUT_TO_WIN)) {
+    if (move_result == TETRALATH_RESULT_ABOUT_TO_WIN) {
         return 6;
     }
 
-    if (move_result == ((int)TETRALATH_RESULT_ABOUT_TO_LOSE)) {
+    if (move_result == TETRALATH_RESULT_ABOUT_TO_LOSE) {
         return 2;
     }
 
-    if (move_result == ((int)TETRALATH_RESULT_LOSS)) {
+    if (move_result == TETRALATH_RESULT_LOSS) {
         return 1;
     }
 
@@ -1043,13 +1045,13 @@ TetralathResult get_player_game_result(const TetralathColor * restrict const boa
 
     const int raw_game_result = check_game_result(board, moves_count, perspective_color, flip_color(perspective_color));
     switch (raw_game_result) {
-        case (int)TETRALATH_RESULT_WIN:
+        case TETRALATH_RESULT_WIN:
             player_game_result = TETRALATH_RESULT_WIN;
             break;
-        case (int)TETRALATH_RESULT_LOSS:
+        case TETRALATH_RESULT_LOSS:
             player_game_result = TETRALATH_RESULT_LOSS;
             break;
-        case (int)TETRALATH_RESULT_DRAW:
+        case TETRALATH_RESULT_DRAW:
             player_game_result = TETRALATH_RESULT_DRAW;
             break;
         default:

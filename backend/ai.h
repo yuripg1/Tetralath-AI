@@ -78,8 +78,6 @@ typedef struct {
 } TetralathSequencesInfo;
 _Static_assert((sizeof(TetralathSequencesInfo) % TETRALATH_CPU_CACHE_LINE_BYTES) == 0, "sizeof(TetralathSequencesInfo) must be a multiple of TETRALATH_CPU_CACHE_LINE_BYTES");
 
-#define TETRALATH_BACKWARD_SEARCH 1
-#define TETRALATH_FORWARD_SEARCH 2
 #define TETRALATH_NUMBER_OF_DIRECTIONS 3
 #define TETRALATH_NO_NEXT_POSITION 61
 #define TETRALATH_NO_PREVIOUS_POSITION 61

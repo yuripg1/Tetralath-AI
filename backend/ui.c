@@ -281,11 +281,11 @@ TetralathColor choose_player_color(const TetralathColor default_player_color) {
         "- Black",
     };
     int option_values[2] = {
-        (int)TETRALATH_COLOR_WHITE,
-        (int)TETRALATH_COLOR_BLACK,
+        TETRALATH_COLOR_WHITE,
+        TETRALATH_COLOR_BLACK,
     };
     const int number_of_options = 2;
-    const int default_value = (int)default_player_color;
+    const int default_value = default_player_color;
     const int y_offset = 0;
     const int width = 13;
     const int height = 3;
@@ -293,9 +293,9 @@ TetralathColor choose_player_color(const TetralathColor default_player_color) {
     const int chosen_value = selector_component(prompt_text, option_texts, option_values, number_of_options, default_value, y_offset, width, height);
 
     switch (chosen_value) {
-        case (int)TETRALATH_COLOR_WHITE:
+        case TETRALATH_COLOR_WHITE:
             return TETRALATH_COLOR_WHITE;
-        case (int)TETRALATH_COLOR_BLACK:
+        case TETRALATH_COLOR_BLACK:
             return TETRALATH_COLOR_BLACK;
         default:
             break;
@@ -311,11 +311,11 @@ TetralathAiMode choose_ai_mode(const TetralathAiMode default_ai_mode) {
         "- Ruthless",
     };
     int option_values[2] = {
-        (int)TETRALATH_AI_MODE_MERCIFUL,
-        (int)TETRALATH_AI_MODE_RUTHLESS,
+        TETRALATH_AI_MODE_MERCIFUL,
+        TETRALATH_AI_MODE_RUTHLESS,
     };
     const int number_of_options = 2;
-    const int default_value = (int)default_ai_mode;
+    const int default_value = default_ai_mode;
     const int y_offset = 4;
     const int width = 10;
     const int height = 3;
@@ -323,9 +323,9 @@ TetralathAiMode choose_ai_mode(const TetralathAiMode default_ai_mode) {
     const int chosen_value = selector_component(prompt_text, option_texts, option_values, number_of_options, default_value, y_offset, width, height);
 
     switch (chosen_value) {
-        case (int)TETRALATH_AI_MODE_MERCIFUL:
+        case TETRALATH_AI_MODE_MERCIFUL:
             return TETRALATH_AI_MODE_MERCIFUL;
-        case (int)TETRALATH_AI_MODE_RUTHLESS:
+        case TETRALATH_AI_MODE_RUTHLESS:
             return TETRALATH_AI_MODE_RUTHLESS;
         default:
             break;
@@ -341,11 +341,11 @@ TetralathAiStrategy choose_ai_strategy(const TetralathAiStrategy default_ai_stra
         "- Defensive",
     };
     int option_values[2] = {
-        (int)TETRALATH_AI_STRATEGY_OFFENSIVE,
-        (int)TETRALATH_AI_STRATEGY_DEFENSIVE,
+        TETRALATH_AI_STRATEGY_OFFENSIVE,
+        TETRALATH_AI_STRATEGY_DEFENSIVE,
     };
     const int number_of_options = 2;
-    const int default_value = (int)default_ai_strategy;
+    const int default_value = default_ai_strategy;
     const int y_offset = 8;
     const int width = 12;
     const int height = 3;
@@ -353,9 +353,9 @@ TetralathAiStrategy choose_ai_strategy(const TetralathAiStrategy default_ai_stra
     const int chosen_value = selector_component(prompt_text, option_texts, option_values, number_of_options, default_value, y_offset, width, height);
 
     switch (chosen_value) {
-        case (int)TETRALATH_AI_STRATEGY_OFFENSIVE:
+        case TETRALATH_AI_STRATEGY_OFFENSIVE:
             return TETRALATH_AI_STRATEGY_OFFENSIVE;
-        case (int)TETRALATH_AI_STRATEGY_DEFENSIVE:
+        case TETRALATH_AI_STRATEGY_DEFENSIVE:
             return TETRALATH_AI_STRATEGY_DEFENSIVE;
         default:
             break;
