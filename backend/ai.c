@@ -278,7 +278,6 @@ static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) check_game_result(const 
         .near_quadruplets_count = {0, 0},
 
         .has_quadruplets = {false, false},
-
         .has_triplets = {false, false},
     };
 
@@ -1078,7 +1077,6 @@ void prioritize_moves_by_outcome(const TetralathColor * restrict const original_
 
     const int moves_count_1 = moves_count + 1;
     const int moves_count_2 = moves_count + 2;
-    const int moves_count_3 = moves_count + 3;
 
     for (int i = 0; i < TETRALATH_BOARD_SIZE; i += 1) {
         const int evaluated_position = move_values[i].position;
@@ -1104,7 +1102,7 @@ void prioritize_moves_by_outcome(const TetralathColor * restrict const original_
 
                 if (next_move_result_2 < TETRALATH_MINIMUM_RESULT_VALUE) {
                     board_copy[next_move_result_2] = perspective_color;
-                    const int next_move_result_3 = check_game_result(board_copy, moves_count_3, perspective_color, opponent_color);
+                    const TetralathResult next_move_result_3 = check_single_position(next_move_result_2, board_copy);
                     board_copy[next_move_result_2] = TETRALATH_COLOR_NONE;
                     if (next_move_result_3 != TETRALATH_RESULT_LOSS) {
                         is_forced_move_for_perspective = true;
@@ -1134,7 +1132,7 @@ int get_forced_next_move(const TetralathColor * restrict const original_board, c
     if (current_result < TETRALATH_MINIMUM_RESULT_VALUE) {
         const int forced_move_candidate = current_result;
         board_copy[forced_move_candidate] = perspective_color;
-        const int next_move_result = check_game_result(board_copy, moves_count + 1, perspective_color, opponent_color);
+        const TetralathResult next_move_result = check_single_position(forced_move_candidate, board_copy);
         board_copy[forced_move_candidate] = TETRALATH_COLOR_NONE;
 
         if (next_move_result != TETRALATH_RESULT_LOSS) {

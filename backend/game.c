@@ -167,10 +167,12 @@ int compute_ai_move(TetralathGame * restrict const game) {
         prioritize_moves_by_outcome(game->board, move_values, game->current_color, game->moves.moves_count, game->ai_strategy);
     }
 
-    int minimum_minimax_depth = TETRALATH_DEFAULT_MINIMAX_MINIMUM_DEPTH;
+    const int minimum_minimax_depth = TETRALATH_DEFAULT_MINIMAX_MINIMUM_DEPTH;
     int maximum_minimax_depth = TETRALATH_DEFAULT_MINIMAX_MAXIMUM_DEPTH;
-    if (maximum_minimax_depth > (TETRALATH_BOARD_SIZE - get_moves_count(game))) {
-        maximum_minimax_depth = TETRALATH_BOARD_SIZE - get_moves_count(game);
+
+    const int number_of_moves_left = (TETRALATH_BOARD_SIZE - get_moves_count(game));
+    if (maximum_minimax_depth > number_of_moves_left) {
+        maximum_minimax_depth = number_of_moves_left;
     }
 
     int minimax_depth = minimum_minimax_depth;
