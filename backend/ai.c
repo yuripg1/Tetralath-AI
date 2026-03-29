@@ -206,43 +206,6 @@ static const alignas(TETRALATH_CPU_CACHE_LINE_BYTES) uint8_t indexed_sequence_va
     [170] = (uint8_t)TETRALATH_SEQUENCE_QUADRUPLET,
 
     /*
-    (64 * 1) + (16 * 1) + (4 * 0) + (1 * 0) =  80
-    (64 * 1) + (16 * 1) + (4 * 0) + (1 * 2) =  82
-    (64 * 1) + (16 * 1) + (4 * 0) + (1 * 3) =  83
-    (64 * 2) + (16 * 2) + (4 * 0) + (1 * 0) = 160
-    (64 * 2) + (16 * 2) + (4 * 0) + (1 * 1) = 161
-    (64 * 2) + (16 * 2) + (4 * 0) + (1 * 3) = 163
-    */
-    [80]  = (uint8_t)TETRALATH_SEQUENCE_NEAR_TRIPLET_1,
-    [82]  = (uint8_t)TETRALATH_SEQUENCE_NEAR_TRIPLET_1,
-    [83]  = (uint8_t)TETRALATH_SEQUENCE_NEAR_TRIPLET_1,
-    [160] = (uint8_t)TETRALATH_SEQUENCE_NEAR_TRIPLET_1,
-    [161] = (uint8_t)TETRALATH_SEQUENCE_NEAR_TRIPLET_1,
-    [163] = (uint8_t)TETRALATH_SEQUENCE_NEAR_TRIPLET_1,
-
-    /*
-    (64 * 1) + (16 * 0) + (4 * 1) + (1 * 0) =  68
-    (64 * 1) + (16 * 0) + (4 * 1) + (1 * 2) =  70
-    (64 * 1) + (16 * 0) + (4 * 1) + (1 * 3) =  71
-    (64 * 2) + (16 * 0) + (4 * 2) + (1 * 0) = 136
-    (64 * 2) + (16 * 0) + (4 * 2) + (1 * 1) = 137
-    (64 * 2) + (16 * 0) + (4 * 2) + (1 * 3) = 139
-    */
-    [68]  = (uint8_t)TETRALATH_SEQUENCE_NEAR_TRIPLET_2,
-    [70]  = (uint8_t)TETRALATH_SEQUENCE_NEAR_TRIPLET_2,
-    [71]  = (uint8_t)TETRALATH_SEQUENCE_NEAR_TRIPLET_2,
-    [136] = (uint8_t)TETRALATH_SEQUENCE_NEAR_TRIPLET_2,
-    [137] = (uint8_t)TETRALATH_SEQUENCE_NEAR_TRIPLET_2,
-    [139] = (uint8_t)TETRALATH_SEQUENCE_NEAR_TRIPLET_2,
-
-    /*
-    (64 * 1) + (16 * 0) + (4 * 2) + (1 * 2) =  74
-    (64 * 2) + (16 * 0) + (4 * 1) + (1 * 1) = 133
-    */
-    [74]  = (uint8_t)TETRALATH_SEQUENCE_NEAR_TRIPLET_3,
-    [133] = (uint8_t)TETRALATH_SEQUENCE_NEAR_TRIPLET_3,
-
-    /*
     (64 * 1) + (16 * 1) + (4 * 0) + (1 * 1) =  81
     (64 * 2) + (16 * 2) + (4 * 0) + (1 * 2) = 162
     */
@@ -304,6 +267,7 @@ If you do not intend on using these predictive results, then you are free to use
 any color as the perspective color (and the opposite color as the opponent
 color).
 */
+
 static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) check_game_result(const TetralathColor * restrict const board, const int moves_count, const TetralathColor perspective_color, const TetralathColor opponent_color) {
     alignas(TETRALATH_CPU_CACHE_LINE_BYTES) TetralathSequencesInfo sequences_info = {
 
@@ -314,18 +278,7 @@ static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) check_game_result(const 
         */
         .near_quadruplets_count = {0, 0},
 
-        /*
-        Stores the counts as well as the empty positions of the near triplets
-        for each color.
-        .near_triplets_empty_positions = ...
-
-        !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! IMPORTANT !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-        The found near triplets may be erroneous and in actuality be near
-        quadruplets (with the first position out of sight), so always check if
-        they are not near quadruplets before considering them for any decisions.
-        */
-        .near_triplets_count = {0, 0},
+        .has_quadruplets = {false, false},
 
         .has_triplets = {false, false},
     };
@@ -342,25 +295,12 @@ static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) check_game_result(const 
             const int sequence_position_4 = ((int)(sequence_next_positions[i][sequence_position_3]));
             const TetralathSequence sequence_value = check_sequence_from_position(sequence_color_1, board[sequence_position_2], board[sequence_position_3], board[sequence_position_4]);
             const int current_color_index = (sequence_color_1 - 1);
-            const TetralathColor flipped_color_index = (flip_color(sequence_color_1) - 1);
             switch (sequence_value) {
                 case TETRALATH_SEQUENCE_QUADRUPLET:
-
-                    // If we find any quadruplet, we can immediately return the
-                    // result because the game is over.
-                    return (sequence_color_1 == perspective_color) ? TETRALATH_RESULT_WIN : TETRALATH_RESULT_LOSS;
-
+                    sequences_info.has_quadruplets[current_color_index] = true;
+                    break;
                 case TETRALATH_SEQUENCE_TRIPLET:
-                    sequences_info.has_triplets[current_color_index] += true;
-                    break;
-                case TETRALATH_SEQUENCE_NEAR_TRIPLET_1:
-                    add_to_near_sequences(&(sequences_info.near_triplets_count[current_color_index]), sequences_info.near_triplets_empty_positions[current_color_index], sequence_position_3, TETRALATH_MAX_NEAR_TRIPLETS);
-                    break;
-                case TETRALATH_SEQUENCE_NEAR_TRIPLET_2:
-                    add_to_near_sequences(&(sequences_info.near_triplets_count[current_color_index]), sequences_info.near_triplets_empty_positions[current_color_index], sequence_position_2, TETRALATH_MAX_NEAR_TRIPLETS);
-                    break;
-                case TETRALATH_SEQUENCE_NEAR_TRIPLET_3:
-                    add_to_near_sequences(&(sequences_info.near_triplets_count[flipped_color_index]), sequences_info.near_triplets_empty_positions[flipped_color_index], sequence_position_2, TETRALATH_MAX_NEAR_TRIPLETS);
+                    sequences_info.has_triplets[current_color_index] = true;
                     break;
                 case TETRALATH_SEQUENCE_NEAR_QUADRUPLET_1:
                     add_to_near_sequences(&(sequences_info.near_quadruplets_count[current_color_index]), sequences_info.near_quadruplets_empty_positions[current_color_index], sequence_position_3, TETRALATH_MAX_NEAR_QUADRUPLETS);
@@ -377,14 +317,31 @@ static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) check_game_result(const 
     const int perspective_color_index = (perspective_color - 1);
 
     // Hints the compiler to prioritize the costlier path.
+    if (DO_NOT_EXPECT(sequences_info.has_quadruplets[perspective_color_index])) {
+
+        // If the perspective color has a quadruplet, it has won the game.
+        return TETRALATH_RESULT_WIN;
+
+    }
+
+    const int opponent_color_index = (opponent_color - 1);
+
+    // Hints the compiler to prioritize the costlier path.
+    if (DO_NOT_EXPECT(sequences_info.has_quadruplets[opponent_color_index])) {
+
+        // If the opponent color has a quadruplet, the perspective color has
+        // lost the game.
+        return TETRALATH_RESULT_LOSS;
+
+    }
+
+    // Hints the compiler to prioritize the costlier path.
     if (DO_NOT_EXPECT(sequences_info.has_triplets[perspective_color_index])) {
 
         // If the perspective color has a triplet, it has lost the game.
         return TETRALATH_RESULT_LOSS;
 
     }
-
-    const int opponent_color_index = (opponent_color - 1);
 
     /*
     Given that during the minimax algorithm (when this check is going to be
@@ -395,10 +352,8 @@ static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) check_game_result(const 
     */
     if (DO_NOT_EXPECT(sequences_info.has_triplets[opponent_color_index])) {
 
-        /*
-        If the opponent color has a triplet, the perspective color has won the
-        game.
-        */
+        // If the opponent color has a triplet, the perspective color has won
+        // the game.
         return TETRALATH_RESULT_WIN;
 
     }
@@ -446,32 +401,60 @@ static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) check_game_result(const 
     }
 
     if (perspective_near_quadruplets_count == 1) {
-        const int candidate_for_winning_move = (int)(sequences_info.near_quadruplets_empty_positions[perspective_color_index][0]);
-        const int opponent_near_triplets_count = sequences_info.near_triplets_count[opponent_color_index];
-        if (opponent_near_triplets_count >= 1) {
-            for (int i = 0; i < opponent_near_triplets_count; i += 1) {
-                if ((int)(sequences_info.near_triplets_empty_positions[opponent_color_index][i]) == candidate_for_winning_move) {
+        return (int)(sequences_info.near_quadruplets_empty_positions[perspective_color_index][0]);
+    }
 
-                    /*
-                    If the perspective color (that has just made a move) has one
-                    near quadruplet but the opponent can't cover it in the next
-                    turn because it would mean forming a triplet for itself, the
-                    perspective color is going to win the game two moves from
-                    now regardless of the opponent's next move.
+    return TETRALATH_RESULT_NONE;
+}
 
-                    !!!!!!!!!!!!!!!!!!!!!!!!!! IMPORTANT !!!!!!!!!!!!!!!!!!!!!!!!!!!
+static TetralathResult HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) check_single_position(const int analyzed_position, const TetralathColor * restrict const board) {
+    bool has_quadruplets = false;
+    bool has_triplets = false;
 
-                    Normally we would need to check if the near triplet is not
-                    actually a near quadruplet (with the first position out of
-                    sight), but at this point in the branching we have already
-                    assured that the opponent has no near quadruplets, so no
-                    extra checking ends up being required.
-                    */
-                    return TETRALATH_RESULT_ABOUT_TO_WIN;
-                }
+    for (int i = 0; i < TETRALATH_NUMBER_OF_DIRECTIONS; i += 1) {
+        int sequence_position_1 = analyzed_position;
+        int number_of_positions_to_check = 1;
+
+        for (int j = 0; j < TETRALATH_POSITIONS_TO_WALK_BACK_ON_QUICK_CHECK; j += 1) {
+            const int previous_position = ((int)(sequence_previous_positions[i][sequence_position_1]));
+            if (previous_position != TETRALATH_NO_PREVIOUS_POSITION) {
+                sequence_position_1 = previous_position;
+                number_of_positions_to_check += 1;
             }
         }
-        return candidate_for_winning_move;
+
+        for (int j = 0; j < number_of_positions_to_check; j += 1) {
+            const int sequence_position_2 = ((int)(sequence_next_positions[i][sequence_position_1]));
+            const int sequence_position_3 = ((int)(sequence_next_positions[i][sequence_position_2]));
+            const int sequence_position_4 = ((int)(sequence_next_positions[i][sequence_position_3]));
+            const TetralathSequence sequence_value = check_sequence_from_position(board[sequence_position_1], board[sequence_position_2], board[sequence_position_3], board[sequence_position_4]);
+            switch (sequence_value) {
+                case TETRALATH_SEQUENCE_QUADRUPLET:
+                    has_quadruplets = true;
+                    break;
+                case TETRALATH_SEQUENCE_TRIPLET:
+                    has_triplets = true;
+                    break;
+                default:
+                    break;
+            }
+
+            if (sequence_position_4 == TETRALATH_NO_NEXT_POSITION) {
+                break;
+            }
+
+            sequence_position_1 = sequence_position_2;
+        }
+    }
+
+    // Hints the compiler to prioritize the costlier path.
+    if (DO_NOT_EXPECT(has_quadruplets)) {
+        return TETRALATH_RESULT_WIN;
+    }
+
+    // Hints the compiler to prioritize the costlier path.
+    if (DO_NOT_EXPECT(has_triplets)) {
+        return TETRALATH_RESULT_LOSS;
     }
 
     return TETRALATH_RESULT_NONE;
@@ -510,19 +493,12 @@ static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) max_level(const Tetralat
     }
 
     const int remaining_depth = (previous_remaining_depth - 1);
-    const int64_t target_end_time = minimax_static_data->target_end_time;
-
-    // Hints the compiler to prioritize the costlier path.
-    if (DO_NOT_EXPECT((remaining_depth == 0) || (get_current_time_nsec() >= target_end_time))) {
-        return TETRALATH_RESULT_NONE;
-    }
-
     const int next_moves_count = moves_count + 1;
 
     int forced_next_move = TETRALATH_POSITION_NONE;
     if (result < TETRALATH_MINIMUM_RESULT_VALUE) {
         board_copy[result] = perspective_color;
-        const int next_move_result = check_game_result(board_copy, next_moves_count, perspective_color, opponent_color);
+        const TetralathResult next_move_result = check_single_position(result, board_copy);
         board_copy[result] = TETRALATH_COLOR_NONE;
 
         // Hints the compiler to prioritize the costlier path.
@@ -535,6 +511,13 @@ static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) max_level(const Tetralat
         }
 
         forced_next_move = result;
+    }
+
+    const int64_t target_end_time = minimax_static_data->target_end_time;
+
+    // Hints the compiler to prioritize the costlier path.
+    if (DO_NOT_EXPECT((remaining_depth == 0) || (get_current_time_nsec() >= target_end_time))) {
+        return TETRALATH_RESULT_NONE;
     }
 
     const int best_possible_result = (TETRALATH_RESULT_WIN_MAX - next_moves_count);
@@ -600,19 +583,12 @@ static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) min_level(const Tetralat
     }
 
     const int remaining_depth = (previous_remaining_depth - 1);
-    const int64_t target_end_time = minimax_static_data->target_end_time;
-
-    // Hints the compiler to prioritize the costlier path.
-    if (DO_NOT_EXPECT((remaining_depth == 0) || (get_current_time_nsec() >= target_end_time))) {
-        return TETRALATH_RESULT_NONE;
-    }
-
     const int next_moves_count = moves_count + 1;
 
     int forced_next_move = TETRALATH_POSITION_NONE;
     if (result < TETRALATH_MINIMUM_RESULT_VALUE) {
         board_copy[result] = opponent_color;
-        const int next_move_result = check_game_result(board_copy, next_moves_count, opponent_color, perspective_color);
+        const TetralathResult next_move_result = check_single_position(result, board_copy);
         board_copy[result] = TETRALATH_COLOR_NONE;
 
         // Hints the compiler to prioritize the costlier path.
@@ -625,6 +601,13 @@ static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) min_level(const Tetralat
         }
 
         forced_next_move = result;
+    }
+
+    const int64_t target_end_time = minimax_static_data->target_end_time;
+
+    // Hints the compiler to prioritize the costlier path.
+    if (DO_NOT_EXPECT((remaining_depth == 0) || (get_current_time_nsec() >= target_end_time))) {
+        return TETRALATH_RESULT_NONE;
     }
 
     const int worst_possible_result = (TETRALATH_RESULT_LOSS_MIN + next_moves_count);
