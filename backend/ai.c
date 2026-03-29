@@ -267,7 +267,6 @@ If you do not intend on using these predictive results, then you are free to use
 any color as the perspective color (and the opposite color as the opponent
 color).
 */
-
 static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) check_game_result(const TetralathColor * restrict const board, const int moves_count, const TetralathColor perspective_color, const TetralathColor opponent_color) {
     alignas(TETRALATH_CPU_CACHE_LINE_BYTES) TetralathSequencesInfo sequences_info = {
 
@@ -407,6 +406,16 @@ static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) check_game_result(const 
     return TETRALATH_RESULT_NONE;
 }
 
+/*
+Checks the board from the perspective of a single position and its neighbors,
+only returning WIN or LOSS results.
+Useful when you want to check if a particular move leads to a terminal result.
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! IMPORTANT !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+This function only reads the board. To evaluate a particular move, you must pass
+the board with the move already made.
+*/
 static TetralathResult HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) check_single_position(const int analyzed_position, const TetralathColor * restrict const board) {
     bool has_quadruplets = false;
     bool has_triplets = false;
