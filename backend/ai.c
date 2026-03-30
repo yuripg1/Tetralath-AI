@@ -398,7 +398,8 @@ static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) check_game_result(const 
 
     }
 
-    if (perspective_near_quadruplets_count == 1) {
+    // Hints the compiler to prioritize the more likely path
+    if (DO_NOT_EXPECT(perspective_near_quadruplets_count == 1)) {
         return (int)(sequences_info.near_quadruplets_empty_positions[perspective_color_index][0]);
     }
 
@@ -500,7 +501,6 @@ static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) max_level(const Tetralat
             break;
     }
 
-    const int remaining_depth = (previous_remaining_depth - 1);
     const int next_moves_count = moves_count + 1;
 
     int forced_next_move = TETRALATH_POSITION_NONE;
@@ -521,10 +521,11 @@ static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) max_level(const Tetralat
         forced_next_move = result;
     }
 
+    const int remaining_depth = (forced_next_move == TETRALATH_POSITION_NONE) ? (previous_remaining_depth - 1) : previous_remaining_depth;
     const int64_t target_end_time = minimax_static_data->target_end_time;
 
     // Hints the compiler to prioritize the costlier path.
-    if (DO_NOT_EXPECT((remaining_depth == 0) || (get_current_time_nsec() >= target_end_time))) {
+    if (DO_NOT_EXPECT(((remaining_depth <= 0) && (forced_next_move == TETRALATH_POSITION_NONE)) || (get_current_time_nsec() >= target_end_time))) {
         return TETRALATH_RESULT_NONE;
     }
 
@@ -590,7 +591,6 @@ static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) min_level(const Tetralat
             break;
     }
 
-    const int remaining_depth = (previous_remaining_depth - 1);
     const int next_moves_count = moves_count + 1;
 
     int forced_next_move = TETRALATH_POSITION_NONE;
@@ -611,10 +611,11 @@ static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) min_level(const Tetralat
         forced_next_move = result;
     }
 
+    const int remaining_depth = (forced_next_move == TETRALATH_POSITION_NONE) ? (previous_remaining_depth - 1) : previous_remaining_depth;
     const int64_t target_end_time = minimax_static_data->target_end_time;
 
     // Hints the compiler to prioritize the costlier path.
-    if (DO_NOT_EXPECT((remaining_depth == 0) || (get_current_time_nsec() >= target_end_time))) {
+    if (DO_NOT_EXPECT(((remaining_depth <= 0) && (forced_next_move == TETRALATH_POSITION_NONE)) || (get_current_time_nsec() >= target_end_time))) {
         return TETRALATH_RESULT_NONE;
     }
 
@@ -933,7 +934,7 @@ static void *minimax_thread(void *arg) {
 
         const int evaluated_position = move_values[local_index].position;
 
-        if (((forced_next_move == TETRALATH_POSITION_NONE) || (forced_next_move == evaluated_position)) && (board_copy[evaluated_position] == TETRALATH_COLOR_NONE) && ((terminal_upper_bound > local_alpha) || (local_alpha == initial_alpha)) && (!prune)) {
+        if (((forced_next_move == TETRALATH_POSITION_NONE) || (forced_next_move == evaluated_position)) && (board_copy[evaluated_position] == TETRALATH_COLOR_NONE) && ((terminal_upper_bound > local_alpha) || (local_alpha == initial_alpha) || (local_alpha < TETRALATH_RESULT_NONE_MAX)) && (!prune)) {
             board_copy[evaluated_position] = perspective_color;
 
             const int evaluated_result = min_level(&static_data, local_alpha, local_beta, next_moves_count, minimax_depth);
