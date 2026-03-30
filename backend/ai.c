@@ -407,17 +407,15 @@ static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) check_game_result(const 
 }
 
 /*
-Checks the board from the perspective of a single position and its neighbors,
-only returning WIN or LOSS results.
-Useful when you want to check if a particular move leads to a terminal result.
+Checks if a particular move leads to a loss.
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! IMPORTANT !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 This function only reads the board. To evaluate a particular move, you must pass
 the board with the move already made and the analyzed position must be the last
-move made
+move made.
 */
-static TetralathResult HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) check_single_position(const int analyzed_position, const TetralathColor * restrict const board) {
+static bool HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) check_is_losing_move(const int analyzed_position, const TetralathColor * restrict const board) {
     bool has_quadruplets = false;
     bool has_triplets = false;
 
@@ -462,17 +460,7 @@ static TetralathResult HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) check_single
         }
     }
 
-    // Hints the compiler to prioritize the costlier path.
-    if (DO_NOT_EXPECT(has_quadruplets)) {
-        return TETRALATH_RESULT_WIN;
-    }
-
-    // Hints the compiler to prioritize the costlier path.
-    if (DO_NOT_EXPECT(has_triplets)) {
-        return TETRALATH_RESULT_LOSS;
-    }
-
-    return TETRALATH_RESULT_NONE;
+    return has_triplets && (!has_quadruplets);
 }
 
 static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) min_level(const TetralathMinimaxStaticData * restrict const minimax_static_data, const int alpha, const int beta, const int moves_count, const int previous_remaining_depth);
@@ -512,11 +500,11 @@ static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) max_level(const Tetralat
     // Hints the compiler to prioritize the more likely path.
     if (DO_NOT_EXPECT(result < TETRALATH_MINIMUM_RESULT_VALUE)) {
         board_copy[result] = perspective_color;
-        const TetralathResult next_move_result = check_single_position(result, board_copy);
+        const bool is_losing_move = check_is_losing_move(result, board_copy);
         board_copy[result] = TETRALATH_COLOR_NONE;
 
         // Hints the compiler to prioritize the costlier path.
-        if (DO_NOT_EXPECT(next_move_result == TETRALATH_RESULT_LOSS)) {
+        if (DO_NOT_EXPECT(is_losing_move)) {
 
             // Returns the losing result with the distance so that we are able
             // to delay the loss as much as possible
@@ -602,11 +590,11 @@ static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) min_level(const Tetralat
     // Hints the compiler to prioritize the more likely path.
     if (DO_NOT_EXPECT(result < TETRALATH_MINIMUM_RESULT_VALUE)) {
         board_copy[result] = opponent_color;
-        const TetralathResult next_move_result = check_single_position(result, board_copy);
+        const bool is_losing_move = check_is_losing_move(result, board_copy);
         board_copy[result] = TETRALATH_COLOR_NONE;
 
         // Hints the compiler to prioritize the costlier path.
-        if (DO_NOT_EXPECT(next_move_result == TETRALATH_RESULT_LOSS)) {
+        if (DO_NOT_EXPECT(is_losing_move)) {
 
             // Returns the winning result with the distance so that we are able
             // to win as fast as possible
@@ -1103,9 +1091,9 @@ void prioritize_moves_by_outcome(const TetralathColor * restrict const original_
 
                 if (next_move_result_2 < TETRALATH_MINIMUM_RESULT_VALUE) {
                     board_copy[next_move_result_2] = perspective_color;
-                    const TetralathResult next_move_result_3 = check_single_position(next_move_result_2, board_copy);
+                    const bool is_losing_move = check_is_losing_move(next_move_result_2, board_copy);
                     board_copy[next_move_result_2] = TETRALATH_COLOR_NONE;
-                    if (next_move_result_3 != TETRALATH_RESULT_LOSS) {
+                    if (!is_losing_move) {
                         is_forced_move_for_perspective = true;
                     }
                 }
@@ -1133,10 +1121,10 @@ int get_forced_next_move(const TetralathColor * restrict const original_board, c
     if (current_result < TETRALATH_MINIMUM_RESULT_VALUE) {
         const int forced_move_candidate = current_result;
         board_copy[forced_move_candidate] = perspective_color;
-        const TetralathResult next_move_result = check_single_position(forced_move_candidate, board_copy);
+        const bool is_losing_move = check_is_losing_move(forced_move_candidate, board_copy);
         board_copy[forced_move_candidate] = TETRALATH_COLOR_NONE;
 
-        if (next_move_result != TETRALATH_RESULT_LOSS) {
+        if (!is_losing_move) {
             return forced_move_candidate;
         }
     }
