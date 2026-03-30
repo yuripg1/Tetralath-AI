@@ -297,8 +297,6 @@ TetralathColor choose_player_color(const TetralathColor default_player_color) {
             return TETRALATH_COLOR_WHITE;
         case TETRALATH_COLOR_BLACK:
             return TETRALATH_COLOR_BLACK;
-        default:
-            break;
     }
 
     return TETRALATH_COLOR_NONE;
@@ -327,8 +325,6 @@ TetralathAiMode choose_ai_mode(const TetralathAiMode default_ai_mode) {
             return TETRALATH_AI_MODE_MERCIFUL;
         case TETRALATH_AI_MODE_RUTHLESS:
             return TETRALATH_AI_MODE_RUTHLESS;
-        default:
-            break;
     }
 
     return TETRALATH_AI_MODE_NONE;
@@ -357,8 +353,6 @@ TetralathAiStrategy choose_ai_strategy(const TetralathAiStrategy default_ai_stra
             return TETRALATH_AI_STRATEGY_OFFENSIVE;
         case TETRALATH_AI_STRATEGY_DEFENSIVE:
             return TETRALATH_AI_STRATEGY_DEFENSIVE;
-        default:
-            break;
     }
 
     return TETRALATH_AI_STRATEGY_NONE;
@@ -424,8 +418,6 @@ TetralathPlayerAction choose_player_action(void) {
         case 'q':
         case 'Q':
             chosen_action = TETRALATH_PLAYER_ACTION_KEY_Q;
-            break;
-        default:
             break;
     }
 

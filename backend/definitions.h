@@ -26,14 +26,14 @@ typedef enum {
 // 11 binary
 #define TETRALATH_COLOR_MASK 3
 
-_Static_assert((TETRALATH_COLOR_WHITE ^ TETRALATH_COLOR_MASK) == TETRALATH_COLOR_BLACK, "TETRALATH_COLOR_WHITE must be flippable into TETRALATH_COLOR_BLACK");
-_Static_assert((TETRALATH_COLOR_BLACK ^ TETRALATH_COLOR_MASK) == TETRALATH_COLOR_WHITE, "TETRALATH_COLOR_BLACK must be flippable into TETRALATH_COLOR_WHITE");
-
 // Flips between white and black colors with a simple XOR operation, without the
 // need for if/else conditionals.
 static inline TetralathColor flip_color(const TetralathColor color) {
     return color ^ TETRALATH_COLOR_MASK;
 }
+
+_Static_assert((TETRALATH_COLOR_WHITE ^ TETRALATH_COLOR_MASK) == TETRALATH_COLOR_BLACK, "TETRALATH_COLOR_WHITE must be flippable into TETRALATH_COLOR_BLACK");
+_Static_assert((TETRALATH_COLOR_BLACK ^ TETRALATH_COLOR_MASK) == TETRALATH_COLOR_WHITE, "TETRALATH_COLOR_BLACK must be flippable into TETRALATH_COLOR_WHITE");
 
 typedef enum {
     /*
@@ -85,6 +85,8 @@ typedef enum {
 
 #define TETRALATH_MINIMUM_RESULT_VALUE TETRALATH_RESULT_INFINITY_MIN
 
+// Mask used with XOR to flip results between perspectives.
+// 111111111 binary
 #define TETRALATH_RESULT_MASK 511
 
 _Static_assert((TETRALATH_RESULT_INFINITY_MIN ^ TETRALATH_RESULT_MASK) == TETRALATH_RESULT_INFINITY_MAX, "TETRALATH_RESULT_INFINITY_MIN must be flippable into TETRALATH_RESULT_INFINITY_MAX");

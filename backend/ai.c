@@ -398,7 +398,7 @@ static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) check_game_result(const 
 
     }
 
-    // Hints the compiler to prioritize the more likely path
+    // Hints the compiler to prioritize the more likely path.
     if (DO_NOT_EXPECT(perspective_near_quadruplets_count == 1)) {
         return (int)(sequences_info.near_quadruplets_empty_positions[perspective_color_index][0]);
     }
@@ -414,7 +414,8 @@ Useful when you want to check if a particular move leads to a terminal result.
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! IMPORTANT !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 This function only reads the board. To evaluate a particular move, you must pass
-the board with the move already made.
+the board with the move already made and the analyzed position must be the last
+move made
 */
 static TetralathResult HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) check_single_position(const int analyzed_position, const TetralathColor * restrict const board) {
     bool has_quadruplets = false;
@@ -426,10 +427,14 @@ static TetralathResult HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) check_single
 
         for (int j = 0; j < TETRALATH_POSITIONS_TO_WALK_BACK_ON_QUICK_CHECK; j += 1) {
             const int previous_position = ((int)(sequence_previous_positions[i][sequence_position_1]));
-            if (previous_position != TETRALATH_NO_PREVIOUS_POSITION) {
-                sequence_position_1 = previous_position;
-                number_of_positions_to_check += 1;
+
+            // Hints the compiler to prioritize the more likely path.
+            if (DO_NOT_EXPECT(previous_position == TETRALATH_NO_PREVIOUS_POSITION)) {
+                break;
             }
+
+            sequence_position_1 = previous_position;
+            number_of_positions_to_check += 1;
         }
 
         for (int j = 0; j < number_of_positions_to_check; j += 1) {
@@ -448,7 +453,8 @@ static TetralathResult HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) check_single
                     break;
             }
 
-            if (sequence_position_4 == TETRALATH_NO_NEXT_POSITION) {
+            // Hints the compiler to prioritize the more likely path.
+            if (DO_NOT_EXPECT(sequence_position_4 == TETRALATH_NO_NEXT_POSITION)) {
                 break;
             }
 
@@ -497,14 +503,14 @@ static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) max_level(const Tetralat
 
         case TETRALATH_RESULT_DRAW:
             return TETRALATH_RESULT_DRAW;
-        default:
-            break;
     }
 
-    const int next_moves_count = moves_count + 1;
+    const int next_moves_count = (moves_count + 1);
 
     int forced_next_move = TETRALATH_POSITION_NONE;
-    if (result < TETRALATH_MINIMUM_RESULT_VALUE) {
+
+    // Hints the compiler to prioritize the more likely path.
+    if (DO_NOT_EXPECT(result < TETRALATH_MINIMUM_RESULT_VALUE)) {
         board_copy[result] = perspective_color;
         const TetralathResult next_move_result = check_single_position(result, board_copy);
         board_copy[result] = TETRALATH_COLOR_NONE;
@@ -587,14 +593,14 @@ static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) min_level(const Tetralat
 
         case TETRALATH_RESULT_DRAW:
             return TETRALATH_RESULT_DRAW;
-        default:
-            break;
     }
 
-    const int next_moves_count = moves_count + 1;
+    const int next_moves_count = (moves_count + 1);
 
     int forced_next_move = TETRALATH_POSITION_NONE;
-    if (result < TETRALATH_MINIMUM_RESULT_VALUE) {
+
+    // Hints the compiler to prioritize the more likely path.
+    if (DO_NOT_EXPECT(result < TETRALATH_MINIMUM_RESULT_VALUE)) {
         board_copy[result] = opponent_color;
         const TetralathResult next_move_result = check_single_position(result, board_copy);
         board_copy[result] = TETRALATH_COLOR_NONE;
@@ -723,8 +729,6 @@ static void get_neighbors_info(TetralathNeighborsInfo * restrict const neighbors
             unobstructed_length = &(neighbors_info->unobstructed_length_forward);
             unobstructed_or_friendly_length = &(neighbors_info->unobstructed_or_friendly_length_forward);
             break;
-        default:
-            return;
     }
 
     int current_position = reference_position;
@@ -778,8 +782,6 @@ static void set_neighboring_relevance_per_position(int neighboring_positions_rel
             unobstructed_or_friendly_length = neighbors_info->unobstructed_or_friendly_length_forward;
             neighbor_positions = neighbors_info->neighbor_positions_forward;
             break;
-        default:
-            return;
     }
 
     for (int i = 0; i < unobstructed_or_friendly_length; i += 1) {
@@ -1045,8 +1047,6 @@ TetralathResult get_player_game_result(const TetralathColor * restrict const boa
             break;
         case TETRALATH_RESULT_DRAW:
             player_game_result = TETRALATH_RESULT_DRAW;
-            break;
-        default:
             break;
     }
 
