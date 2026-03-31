@@ -5,7 +5,8 @@ import board
 import definitions
 
 
-TETRALATH_FPS = 30
+TETRALATH_FPS_HIGH = 30
+TETRALATH_FPS_LOW = 6
 TETRALATH_WINDOW_WIDTH = 1224
 TETRALATH_WINDOW_HEIGHT = 691
 TETRALATH_WINDOW_TITLE = "Tetralath"
@@ -87,7 +88,7 @@ def refresh_game_ui(
     for menu in menus:
         menu.draw(game_window)
     pygame.display.flip()
-    clock.tick(TETRALATH_FPS)
+    clock.tick(TETRALATH_FPS_HIGH if game["high_fps"] else TETRALATH_FPS_LOW)
 
 
 def get_events(

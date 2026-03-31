@@ -80,8 +80,11 @@ def ai_move_processing_thread(
 
 
 def handle_ai_move_start(
-    libtetralath_instance: libtetralath.LibTetralath, ai_move_processing_data: definitions.TetralathAIMoveProcessingData
+    game: definitions.TetralathGame,
+    libtetralath_instance: libtetralath.LibTetralath,
+    ai_move_processing_data: definitions.TetralathAIMoveProcessingData,
 ) -> None:
+    game["high_fps"] = False
     ai_move_processing_data["start_time"] = None
     ai_move_processing_data["end_time"] = None
     ai_move_processing_data["move"] = None
@@ -97,6 +100,7 @@ def handle_ai_move_end(
     ai_move_processing_data: definitions.TetralathAIMoveProcessingData,
 ) -> None:
     game["advance_turn"] = True
+    game["high_fps"] = True
     ai_move_processing_data["thread"] = None
     set_move(game, libtetralath_instance, ai_move_processing_data["move"], game["current_color"])
     update_game_result(game, libtetralath_instance)
@@ -118,6 +122,7 @@ def graphical_game() -> None:
     game: definitions.TetralathGame = {
         "advance_turn": False,
         "redraw_board": True,
+        "high_fps": True,
         "highlighted_board_position": None,
         "board": [definitions.TetralathColor.NONE] * ui.TETRALATH_BOARD_NUMBER_OF_HEXAGONS,
         "moves_count": 0,
@@ -165,7 +170,7 @@ def graphical_game() -> None:
                 ui.trigger_redraw_board_event(global_ui_events)
             if game["current_color"] != game["player_color"]:
                 if ai_move_processing_data["thread"] is None:
-                    handle_ai_move_start(libtetralath_instance, ai_move_processing_data)
+                    handle_ai_move_start(game, libtetralath_instance, ai_move_processing_data)
                     ui.update_ai_info_label(ai_move_processing_data, ai_info_label, False)
                     ui.trigger_redraw_board_event(global_ui_events)
                 if ai_move_processing_data["thread"] is not None and not ai_move_processing_data["thread"].is_alive():

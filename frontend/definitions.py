@@ -47,6 +47,7 @@ class TetralathState(enum.IntEnum):
 class TetralathGame(typing.TypedDict):
     advance_turn: bool
     redraw_board: bool
+    high_fps: bool
     highlighted_board_position: int | None
     board: list[TetralathColor]
     moves_count: int
