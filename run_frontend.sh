@@ -1,12 +1,10 @@
-BACKEND_DIR="./backend"
-BACKEND_LIBRARY="${BACKEND_DIR}/libtetralath.so"
+#!/usr/bin/env bash
+set -eux -o pipefail
+source ./config.sh
 
-make "--directory=${BACKEND_DIR}" clean
-make "--directory=${BACKEND_DIR}" lib
+make --directory=${BACKEND_DIR} clean
+make --directory=${BACKEND_DIR} lib
 
-FRONTEND_DIR="./frontend"
-VENV_DIR="${FRONTEND_DIR}/.venv"
-
-python3 -m venv "${VENV_DIR}"
+python3 -m venv ${VENV_DIR}
 "${VENV_DIR}/bin/pip3" install -r "${FRONTEND_DIR}/requirements.txt"
 "${VENV_DIR}/bin/python3" "${FRONTEND_DIR}/main.py"

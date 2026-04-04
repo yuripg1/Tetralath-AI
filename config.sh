@@ -1,0 +1,5 @@
+BACKEND_DIR="./backend"
+BACKEND_EXECUTABLE="${BACKEND_DIR}/tetralath"
+BACKEND_LIBRARY="${BACKEND_DIR}/libtetralath.so"
+FRONTEND_DIR="./frontend"
+VENV_DIR="${FRONTEND_DIR}/.venv"

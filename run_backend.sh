@@ -1,7 +1,8 @@
-BACKEND_DIR="./backend"
-BACKEND_EXECUTABLE="${BACKEND_DIR}/tetralath"
+#!/usr/bin/env bash
+set -eu -o pipefail
+source ./config.sh
 
-make "--directory=${BACKEND_DIR}" clean
-make "--directory=${BACKEND_DIR}"
+make --directory=${BACKEND_DIR} clean
+make --directory=${BACKEND_DIR}
 
 ${BACKEND_EXECUTABLE}

@@ -26,8 +26,7 @@ From the project root:
 ```shell
 $ sudo apt update
 $ sudo apt install -y build-essential python3-dev python3-pip python3-venv
-$ chmod +x ./run_frontend.sh
-$ ./run_frontend.sh
+$ bash ./run_frontend.sh
 ```
 
 This builds the shared library in `backend/` (`libtetralath.so`), sets up a Python virtual environment in `frontend/.venv`, installs dependencies from `frontend/requirements.txt`, and runs the GUI. The game engine and AI run in the shared library.
@@ -41,8 +40,7 @@ From the project root:
 ```shell
 $ sudo apt update
 $ sudo apt install -y build-essential libncurses-dev
-$ chmod +x ./run_backend.sh
-$ ./run_backend.sh
+$ bash ./run_backend.sh
 ```
 
 This builds the standalone application and runs the TUI.
