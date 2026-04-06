@@ -515,11 +515,11 @@ static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) max_level(const Tetralat
         forced_next_move = result;
     }
 
-    const int remaining_depth = (forced_next_move == TETRALATH_POSITION_NONE) ? (previous_remaining_depth - 1) : previous_remaining_depth;
+    const int remaining_depth = (forced_next_move == TETRALATH_POSITION_NONE) ? (previous_remaining_depth - 1) : ((previous_remaining_depth > 1) ? previous_remaining_depth : 2);
     const int64_t target_end_time = minimax_static_data->target_end_time;
 
     // Hints the compiler to prioritize the costlier path.
-    if (DO_NOT_EXPECT(((remaining_depth <= 0) && (forced_next_move == TETRALATH_POSITION_NONE)) || (get_current_time_nsec() >= target_end_time))) {
+    if (DO_NOT_EXPECT((remaining_depth <= 0) || (get_current_time_nsec() >= target_end_time))) {
         return TETRALATH_RESULT_NONE;
     }
 
@@ -605,11 +605,11 @@ static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) min_level(const Tetralat
         forced_next_move = result;
     }
 
-    const int remaining_depth = (forced_next_move == TETRALATH_POSITION_NONE) ? (previous_remaining_depth - 1) : previous_remaining_depth;
+    const int remaining_depth = (forced_next_move == TETRALATH_POSITION_NONE) ? (previous_remaining_depth - 1) : ((previous_remaining_depth > 1) ? previous_remaining_depth : 2);
     const int64_t target_end_time = minimax_static_data->target_end_time;
 
     // Hints the compiler to prioritize the costlier path.
-    if (DO_NOT_EXPECT(((remaining_depth <= 0) && (forced_next_move == TETRALATH_POSITION_NONE)) || (get_current_time_nsec() >= target_end_time))) {
+    if (DO_NOT_EXPECT((remaining_depth <= 0) || (get_current_time_nsec() >= target_end_time))) {
         return TETRALATH_RESULT_NONE;
     }
 

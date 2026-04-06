@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -eux -o pipefail
+set -eu -o pipefail
 source ./config.sh
 
 make --directory=${BACKEND_DIR} clean
