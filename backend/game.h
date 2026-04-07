@@ -4,24 +4,24 @@
 #include "ai.h"
 #include "definitions.h"
 
-typedef struct {
+typedef struct TetralathMove {
     int position;
     int color;
 } TetralathMove;
 
-typedef struct {
+typedef struct TetralathMoves {
     TetralathMove moves_list[TETRALATH_BOARD_SIZE];
     int moves_count;
 } TetralathMoves;
 
-typedef struct {
+typedef struct TetralathMinimaxOutput {
     int64_t time_taken_nsec;
     int minimax_depth;
     int minimax_result;
     int ai_move;
 } TetralathMinimaxOutput;
 
-typedef struct {
+typedef struct TetralathGame {
     TetralathMoves moves;
     TetralathColor board[TETRALATH_ALLOCATED_BOARD_LENGTH];
     TetralathMinimaxOutput latest_minimax_output;

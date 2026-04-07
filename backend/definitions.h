@@ -1,7 +1,7 @@
 #ifndef DEFINITIONS_H
 #define DEFINITIONS_H
 
-typedef enum {
+typedef enum TetralathColor {
     // Can represent an empty position.
     // 00 binary
     TETRALATH_COLOR_NONE = 0,
@@ -35,7 +35,7 @@ static inline TetralathColor flip_color(const TetralathColor color) {
 _Static_assert((TETRALATH_COLOR_WHITE ^ TETRALATH_COLOR_MASK) == TETRALATH_COLOR_BLACK, "TETRALATH_COLOR_WHITE must be flippable into TETRALATH_COLOR_BLACK");
 _Static_assert((TETRALATH_COLOR_BLACK ^ TETRALATH_COLOR_MASK) == TETRALATH_COLOR_WHITE, "TETRALATH_COLOR_BLACK must be flippable into TETRALATH_COLOR_WHITE");
 
-typedef enum {
+typedef enum TetralathResult {
     /*
     Numbers less than 64 (TETRALATH_MINIMUM_RESULT_VALUE) are reserved to
     represent the next move in board states where the game is ongoing but the
@@ -114,7 +114,7 @@ _Static_assert((TETRALATH_RESULT_LOSS_MAX - TETRALATH_RESULT_LOSS_MIN) >= 64, "T
 _Static_assert((TETRALATH_RESULT_WIN_MAX - TETRALATH_RESULT_WIN_MIN) >= 64, "There must be a gap >= 64 between TETRALATH_RESULT_WIN_MAX and TETRALATH_RESULT_WIN_MIN");
 _Static_assert((TETRALATH_RESULT_ABOUT_TO_WIN - TETRALATH_RESULT_NONE_MAX) >= 64, "There must be a gap >= 64 between TETRALATH_RESULT_ABOUT_TO_WIN and TETRALATH_RESULT_NONE_MAX");
 
-typedef enum {
+typedef enum TetralathSequence {
     TETRALATH_SEQUENCE_NONE = 0,
     TETRALATH_SEQUENCE_TRIPLET,
     TETRALATH_SEQUENCE_QUADRUPLET,
@@ -122,26 +122,26 @@ typedef enum {
     TETRALATH_SEQUENCE_NEAR_QUADRUPLET_2,
 } TetralathSequence;
 
-typedef enum {
+typedef enum TetralathState {
     TETRALATH_STATE_NONE = 0,
     TETRALATH_STATE_RUNNING,
     TETRALATH_STATE_ENDING,
     TETRALATH_STATE_QUITTING,
 } TetralathState;
 
-typedef enum {
+typedef enum TetralathAiMode {
     TETRALATH_AI_MODE_NONE = 0,
     TETRALATH_AI_MODE_MERCIFUL,
     TETRALATH_AI_MODE_RUTHLESS,
 } TetralathAiMode;
 
-typedef enum {
+typedef enum TetralathAiStrategy {
     TETRALATH_AI_STRATEGY_NONE = 0,
     TETRALATH_AI_STRATEGY_OFFENSIVE,
     TETRALATH_AI_STRATEGY_DEFENSIVE,
 } TetralathAiStrategy;
 
-typedef enum {
+typedef enum TetralathBoardWalkDirection {
     TETRALATH_BOARD_WALK_DIRECTION_BACKWARD = 0,
     TETRALATH_BOARD_WALK_DIRECTION_FORWARD,
 } TetralathBoardWalkDirection;

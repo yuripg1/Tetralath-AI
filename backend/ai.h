@@ -7,7 +7,7 @@
 
 #include "definitions.h"
 
-typedef struct {
+typedef struct TetralathMoveValue {
     int position;
     int minimax_result;
     int terminal_upper_bound;
@@ -17,7 +17,7 @@ typedef struct {
 } TetralathMoveValue;
 
 #define TETRALATH_NEIGHBORS_LENGTH_TO_SEARCH 3
-typedef struct {
+typedef struct TetralathNeighborsInfo {
     const TetralathColor perspective_color;
     const TetralathColor opponent_color;
     const int reference_position;
@@ -31,14 +31,14 @@ typedef struct {
 } TetralathNeighborsInfo;
 
 #define TETRALATH_SHARED_INT_BASE_SIZE (sizeof(pthread_mutex_t) + sizeof(int))
-typedef struct {
+typedef struct TetralathSharedInt {
     pthread_mutex_t mutex;
     int value;
     const uint8_t padding[TETRALATH_CPU_CACHE_LINE_BYTES - TETRALATH_SHARED_INT_BASE_SIZE];
 } TetralathSharedInt;
 _Static_assert((sizeof(TetralathSharedInt) % TETRALATH_CPU_CACHE_LINE_BYTES) == 0, "sizeof(TetralathSharedInt) must be a multiple of TETRALATH_CPU_CACHE_LINE_BYTES");
 
-typedef struct {
+typedef struct TetralathMinimaxThreadData {
     const TetralathColor * restrict original_board;
     TetralathMoveValue * restrict move_values;
     TetralathSharedInt * restrict shared_move_index;
@@ -53,7 +53,7 @@ typedef struct {
 } TetralathMinimaxThreadData;
 
 #define TETRALATH_MINIMAX_STATIC_DATA_BASE_SIZE (sizeof(void*) + sizeof(int64_t) + sizeof(TetralathColor))
-typedef struct {
+typedef struct TetralathMinimaxStaticData {
     TetralathColor * restrict const board_copy;
     const int64_t target_end_time;
     const TetralathColor perspective_color;
@@ -64,7 +64,7 @@ _Static_assert((sizeof(TetralathMinimaxStaticData) % TETRALATH_CPU_CACHE_LINE_BY
 #define TETRALATH_MAX_NEAR_QUADRUPLETS 2
 
 #define TETRALATH_SEQUENCES_INFO_BASE_SIZE ((sizeof(int) * TETRALATH_NUMBER_OF_COLORS) + (sizeof(bool) * TETRALATH_NUMBER_OF_COLORS * 2) + (sizeof(int8_t) * TETRALATH_NUMBER_OF_COLORS * TETRALATH_MAX_NEAR_QUADRUPLETS))
-typedef struct {
+typedef struct TetralathSequencesInfo {
     int near_quadruplets_count[TETRALATH_NUMBER_OF_COLORS];
     bool has_quadruplets[TETRALATH_NUMBER_OF_COLORS];
     bool has_triplets[TETRALATH_NUMBER_OF_COLORS];

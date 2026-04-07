@@ -3,13 +3,13 @@
 
 #include "definitions.h"
 
-typedef enum {
+typedef enum TetralathAiInfoState {
     TETRALATH_AI_INFO_STATE_NONE = 0,
     TETRALATH_AI_INFO_STATE_THINKING = 1,
     TETRALATH_AI_INFO_STATE_FINISHED = 2,
 } TetralathAiInfoState;
 
-typedef enum {
+typedef enum TetralathPlayerAction {
     TETRALATH_PLAYER_ACTION_NONE = 0,
     TETRALATH_PLAYER_ACTION_KEY_LEFT = 1,
     TETRALATH_PLAYER_ACTION_KEY_RIGHT = 2,
@@ -21,7 +21,7 @@ typedef enum {
     TETRALATH_PLAYER_ACTION_KEY_Q = 8,
 } TetralathPlayerAction;
 
-typedef struct {
+typedef struct TetralathUiPosition {
     const int x;
     const int y;
 } TetralathUiPosition;

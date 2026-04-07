@@ -1212,10 +1212,10 @@ void minimax(const TetralathColor * restrict const original_board, TetralathMove
     }
 
     pthread_t threads[number_of_threads];
-    for (int i = 0; i < number_of_threads; i++) {
-        pthread_create(&threads[i], NULL, minimax_thread, &thread_data[i]);
+    for (int i = 0; i < number_of_threads; i += 1) {
+        pthread_create(&(threads[i]), NULL, minimax_thread, &(thread_data[i]));
     }
-    for (int i = 0; i < number_of_threads; i++) {
+    for (int i = 0; i < number_of_threads; i += 1) {
         pthread_join(threads[i], NULL);
     }
 
