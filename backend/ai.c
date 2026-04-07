@@ -229,27 +229,27 @@ static TetralathSequence HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) check_sequ
     return (TetralathSequence)(indexed_sequence_values[sequence_value]);
 }
 
-static void HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) add_to_near_sequences(int * restrict const near_sequences_count_pointer, uint8_t * restrict const near_sequences_empty_positions, const int empty_position, const int max_elements) {
-    const int near_sequences_count = (*near_sequences_count_pointer);
+static void HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) add_to_near_quadruplets(int * restrict const near_quadruplets_count_pointer, uint8_t * restrict const near_quadruplets_empty_positions, const int empty_position) {
+    const int near_quadruplets_count = (*near_quadruplets_count_pointer);
 
     // Hints the compiler to prioritize the costlier path.
-    if (DO_NOT_EXPECT(near_sequences_count >= max_elements)) {
+    if (DO_NOT_EXPECT(near_quadruplets_count >= TETRALATH_MAX_NEAR_QUADRUPLETS)) {
         return;
     }
 
     const uint8_t casted_empty_position = ((uint8_t)(empty_position));
 
-    for (int i = 0; i < near_sequences_count; i += 1) {
+    for (int i = 0; i < near_quadruplets_count; i += 1) {
 
         // Hints the compiler to prioritize the costlier path.
-        if (DO_NOT_EXPECT(near_sequences_empty_positions[i] == casted_empty_position)) {
+        if (DO_NOT_EXPECT(near_quadruplets_empty_positions[i] == casted_empty_position)) {
             return;
         }
 
     }
 
-    near_sequences_empty_positions[near_sequences_count] = casted_empty_position;
-    (*near_sequences_count_pointer) += 1;
+    near_quadruplets_empty_positions[near_quadruplets_count] = casted_empty_position;
+    (*near_quadruplets_count_pointer) += 1;
 }
 
 /*
@@ -301,10 +301,10 @@ static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) check_game_result(const 
                     sequences_info.has_triplets[current_color_index] = true;
                     break;
                 case TETRALATH_SEQUENCE_NEAR_QUADRUPLET_1:
-                    add_to_near_sequences(&(sequences_info.near_quadruplets_count[current_color_index]), sequences_info.near_quadruplets_empty_positions[current_color_index], sequence_position_3, TETRALATH_MAX_NEAR_QUADRUPLETS);
+                    add_to_near_quadruplets(&(sequences_info.near_quadruplets_count[current_color_index]), sequences_info.near_quadruplets_empty_positions[current_color_index], sequence_position_3);
                     break;
                 case TETRALATH_SEQUENCE_NEAR_QUADRUPLET_2:
-                    add_to_near_sequences(&(sequences_info.near_quadruplets_count[current_color_index]), sequences_info.near_quadruplets_empty_positions[current_color_index], sequence_position_2, TETRALATH_MAX_NEAR_QUADRUPLETS);
+                    add_to_near_quadruplets(&(sequences_info.near_quadruplets_count[current_color_index]), sequences_info.near_quadruplets_empty_positions[current_color_index], sequence_position_2);
                     break;
                 default:
                     break;
@@ -515,14 +515,15 @@ static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) max_level(const Tetralat
         forced_next_move = result;
     }
 
-    const int remaining_depth = (forced_next_move == TETRALATH_POSITION_NONE) ? (previous_remaining_depth - 1) : ((previous_remaining_depth > 1) ? previous_remaining_depth : 2);
+    const int64_t current_time = get_current_time_nsec();
     const int64_t target_end_time = minimax_static_data->target_end_time;
 
     // Hints the compiler to prioritize the costlier path.
-    if (DO_NOT_EXPECT((remaining_depth <= 0) || (get_current_time_nsec() >= target_end_time))) {
+    if (DO_NOT_EXPECT((previous_remaining_depth == 1) || (current_time >= target_end_time))) {
         return TETRALATH_RESULT_NONE;
     }
 
+    const int remaining_depth = (forced_next_move == TETRALATH_POSITION_NONE) ? (previous_remaining_depth - 1) : previous_remaining_depth;
     const int best_possible_result = (TETRALATH_RESULT_WIN_MAX - next_moves_count);
     const int local_beta = (beta > best_possible_result) ? best_possible_result : beta;
 
@@ -605,14 +606,15 @@ static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) min_level(const Tetralat
         forced_next_move = result;
     }
 
-    const int remaining_depth = (forced_next_move == TETRALATH_POSITION_NONE) ? (previous_remaining_depth - 1) : ((previous_remaining_depth > 1) ? previous_remaining_depth : 2);
+    const int64_t current_time = get_current_time_nsec();
     const int64_t target_end_time = minimax_static_data->target_end_time;
 
     // Hints the compiler to prioritize the costlier path.
-    if (DO_NOT_EXPECT((remaining_depth <= 0) || (get_current_time_nsec() >= target_end_time))) {
+    if (DO_NOT_EXPECT((previous_remaining_depth == 1) || (current_time >= target_end_time))) {
         return TETRALATH_RESULT_NONE;
     }
 
+    const int remaining_depth = (forced_next_move == TETRALATH_POSITION_NONE) ? (previous_remaining_depth - 1) : previous_remaining_depth;
     const int worst_possible_result = (TETRALATH_RESULT_LOSS_MIN + next_moves_count);
     const int local_alpha = (alpha < worst_possible_result) ? worst_possible_result : alpha;
 
