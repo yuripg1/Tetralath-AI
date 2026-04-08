@@ -47,6 +47,7 @@ typedef struct TetralathMinimaxThreadData {
     TetralathColor perspective_color;
     int next_moves_count;
     int minimax_depth;
+    int current_raw_game_result;
     int forced_next_move;
     int initial_alpha;
     int initial_beta;
@@ -78,7 +79,8 @@ _Static_assert((sizeof(TetralathSequencesInfo) % TETRALATH_CPU_CACHE_LINE_BYTES)
 #define TETRALATH_NO_PREVIOUS_POSITION 61
 #define TETRALATH_SEQUENCE_START_POSITIONS_PER_DIRECTION_COUNT 43
 #define TETRALATH_SEQUENCES_LOOKUP_TABLE_LENGTH 192
-#define TETRALATH_POSITIONS_TO_WALK_BACK_ON_QUICK_CHECK 2
+#define TETRALATH_POSITIONS_TO_WALK_BACK_ON_LOSS_CHECK 2
+#define TETRALATH_POSITIONS_TO_WALK_BACK_ON_QUICK_CHECK 3
 #define TETRALATH_NEIGHBORS_BITS_PER_RELEVANCE_LEVEL 3
 #define TETRALATH_WEIGHT_ADDITION_NEIGHBORING_MOVE_LESS_IMPORTANT 8
 #define TETRALATH_WEIGHT_ADDITION_NEIGHBORING_MOVE_MORE_IMPORTANT 32768
@@ -87,11 +89,12 @@ _Static_assert((sizeof(TetralathSequencesInfo) % TETRALATH_CPU_CACHE_LINE_BYTES)
 void compute_previous_positions(void);
 void initialize_move_values(TetralathMoveValue * restrict const move_values, const bool shuffle_order);
 void copy_move_values(TetralathMoveValue * restrict const new_move_values, const TetralathMoveValue * restrict const move_values);
-TetralathResult get_player_game_result(const TetralathColor * restrict const board, const int moves_count, const TetralathColor perspective_color);
+int get_raw_game_result(const TetralathColor * restrict const board, const int moves_count, const TetralathColor perspective_color);
+TetralathResult get_simplified_game_result(const int raw_game_result);
 void prioritize_neighboring_moves(const TetralathColor * restrict const board, TetralathMoveValue * restrict const move_values, const TetralathColor perspective_color, const TetralathAiStrategy ai_strategy);
 void prioritize_moves_by_outcome(const TetralathColor * const original_board, TetralathMoveValue * restrict const move_values, const TetralathColor perspective_color, const int moves_count, const TetralathAiStrategy ai_strategy);
-int get_forced_next_move(const TetralathColor * restrict const original_board, const TetralathColor perspective_color, const int moves_count);
+int get_forced_next_move(const TetralathColor * restrict const original_board, const TetralathColor perspective_color, const int current_raw_game_result);
 TetralathMoveValue *get_new_best_move(TetralathMoveValue * const move_values, int previous_best_move, int previous_best_result);
-void minimax(const TetralathColor * restrict const original_board, TetralathMoveValue * restrict const move_values, const TetralathColor perspective_color, const int moves_count, const int minimax_depth, const int forced_next_move, const TetralathAiMode ai_mode, const int number_of_threads, const int64_t target_end_time, const bool use_weights_on_sort);
+void minimax(const TetralathColor * restrict const original_board, TetralathMoveValue * restrict const move_values, const TetralathColor perspective_color, const int moves_count, const int minimax_depth, const int current_raw_game_result, const int forced_next_move, const TetralathAiMode ai_mode, const int number_of_threads, const int64_t target_end_time, const bool use_weights_on_sort);
 
 #endif

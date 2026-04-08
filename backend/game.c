@@ -84,7 +84,8 @@ TetralathState get_game_state(const TetralathGame * restrict const game) {
 }
 
 void update_game_result(TetralathGame * restrict const game) {
-    game->result = get_player_game_result(game->board, game->moves.moves_count, game->player_color);
+    const int raw_game_result = get_raw_game_result(game->board, game->moves.moves_count, game->player_color);
+    game->result = get_simplified_game_result(raw_game_result);
 }
 
 TetralathResult get_game_result(const TetralathGame * restrict const game) {
@@ -160,7 +161,9 @@ int compute_ai_move(TetralathGame * restrict const game) {
     TetralathMoveValue move_values[TETRALATH_BOARD_SIZE];
     initialize_move_values(move_values, true);
 
-    const int forced_next_move = get_forced_next_move(game->board, game->current_color, game->moves.moves_count);
+    const int current_raw_game_result = get_raw_game_result(game->board, game->moves.moves_count, flip_color(game->current_color));
+
+    const int forced_next_move = get_forced_next_move(game->board, game->current_color, current_raw_game_result);
 
     if (forced_next_move == TETRALATH_POSITION_NONE) {
         prioritize_neighboring_moves(game->board, move_values, game->current_color, game->ai_strategy);
@@ -183,7 +186,7 @@ int compute_ai_move(TetralathGame * restrict const game) {
     };
     int64_t current_time = get_current_time_nsec();
     while (minimax_depth <= maximum_minimax_depth && current_time < target_end_time) {
-        minimax(game->board, move_values, game->current_color, game->moves.moves_count, minimax_depth, forced_next_move, game->ai_mode, game->number_of_threads, target_end_time, use_weights_on_sort);
+        minimax(game->board, move_values, game->current_color, game->moves.moves_count, minimax_depth, current_raw_game_result, forced_next_move, game->ai_mode, game->number_of_threads, target_end_time, use_weights_on_sort);
         current_time = get_current_time_nsec();
 
         TetralathMoveValue *best_move = get_new_best_move(move_values, best_minimax_output.ai_move, best_minimax_output.minimax_result);

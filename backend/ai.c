@@ -412,18 +412,17 @@ Checks if a particular move leads to a loss.
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! IMPORTANT !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 This function only reads the board. To evaluate a particular move, you must pass
-the board with the move already made and the analyzed position must be the last
-move made.
+the board with the move already made.
 */
-static bool HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) check_is_losing_move(const int analyzed_position, const TetralathColor * restrict const board) {
+static bool HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) check_is_losing_move(const int latest_move_position, const TetralathColor * restrict const board) {
     bool has_quadruplets = false;
     bool has_triplets = false;
 
     for (int i = 0; i < TETRALATH_NUMBER_OF_DIRECTIONS; i += 1) {
-        int sequence_position_1 = analyzed_position;
+        int sequence_position_1 = latest_move_position;
         int number_of_positions_to_check = 1;
 
-        for (int j = 0; j < TETRALATH_POSITIONS_TO_WALK_BACK_ON_QUICK_CHECK; j += 1) {
+        for (int j = 0; j < TETRALATH_POSITIONS_TO_WALK_BACK_ON_LOSS_CHECK; j += 1) {
             const int previous_position = ((int)(sequence_previous_positions[i][sequence_position_1]));
 
             // Hints the compiler to prioritize the more likely path.
@@ -440,6 +439,7 @@ static bool HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) check_is_losing_move(co
             const int sequence_position_3 = ((int)(sequence_next_positions[i][sequence_position_2]));
             const int sequence_position_4 = ((int)(sequence_next_positions[i][sequence_position_3]));
             const TetralathSequence sequence_value = check_sequence_from_position(board[sequence_position_1], board[sequence_position_2], board[sequence_position_3], board[sequence_position_4]);
+
             switch (sequence_value) {
                 case TETRALATH_SEQUENCE_QUADRUPLET:
                     has_quadruplets = true;
@@ -463,17 +463,64 @@ static bool HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) check_is_losing_move(co
     return has_triplets && (!has_quadruplets);
 }
 
-static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) min_level(const TetralathMinimaxStaticData * restrict const minimax_static_data, const int alpha, const int beta, const int moves_count, const int previous_remaining_depth);
+/*
+Checks if a particular move requires a full board check.
 
-static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) max_level(const TetralathMinimaxStaticData * restrict const minimax_static_data, const int alpha, const int beta, const int moves_count, const int previous_remaining_depth) {
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! IMPORTANT !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+This function only reads the board. To evaluate a particular move, you must pass
+the board with the move already made.
+*/
+static bool HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) should_check_board_function(const int latest_move_position, const TetralathColor * restrict const board) {
+    for (int i = 0; i < TETRALATH_NUMBER_OF_DIRECTIONS; i += 1) {
+        int sequence_position_1 = latest_move_position;
+        int number_of_positions_to_check = 1;
+
+        for (int j = 0; j < TETRALATH_POSITIONS_TO_WALK_BACK_ON_QUICK_CHECK; j += 1) {
+            const int previous_position = ((int)(sequence_previous_positions[i][sequence_position_1]));
+
+            // Hints the compiler to prioritize the more likely path.
+            if (DO_NOT_EXPECT(previous_position == TETRALATH_NO_PREVIOUS_POSITION)) {
+                break;
+            }
+
+            sequence_position_1 = previous_position;
+            number_of_positions_to_check += 1;
+        }
+
+        for (int j = 0; j < number_of_positions_to_check; j += 1) {
+            const int sequence_position_2 = ((int)(sequence_next_positions[i][sequence_position_1]));
+            const int sequence_position_3 = ((int)(sequence_next_positions[i][sequence_position_2]));
+            const int sequence_position_4 = ((int)(sequence_next_positions[i][sequence_position_3]));
+            const TetralathSequence sequence_value = check_sequence_from_position(board[sequence_position_1], board[sequence_position_2], board[sequence_position_3], board[sequence_position_4]);
+
+            if (DO_NOT_EXPECT(sequence_value != TETRALATH_SEQUENCE_NONE)) {
+                return true;
+            }
+
+            // Hints the compiler to prioritize the more likely path.
+            if (DO_NOT_EXPECT(sequence_position_4 == TETRALATH_NO_NEXT_POSITION)) {
+                break;
+            }
+
+            sequence_position_1 = sequence_position_2;
+        }
+    }
+
+    return false;
+}
+
+static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) min_level(const TetralathMinimaxStaticData * restrict const minimax_static_data, const int alpha, const int beta, const bool should_check_board, const int moves_count, const int remaining_depth);
+
+static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) max_level(const TetralathMinimaxStaticData * restrict const minimax_static_data, const int alpha, const int beta, const bool should_check_board, const int moves_count, const int remaining_depth) {
     const TetralathColor perspective_color = minimax_static_data->perspective_color;
     const TetralathColor opponent_color = flip_color(perspective_color);
 
     TetralathColor * restrict const board_copy = minimax_static_data->board_copy;
 
-    const int result = check_game_result(board_copy, moves_count, opponent_color, perspective_color);
+    const int current_result = should_check_board ? check_game_result(board_copy, moves_count, opponent_color, perspective_color) : TETRALATH_RESULT_NONE;
 
-    switch (result) {
+    switch (current_result) {
 
         // Returns the winning result with the distance so that we are able to
         // win as fast as possible
@@ -498,10 +545,12 @@ static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) max_level(const Tetralat
     int forced_next_move = TETRALATH_POSITION_NONE;
 
     // Hints the compiler to prioritize the more likely path.
-    if (DO_NOT_EXPECT(result < TETRALATH_MINIMUM_RESULT_VALUE)) {
-        board_copy[result] = perspective_color;
-        const bool is_losing_move = check_is_losing_move(result, board_copy);
-        board_copy[result] = TETRALATH_COLOR_NONE;
+    if (DO_NOT_EXPECT(current_result < TETRALATH_MINIMUM_RESULT_VALUE)) {
+        const int forced_move_candidate = current_result;
+
+        board_copy[forced_move_candidate] = perspective_color;
+        const bool is_losing_move = check_is_losing_move(forced_move_candidate, board_copy);
+        board_copy[forced_move_candidate] = TETRALATH_COLOR_NONE;
 
         // Hints the compiler to prioritize the costlier path.
         if (DO_NOT_EXPECT(is_losing_move)) {
@@ -512,20 +561,22 @@ static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) max_level(const Tetralat
 
         }
 
-        forced_next_move = result;
+        forced_next_move = forced_move_candidate;
     }
 
     const int64_t current_time = get_current_time_nsec();
     const int64_t target_end_time = minimax_static_data->target_end_time;
 
     // Hints the compiler to prioritize the costlier path.
-    if (DO_NOT_EXPECT((previous_remaining_depth == 1) || (current_time >= target_end_time))) {
+    if (DO_NOT_EXPECT((remaining_depth <= 1) || (current_time >= target_end_time))) {
         return TETRALATH_RESULT_NONE;
     }
 
-    const int remaining_depth = (forced_next_move == TETRALATH_POSITION_NONE) ? (previous_remaining_depth - 1) : previous_remaining_depth;
+    const int next_remaining_depth = (forced_next_move == TETRALATH_POSITION_NONE) ? (remaining_depth - 1) : remaining_depth;
     const int best_possible_result = (TETRALATH_RESULT_WIN_MAX - next_moves_count);
     const int local_beta = (beta > best_possible_result) ? best_possible_result : beta;
+
+    const bool next_should_check_board_cue = ((bool)(should_check_board && (current_result != TETRALATH_RESULT_NONE)));
 
     int best_result = TETRALATH_RESULT_INFINITY_MIN;
     int local_alpha = alpha;
@@ -537,7 +588,8 @@ static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) max_level(const Tetralat
         }
 
         board_copy[evaluated_position] = perspective_color;
-        const int evaluated_result = min_level(minimax_static_data, local_alpha, local_beta, next_moves_count, remaining_depth);
+        const bool next_should_check_board = next_should_check_board_cue ? true : should_check_board_function(evaluated_position, board_copy);
+        const int evaluated_result = min_level(minimax_static_data, local_alpha, local_beta, next_should_check_board, next_moves_count, next_remaining_depth);
         board_copy[evaluated_position] = TETRALATH_COLOR_NONE;
 
         if (evaluated_result > best_result) {
@@ -556,15 +608,15 @@ static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) max_level(const Tetralat
     return best_result;
 }
 
-static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) min_level(const TetralathMinimaxStaticData * restrict const minimax_static_data, const int alpha, const int beta, const int moves_count, const int previous_remaining_depth) {
+static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) min_level(const TetralathMinimaxStaticData * restrict const minimax_static_data, const int alpha, const int beta, const bool should_check_board, const int moves_count, const int remaining_depth) {
     const TetralathColor perspective_color = minimax_static_data->perspective_color;
     const TetralathColor opponent_color = flip_color(perspective_color);
 
     TetralathColor * restrict const board_copy = minimax_static_data->board_copy;
 
-    const int result = check_game_result(board_copy, moves_count, perspective_color, opponent_color);
+    const int current_result = should_check_board ? check_game_result(board_copy, moves_count, perspective_color, opponent_color) : TETRALATH_RESULT_NONE;
 
-    switch (result) {
+    switch (current_result) {
 
         // Returns the winning result with the distance so that we are able to
         // win as fast as possible
@@ -589,10 +641,12 @@ static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) min_level(const Tetralat
     int forced_next_move = TETRALATH_POSITION_NONE;
 
     // Hints the compiler to prioritize the more likely path.
-    if (DO_NOT_EXPECT(result < TETRALATH_MINIMUM_RESULT_VALUE)) {
-        board_copy[result] = opponent_color;
-        const bool is_losing_move = check_is_losing_move(result, board_copy);
-        board_copy[result] = TETRALATH_COLOR_NONE;
+    if (DO_NOT_EXPECT(current_result < TETRALATH_MINIMUM_RESULT_VALUE)) {
+        const int forced_move_candidate = current_result;
+
+        board_copy[forced_move_candidate] = opponent_color;
+        const bool is_losing_move = check_is_losing_move(forced_move_candidate, board_copy);
+        board_copy[forced_move_candidate] = TETRALATH_COLOR_NONE;
 
         // Hints the compiler to prioritize the costlier path.
         if (DO_NOT_EXPECT(is_losing_move)) {
@@ -603,20 +657,22 @@ static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) min_level(const Tetralat
 
         }
 
-        forced_next_move = result;
+        forced_next_move = forced_move_candidate;
     }
 
     const int64_t current_time = get_current_time_nsec();
     const int64_t target_end_time = minimax_static_data->target_end_time;
 
     // Hints the compiler to prioritize the costlier path.
-    if (DO_NOT_EXPECT((previous_remaining_depth == 1) || (current_time >= target_end_time))) {
+    if (DO_NOT_EXPECT((remaining_depth <= 1) || (current_time >= target_end_time))) {
         return TETRALATH_RESULT_NONE;
     }
 
-    const int remaining_depth = (forced_next_move == TETRALATH_POSITION_NONE) ? (previous_remaining_depth - 1) : previous_remaining_depth;
+    const int next_remaining_depth = (forced_next_move == TETRALATH_POSITION_NONE) ? (remaining_depth - 1) : remaining_depth;
     const int worst_possible_result = (TETRALATH_RESULT_LOSS_MIN + next_moves_count);
     const int local_alpha = (alpha < worst_possible_result) ? worst_possible_result : alpha;
+
+    const bool next_should_check_board_cue = ((bool)(should_check_board && (current_result != TETRALATH_RESULT_NONE)));
 
     int worst_result = TETRALATH_RESULT_INFINITY_MAX;
     int local_beta = beta;
@@ -628,7 +684,8 @@ static int HOT ALIGN_TO(TETRALATH_CPU_CACHE_LINE_BYTES) min_level(const Tetralat
         }
 
         board_copy[evaluated_position] = opponent_color;
-        const int evaluated_result = max_level(minimax_static_data, local_alpha, local_beta, next_moves_count, remaining_depth);
+        const bool next_should_check_board = next_should_check_board_cue ? true : should_check_board_function(evaluated_position, board_copy);
+        const int evaluated_result = max_level(minimax_static_data, local_alpha, local_beta, next_should_check_board, next_moves_count, next_remaining_depth);
         board_copy[evaluated_position] = TETRALATH_COLOR_NONE;
 
         if (evaluated_result < worst_result) {
@@ -891,6 +948,8 @@ static void *minimax_thread(void *arg) {
     const int next_moves_count = thread_data->next_moves_count;
     const int minimax_depth = thread_data->minimax_depth;
 
+    const bool next_should_check_board_cue = ((bool)(thread_data->current_raw_game_result != TETRALATH_RESULT_NONE));
+
     alignas(TETRALATH_CPU_CACHE_LINE_BYTES) TetralathColor board_copy[TETRALATH_ALLOCATED_BOARD_LENGTH];
     copy_board(board_copy, thread_data->original_board);
 
@@ -929,7 +988,8 @@ static void *minimax_thread(void *arg) {
         if (((forced_next_move == TETRALATH_POSITION_NONE) || (forced_next_move == evaluated_position)) && (board_copy[evaluated_position] == TETRALATH_COLOR_NONE) && ((terminal_upper_bound > local_alpha) || (local_alpha == initial_alpha) || (local_alpha < TETRALATH_RESULT_NONE_MAX)) && (!prune)) {
             board_copy[evaluated_position] = perspective_color;
 
-            const int evaluated_result = min_level(&static_data, local_alpha, local_beta, next_moves_count, minimax_depth);
+            const bool next_should_check_board = next_should_check_board_cue ? true: should_check_board_function(evaluated_position, board_copy);
+            const int evaluated_result = min_level(&static_data, local_alpha, local_beta, next_should_check_board, next_moves_count, minimax_depth);
 
             if (evaluated_result > local_alpha) {
                 pthread_mutex_lock(mutex_shared_alpha);
@@ -1024,23 +1084,26 @@ void copy_move_values(TetralathMoveValue * restrict const new_move_values, const
     }
 }
 
-TetralathResult get_player_game_result(const TetralathColor * restrict const board, const int moves_count, const TetralathColor perspective_color) {
-    TetralathResult player_game_result = TETRALATH_RESULT_NONE;
+int get_raw_game_result(const TetralathColor * restrict const board, const int moves_count, const TetralathColor perspective_color) {
+    return check_game_result(board, moves_count, perspective_color, flip_color(perspective_color));
+}
 
-    const int raw_game_result = check_game_result(board, moves_count, perspective_color, flip_color(perspective_color));
+TetralathResult get_simplified_game_result(const int raw_game_result) {
+    TetralathResult simplified_game_result = TETRALATH_RESULT_NONE;
+
     switch (raw_game_result) {
         case TETRALATH_RESULT_WIN:
-            player_game_result = TETRALATH_RESULT_WIN;
+            simplified_game_result = TETRALATH_RESULT_WIN;
             break;
         case TETRALATH_RESULT_LOSS:
-            player_game_result = TETRALATH_RESULT_LOSS;
+            simplified_game_result = TETRALATH_RESULT_LOSS;
             break;
         case TETRALATH_RESULT_DRAW:
-            player_game_result = TETRALATH_RESULT_DRAW;
+            simplified_game_result = TETRALATH_RESULT_DRAW;
             break;
     }
 
-    return player_game_result;
+    return simplified_game_result;
 }
 
 void prioritize_neighboring_moves(const TetralathColor * restrict const board, TetralathMoveValue * restrict const move_values, const TetralathColor perspective_color, const TetralathAiStrategy ai_strategy) {
@@ -1112,16 +1175,13 @@ void prioritize_moves_by_outcome(const TetralathColor * restrict const original_
     }
 }
 
-int get_forced_next_move(const TetralathColor * restrict const original_board, const TetralathColor perspective_color, const int moves_count) {
-    TetralathColor board_copy[TETRALATH_ALLOCATED_BOARD_LENGTH];
-    copy_board(board_copy, original_board);
+int get_forced_next_move(const TetralathColor * restrict const original_board, const TetralathColor perspective_color, const int current_raw_game_result) {
+    if (current_raw_game_result < TETRALATH_MINIMUM_RESULT_VALUE) {
+        const int forced_move_candidate = current_raw_game_result;
 
-    const TetralathColor opponent_color = flip_color(perspective_color);
+        TetralathColor board_copy[TETRALATH_ALLOCATED_BOARD_LENGTH];
+        copy_board(board_copy, original_board);
 
-    const int current_result = check_game_result(board_copy, moves_count, opponent_color, perspective_color);
-
-    if (current_result < TETRALATH_MINIMUM_RESULT_VALUE) {
-        const int forced_move_candidate = current_result;
         board_copy[forced_move_candidate] = perspective_color;
         const bool is_losing_move = check_is_losing_move(forced_move_candidate, board_copy);
         board_copy[forced_move_candidate] = TETRALATH_COLOR_NONE;
@@ -1175,7 +1235,7 @@ TetralathMoveValue *get_new_best_move(TetralathMoveValue * const move_values, in
     return new_best_move;
 }
 
-void minimax(const TetralathColor * restrict const original_board, TetralathMoveValue * restrict const move_values, const TetralathColor perspective_color, const int moves_count, const int minimax_depth, const int forced_next_move, const TetralathAiMode ai_mode, const int number_of_threads, const int64_t target_end_time, const bool use_weights_on_sort) {
+void minimax(const TetralathColor * restrict const original_board, TetralathMoveValue * restrict const move_values, const TetralathColor perspective_color, const int moves_count, const int minimax_depth, const int current_raw_game_result, const int forced_next_move, const TetralathAiMode ai_mode, const int number_of_threads, const int64_t target_end_time, const bool use_weights_on_sort) {
     TetralathMoveValue new_move_values[TETRALATH_BOARD_SIZE];
     copy_move_values(new_move_values, move_values);
 
@@ -1206,6 +1266,7 @@ void minimax(const TetralathColor * restrict const original_board, TetralathMove
         thread_data[i].perspective_color = perspective_color;
         thread_data[i].next_moves_count = next_moves_count;
         thread_data[i].minimax_depth = minimax_depth;
+        thread_data[i].current_raw_game_result = current_raw_game_result;
         thread_data[i].forced_next_move = forced_next_move;
         thread_data[i].initial_alpha = initial_alpha;
         thread_data[i].initial_beta = initial_beta;
