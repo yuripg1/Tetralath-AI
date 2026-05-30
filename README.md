@@ -8,7 +8,7 @@ Tetralath is a two-player turn-based board game played on a hexagonal board of 6
 
 - **Pieces:** Two colors, white and black. You choose your color. The AI uses the other.
 - **Turns:** Players alternate every turn. On your turn, you place one piece of your color on any empty cell.
-- **Start:** White always make the first move to start the game.
+- **Start:** White always makes the first move to start the game.
 - **Winning:** You win by forming a line of 4 pieces of your color (horizontal or along a diagonal).
 - **Losing:** If you form a line of 3 pieces of your color, you lose (your opponent wins).
 - **Summary:** 4-in-a-row wins. 3-in-a-row alone loses.
@@ -51,22 +51,22 @@ This builds the standalone application and runs the TUI.
 
 ## Why two different languages?
 
-- **C:** In a project with no security concerns, C's low-level nature makes it the obvious choice for eeking out every bit of performance from the AI. At first, it was a standalone application with the game engine and the terminal (TUI) interface tightly coupled. It was later refactored to decouple those components and expose a headless game engine via shared library. Makes use of pthreads for multi-threading and ncurses for the TUI.
-- **Python:** Python's ease-of-use, code legibility and plethora of libraries make it a good choice for implementing a graphical interface that only manages simple interactive logic and integrates well with the headless game engine for everything else. Makes use of pygame-ce and pygame-menu-ce for the GUI.
+- **C:** In a project with no security concerns, C's low-level nature makes it the obvious choice for eking out every bit of performance from the AI. At first, it was a standalone application with the game engine and the terminal (TUI) interface tightly coupled. It was later refactored to decouple those components and expose a headless game engine via a shared library. It makes use of pthreads for multi-threading and ncurses for the TUI.
+- **Python:** Python's ease-of-use, code legibility and plethora of libraries make it a good choice for implementing a graphical interface that only manages simple interactive logic and integrates well with the headless game engine for everything else. It makes use of pygame-ce and pygame-menu-ce for the GUI.
 
 ---
 
 ## AI
 
-At the core of the AI is a minimax algorithm with alpha-beta pruning, iterative deepening and multi-threading. It runs the minimax search with depth 1, then 2, then 3 and so on until it reaches the processing time limit. Between those searches with increasing depth, it sorts the possible moves from best to worst (based on the previous run), which greatly improves the amount of pruning done and, thus, makes the next search perform much better. It also implements multi-threading so that we can evaluate multiple possible moves at the same time while also doing the best effort to make the threads efficiently divide up their work among them and to keep an updated alpha value during the search.
+At the core of the AI is a minimax algorithm with alpha-beta pruning, iterative deepening and multi-threading. It runs the minimax search with depth 1, then 2, then 3 and so on until it reaches the processing time limit. Between those searches with increasing depth, it sorts the possible moves from best to worst (based on the previous run), which greatly improves the amount of pruning done and, thus, makes the next search perform much better. It also implements multi-threading so that we can evaluate multiple possible moves at the same time while also making the best effort to make the threads efficiently divide up their work among themselves and to keep an updated alpha value during the search.
 
-It also implements two sets of settings "AI mode" and "AI strategy" which are described below.
+It also implements two sets of settings: "AI mode" and "AI strategy," which are described below.
 
 ### AI modes
 
-- **Merciful:** This mode searches for the fastest winning scenario (the one that requires the least amount of moves) in its horizon. That means that, when it has victory in sight, it proceeds to do the moves to win the game at the earliest opportunity. It's considered "merciful" because it doesn't fool around and it finishes the opponent as soon as possible. This search for the best winning scenario has a cost, though, and it makes the AI perform worse than the alternative (the "ruthless" mode).
+- **Merciful:** This mode searches for the fastest winning scenario (the one that requires the fewest moves) in its horizon. That means that, when it has victory in sight, it proceeds to do the moves to win the game at the earliest opportunity. It's considered "merciful" because it doesn't fool around and it finishes the opponent as soon as possible. This search for the best winning scenario has a cost, though, and it makes the AI perform worse than the alternative (the "ruthless" mode).
 
-- **Ruthless:** This mode searches for any winning scenario (not necessarily the one that requires the least amount of moves) in its horizon. That means that, when it has victory in sight, it proceeds to do any move that keeps it on track to winning but may not go straight for the quickest win. It's considered "ruthless" because, instead of finishing the opponent as soon as possible, it may sometimes end up doing some dummy moves and leave the opponent lingering but already sure of its coming defeat. This search for any winning scenario makes the AI perform better than the alternative (the "merciful" mode) because it ends up being able to prune more branches in the minimax algorithm.
+- **Ruthless:** This mode searches for any winning scenario (not necessarily the one that requires the fewest moves) in its horizon. That means that, when it has victory in sight, it proceeds to do any move that keeps it on track to winning but may not go straight for the quickest win. It's considered "ruthless" because, instead of finishing the opponent as soon as possible, it may sometimes end up doing some dummy moves and leave the opponent lingering but already sure of its coming defeat. This search for any winning scenario makes the AI perform better than the alternative (the "merciful" mode) because it ends up being able to prune more branches in the minimax algorithm.
 
 ### AI strategies
 
